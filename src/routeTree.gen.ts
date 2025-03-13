@@ -11,10 +11,17 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as authVerifyAccountImport } from './routes/(auth)/verify-account'
 import { Route as authRegisterImport } from './routes/(auth)/register'
 import { Route as authLoginImport } from './routes/(auth)/login'
 
 // Create/Update Routes
+
+const authVerifyAccountRoute = authVerifyAccountImport.update({
+  id: '/(auth)/verify-account',
+  path: '/verify-account',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const authRegisterRoute = authRegisterImport.update({
   id: '/(auth)/register',
@@ -46,6 +53,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authRegisterImport
       parentRoute: typeof rootRoute
     }
+    '/(auth)/verify-account': {
+      id: '/(auth)/verify-account'
+      path: '/verify-account'
+      fullPath: '/verify-account'
+      preLoaderRoute: typeof authVerifyAccountImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -54,36 +68,45 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
+  '/verify-account': typeof authVerifyAccountRoute
 }
 
 export interface FileRoutesByTo {
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
+  '/verify-account': typeof authVerifyAccountRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
+  '/(auth)/verify-account': typeof authVerifyAccountRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/register'
+  fullPaths: '/login' | '/register' | '/verify-account'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register'
-  id: '__root__' | '/(auth)/login' | '/(auth)/register'
+  to: '/login' | '/register' | '/verify-account'
+  id:
+    | '__root__'
+    | '/(auth)/login'
+    | '/(auth)/register'
+    | '/(auth)/verify-account'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
+  authVerifyAccountRoute: typeof authVerifyAccountRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
+  authVerifyAccountRoute: authVerifyAccountRoute,
 }
 
 export const routeTree = rootRoute
@@ -97,7 +120,8 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/(auth)/login",
-        "/(auth)/register"
+        "/(auth)/register",
+        "/(auth)/verify-account"
       ]
     },
     "/(auth)/login": {
@@ -105,6 +129,9 @@ export const routeTree = rootRoute
     },
     "/(auth)/register": {
       "filePath": "(auth)/register.tsx"
+    },
+    "/(auth)/verify-account": {
+      "filePath": "(auth)/verify-account.tsx"
     }
   }
 }
