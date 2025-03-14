@@ -11,11 +11,18 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as IndexImport } from './routes/index'
 import { Route as authVerifyAccountImport } from './routes/(auth)/verify-account'
 import { Route as authRegisterImport } from './routes/(auth)/register'
 import { Route as authLoginImport } from './routes/(auth)/login'
 
 // Create/Update Routes
+
+const IndexRoute = IndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const authVerifyAccountRoute = authVerifyAccountImport.update({
   id: '/(auth)/verify-account',
@@ -39,6 +46,13 @@ const authLoginRoute = authLoginImport.update({
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
     '/(auth)/login': {
       id: '/(auth)/login'
       path: '/login'
@@ -66,12 +80,14 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
 }
 
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
@@ -79,6 +95,7 @@ export interface FileRoutesByTo {
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
+  '/': typeof IndexRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
   '/(auth)/verify-account': typeof authVerifyAccountRoute
@@ -86,11 +103,12 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/register' | '/verify-account'
+  fullPaths: '/' | '/login' | '/register' | '/verify-account'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register' | '/verify-account'
+  to: '/' | '/login' | '/register' | '/verify-account'
   id:
     | '__root__'
+    | '/'
     | '/(auth)/login'
     | '/(auth)/register'
     | '/(auth)/verify-account'
@@ -98,12 +116,14 @@ export interface FileRouteTypes {
 }
 
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
   authVerifyAccountRoute: typeof authVerifyAccountRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
   authVerifyAccountRoute: authVerifyAccountRoute,
@@ -119,10 +139,14 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
+        "/",
         "/(auth)/login",
         "/(auth)/register",
         "/(auth)/verify-account"
       ]
+    },
+    "/": {
+      "filePath": "index.tsx"
     },
     "/(auth)/login": {
       "filePath": "(auth)/login.tsx"
