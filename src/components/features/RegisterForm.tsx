@@ -1,24 +1,30 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useRegisterApi } from "@apis/useAccountApi.tsx";
+
+const schema = z.object({
+  email: z.string(),
+  username: z.string(),
+  password: z.string(),
+  confirmPassword: z.string(),
+  referralCode: z.string(),
+  acceptPrivacy: z.boolean(),
+})
 
 function RegisterForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm()
+
+  const navigate = useNavigate();
+  const mutation = useRegisterApi();
+
   return (
     <>
-
       <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-bold mb-4 text-center text-white">Đăng ký</h2>
         <p className="text-center mb-6 text-gray-400">Bắt đầu với HHMShop</p>
         <form>
-          <div className="mb-4">
-            <label className="block text-gray-400 mb-2" htmlFor="fullname">
-              Họ và tên
-            </label>
-            <input
-              type="text"
-              id="fullname"
-              className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
-            />
-          </div>
           <div className="mb-4">
             <label className="block text-gray-400 mb-2" htmlFor="email">
               Email
@@ -26,7 +32,7 @@ function RegisterForm() {
             <input
               type="email"
               id="email"
-              required={ true }
+              required={true}
               className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
             />
           </div>
@@ -37,7 +43,7 @@ function RegisterForm() {
             <input
               type="text"
               id="username"
-              required={ true }
+              required={true}
               className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
             />
           </div>
@@ -48,7 +54,7 @@ function RegisterForm() {
             <input
               type="password"
               id="password"
-              required={ true }
+              required={true}
               className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
             />
           </div>
@@ -59,7 +65,7 @@ function RegisterForm() {
             <input
               type="password"
               id="confirm-password"
-              required={ true }
+              required={true}
               className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
             />
           </div>
