@@ -1,36 +1,96 @@
+import * as React from "react";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { useLoginApi } from "@apis/useAccountApis.tsx";
+
+interface LoginForm {
+  credential: string;
+  password: string;
+  rememberMe: boolean;
+}
 
 function LoginForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
+
+  const navigate = useNavigate();
+  const mutation = useLoginApi();
+
+  const onSubmit: SubmitHandler<LoginForm> = async (data) => {
+    try {
+      const responseData = await mutation.mutateAsync(data);
+
+      if (responseData) {
+        toast.success(
+          "Đăng nhập thành công",
+          {
+            cancel: {
+              label: "X",
+              onClick: () => toast.dismiss
+            }
+          }
+        );
+
+        localStorage.setItem("access_token", responseData.data.accessToken);
+        localStorage.setItem("refresh_token", responseData.data.refreshToken);
+
+        setTimeout(() => navigate({ to: "/" }), 500);
+      }
+    } catch (error: any) {
+      toast.error(
+        `${error.response.data.message}`,
+        {
+          cancel: {
+            label: "X",
+            onClick: () => toast.dismiss
+          }
+        }
+      );
+    }
+  }
+
   return (
     <>
       <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-bold mb-4 text-center text-white">Đăng nhập</h2>
         <p className="text-center mb-6 text-gray-400">Chào mừng đến với HHMShop</p>
-        <form>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-4">
             <label className="block text-gray-400 mb-2" htmlFor="username">
               Tài khoản
             </label>
             <input
+              {...register("credential", {
+                required: "Tài khoản/email không được để trống",
+              })}
               type="text"
               id="username"
               className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
             />
+            {errors.credential && <p className="text-sm text-red-500">{errors.credential.message}</p>}
           </div>
           <div className="mb-4">
             <label className="block text-gray-400 mb-2" htmlFor="password">
               Mật khẩu
             </label>
             <input
+              {...register("password", {
+                required: "Mật khẩu không được để trống",
+              })}
               type="password"
               id="password"
               className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
             />
+            {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
           </div>
           <div className="flex items-center justify-between mb-4">
             <label className="flex items-center text-gray-400">
-              <input type="checkbox" className="form-checkbox bg-gray-700 border-gray-600"/>
+              <input
+                {...register("rememberMe")}
+                type="checkbox"
+                className="form-checkbox bg-gray-700 border-gray-600"
+              />
               <span className="ml-2">Lưu tài khoản</span>
             </label>
             <Link to="#" className="text-gray-500 hover:underline">
@@ -39,6 +99,7 @@ function LoginForm() {
           </div>
           <div className="mb-4">
             <button
+              type="submit"
               className="w-full bg-gray-700 text-white py-2 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">
               Đăng nhập
             </button>
