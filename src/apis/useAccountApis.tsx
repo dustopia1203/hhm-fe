@@ -1,5 +1,6 @@
 import { publicClient } from "./axiosClient.ts";
 import { useMutation } from "@tanstack/react-query";
+import resourceUrls from "@constants/resourceUrls.ts";
 
 // Login API
 interface LoginRequest {
@@ -20,7 +21,7 @@ interface LoginResponse {
 }
 
 async function login(data: LoginRequest): Promise<LoginResponse> {
-  const response = await publicClient.post("/api/account/authenticate", data);
+  const response = await publicClient.post(resourceUrls.ACCOUNT_RESOURCE.LOGIN, data);
 
   return response.data;
 }
@@ -43,7 +44,7 @@ interface RegisterResponse {
 }
 
 async function register(data: RegisterRequest): Promise<RegisterResponse> {
-  const response = await publicClient.post("/api/account/register", data);
+  const response = await publicClient.post(resourceUrls.ACCOUNT_RESOURCE.REGISTER, data);
 
   return response.data;
 }
@@ -54,4 +55,26 @@ function useRegisterApi() {
   });
 }
 
-export { useLoginApi, useRegisterApi };
+// Register API
+interface ActiveAccountRequest {
+  credential: string;
+  activationCode: string;
+}
+
+interface ActiveAccountResponse {
+  data: boolean;
+}
+
+async function activeAccount(data: ActiveAccountRequest): Promise<ActiveAccountResponse> {
+  const response = await publicClient.post(resourceUrls.ACCOUNT_RESOURCE.ACTIVE_ACCOUNT, data);
+
+  return response.data;
+}
+
+function useActiveAccountApi() {
+  return useMutation({
+    mutationFn: activeAccount,
+  });
+}
+
+export { useLoginApi, useRegisterApi, useActiveAccountApi };
