@@ -13,11 +13,15 @@ interface LoginForm {
 
 function LoginForm() {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
-
   const navigate = useNavigate();
   const mutationLogin = useLoginApi();
   const queryProfile = useGetAccountProfileApi({ enabled: false });
   const setProfile = useProfileStore(state => state.setProfile);
+  const profile = useProfileStore(state => state.profile);
+
+  if (profile) {
+    navigate({ to: "/" });
+  }
 
   const onSubmit: SubmitHandler<LoginForm> = async (data) => {
     try {

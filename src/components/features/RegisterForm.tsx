@@ -6,6 +6,7 @@ import { useRegisterApi } from "@apis/useAccountApis.tsx";
 import validateConstraints from "@constants/validateConstraints.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import useProfileStore from "@stores/useProfileStore.ts";
 
 const schema = z.object({
   email: z.string()
@@ -34,10 +35,15 @@ type RegisterForm = z.infer<typeof schema>
 
 function RegisterForm() {
   const { register, handleSubmit, control, formState: { errors } } = useForm<RegisterForm>({ resolver: zodResolver(schema) })
-
   const navigate = useNavigate();
   const mutation = useRegisterApi();
   const acceptPrivacyChecked = useWatch({ name: "acceptPrivacy", control });
+
+  const profile = useProfileStore(state => state.profile);
+
+  if (profile) {
+    navigate({ to: "/" });
+  }
 
   const onSubmit: SubmitHandler<RegisterForm> = async (data) => {
     try {
