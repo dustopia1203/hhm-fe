@@ -8,6 +8,7 @@ const publicClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true
 })
 
 const authClient = axios.create({
@@ -15,7 +16,8 @@ const authClient = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
-  }
+  },
+  withCredentials: true
 })
 
 authClient.interceptors.request.use(

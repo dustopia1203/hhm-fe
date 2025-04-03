@@ -1,9 +1,9 @@
-import * as React from "react";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useLoginApi } from "@apis/useAccountApis.tsx";
+import { useGetAccountProfileApi, useLoginApi } from "@apis/useAccountApis.tsx";
+import useProfileStore from "@stores/useProfileStore.ts";
 
 interface LoginForm {
   credential: string;
@@ -15,11 +15,13 @@ function LoginForm() {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
 
   const navigate = useNavigate();
-  const mutation = useLoginApi();
+  const mutationLogin = useLoginApi();
+  const queryProfile = useGetAccountProfileApi({ enabled: false });
+  const setProfile = useProfileStore(state => state.setProfile);
 
   const onSubmit: SubmitHandler<LoginForm> = async (data) => {
     try {
-      const responseData = await mutation.mutateAsync(data);
+      const responseData = await mutationLogin.mutateAsync(data);
 
       if (responseData) {
         toast.success(
@@ -34,6 +36,12 @@ function LoginForm() {
 
         localStorage.setItem("access_token", responseData.data.accessToken);
         localStorage.setItem("refresh_token", responseData.data.refreshToken);
+
+        const accountProfileResponse = await queryProfile.refetch();
+
+        if (accountProfileResponse) {
+          setProfile(accountProfileResponse.data.data);
+        }
 
         setTimeout(() => navigate({ to: "/" }), 500);
       }

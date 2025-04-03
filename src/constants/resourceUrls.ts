@@ -12,6 +12,7 @@ const resourceUrls: ResourceUrls = {
         RESEND_CODE: "/api/account/resend-code",
         LOGIN: "/api/account/authenticate",
         REFRESH_TOKEN: "/api/account/refresh-token",
+        GET_PROFILE: "/api/account/profile",
     }
 }
 

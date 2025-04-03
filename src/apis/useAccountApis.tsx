@@ -1,5 +1,5 @@
-import { publicClient } from "./axiosClient.ts";
-import { useMutation } from "@tanstack/react-query";
+import { authClient, publicClient } from "./axiosClient.ts";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import resourceUrls from "@constants/resourceUrls.ts";
 
 // Login API
@@ -55,7 +55,7 @@ function useRegisterApi() {
   });
 }
 
-// Register API
+// Active account by activation code API
 interface ActiveAccountRequest {
   credential: string;
   activationCode: string;
@@ -77,4 +77,39 @@ function useActiveAccountApi() {
   });
 }
 
-export { useLoginApi, useRegisterApi, useActiveAccountApi };
+// Get account profile API
+interface AccountProfileResponse {
+  data: {
+    username: string,
+    grantedPrivileges: [string],
+    firstName: string,
+    lastName: string,
+    middleName: string,
+    phone: string,
+    dateOfBirth: number,
+    avatarUrl: string,
+    gender: "MALE" | "FEMALE" | "OTHER",
+    address: string,
+  }
+}
+
+async function getAccountProfile(): Promise<AccountProfileResponse> {
+  const response = await authClient.get(resourceUrls.ACCOUNT_RESOURCE.GET_PROFILE);
+
+  return response.data;
+}
+
+function useGetAccountProfileApi(options?: { enabled?: boolean   }) {
+  return useQuery({
+    queryKey: ["accountProfile"],
+    queryFn: getAccountProfile,
+    enabled: options?.enabled ?? true
+  });
+}
+
+export {
+  useLoginApi,
+  useRegisterApi,
+  useActiveAccountApi,
+  useGetAccountProfileApi
+};
