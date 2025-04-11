@@ -11,12 +11,19 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as AdminDashboardImport } from './routes/adminDashboard'
 import { Route as IndexImport } from './routes/index'
 import { Route as authVerifyAccountImport } from './routes/(auth)/verify-account'
 import { Route as authRegisterImport } from './routes/(auth)/register'
 import { Route as authLoginImport } from './routes/(auth)/login'
 
 // Create/Update Routes
+
+const AdminDashboardRoute = AdminDashboardImport.update({
+  id: '/adminDashboard',
+  path: '/adminDashboard',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
@@ -53,6 +60,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/adminDashboard': {
+      id: '/adminDashboard'
+      path: '/adminDashboard'
+      fullPath: '/adminDashboard'
+      preLoaderRoute: typeof AdminDashboardImport
+      parentRoute: typeof rootRoute
+    }
     '/(auth)/login': {
       id: '/(auth)/login'
       path: '/login'
@@ -81,6 +95,7 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/adminDashboard': typeof AdminDashboardRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
@@ -88,6 +103,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/adminDashboard': typeof AdminDashboardRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
@@ -96,6 +112,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/adminDashboard': typeof AdminDashboardRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
   '/(auth)/verify-account': typeof authVerifyAccountRoute
@@ -103,12 +120,18 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/verify-account'
+  fullPaths:
+    | '/'
+    | '/adminDashboard'
+    | '/login'
+    | '/register'
+    | '/verify-account'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register' | '/verify-account'
+  to: '/' | '/adminDashboard' | '/login' | '/register' | '/verify-account'
   id:
     | '__root__'
     | '/'
+    | '/adminDashboard'
     | '/(auth)/login'
     | '/(auth)/register'
     | '/(auth)/verify-account'
@@ -117,6 +140,7 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminDashboardRoute: typeof AdminDashboardRoute
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
   authVerifyAccountRoute: typeof authVerifyAccountRoute
@@ -124,6 +148,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminDashboardRoute: AdminDashboardRoute,
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
   authVerifyAccountRoute: authVerifyAccountRoute,
@@ -140,6 +165,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/adminDashboard",
         "/(auth)/login",
         "/(auth)/register",
         "/(auth)/verify-account"
@@ -147,6 +173,9 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/adminDashboard": {
+      "filePath": "adminDashboard.tsx"
     },
     "/(auth)/login": {
       "filePath": "(auth)/login.tsx"
