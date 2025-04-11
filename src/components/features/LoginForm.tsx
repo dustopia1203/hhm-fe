@@ -19,7 +19,10 @@ function LoginForm() {
   const setProfile = useProfileStore(state => state.setProfile);
   const profile = useProfileStore(state => state.profile);
 
-  if (profile) {
+  if (profile?.username === "admin") {
+    navigate({ to: "/adminDashboard" });
+  }
+  else if (profile) {
     navigate({ to: "/" });
   }
 
@@ -44,10 +47,15 @@ function LoginForm() {
         const accountProfileResponse = await queryProfile.refetch();
 
         if (accountProfileResponse) {
-          setProfile(accountProfileResponse.data.data);
+          const profileData = accountProfileResponse.data.data;
+          setProfile(profileData);
+          // Kiểm tra vai trò của tài khoản
+          if (profileData.username === "admin") {
+            navigate({ to: "/adminDashboard" });
+          } else {
+            navigate({ to: "/" });
+          }
         }
-
-        setTimeout(() => navigate({ to: "/" }), 500);
       }
     } catch (error: any) {
       toast.error(
@@ -122,13 +130,13 @@ function LoginForm() {
             <button
               className="bg-gray-700 p-2 rounded-full w-10 h-10 flex items-center justify-center text-blue-500 hover:bg-gray-600 hover:text-blue-400 focus:ring-2 focus:ring-gray-500">
               <Link to="#">
-                <FaFacebook/>
+                <FaFacebook />
               </Link>
             </button>
             <button
               className="bg-gray-700 p-2 rounded-full w-10 h-10 flex items-center justify-center text-red-500 hover:bg-gray-600 hover:text-gray-300 focus:ring-2 focus:ring-gray-500">
               <Link to="#">
-                <FaGoogle/>
+                <FaGoogle />
               </Link>
             </button>
           </div>
