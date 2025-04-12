@@ -88,64 +88,67 @@ function Header() {
             </div>
           )}
       </div>
-      {/* Main header */}
-      <div className="container mx-auto flex items-center justify-between py-4 px-48">
-        <div className="flex items-center space-x-2">
-          <img src="/vite.svg" alt="HHMShop Logo" className="h-8 w-8" />
-          <Link to="/" className="text-lg font-bold text-white">HHMShop</Link>
-        </div>
-        {/* Search bar */}
-        <form className="flex-1 mx-6 relative">
-          <input
-            type="text"
-            name="search"
-            placeholder="Tìm kiếm sản phẩm"
-            className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
-          />
-          <button
-            type="submit"
-            className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 cursor-pointer"
+      {!profile?.grantedPrivileges?.includes("ALL:MANAGE") && (
+        <>
+          {/* Main header */}
+          <div className="container mx-auto flex items-center justify-between py-4 px-48">
+            <div className="flex items-center space-x-2">
+              <img src="/vite.svg" alt="HHMShop Logo" className="h-8 w-8" />
+              <Link to="/" className="text-lg font-bold text-white">HHMShop</Link>
+            </div>
+            {/* Search bar */}
+            <form className="flex-1 mx-6 relative">
+              <input
+                type="text"
+                name="search"
+                placeholder="Tìm kiếm sản phẩm"
+                className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
+              />
+              <button
+                type="submit"
+                className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-400 cursor-pointer"
+              >
+                <FiSearch size={20} />
+              </button>
+            </form>
+            {/* Shipping + Cart */}
+            <div className="flex items-center space-x-4">
+              <Link to="#">
+                <FaTruck className="text-gray-300 cursor-pointer" size={24} />
+              </Link>
+              <Link to="#">
+                <FiShoppingCart className="text-gray-300 cursor-pointer" size={22} />
+              </Link>
+            </div>
+          </div>
+          <div
+            className="bg-gray-800 text-white py-2 px-4 border-b border-gray-700 relative z-40 inline-flex items-center gap-2 cursor-pointer"
+            onMouseEnter={handleCategoryEnter}
+            onMouseLeave={handleCategoryLeave}
           >
-            <FiSearch size={20} />
-          </button>
-        </form>
-        {/* Shipping + Cart */}
-        <div className="flex items-center space-x-4">
-          <Link to="#">
-            <FaTruck className="text-gray-300 cursor-pointer" size={24} />
-          </Link>
-          <Link to="#">
-            <FiShoppingCart className="text-gray-300 cursor-pointer" size={22} />
-          </Link>
-        </div>
-      </div>
-      <div
-        className="bg-gray-800 text-white py-2 px-4 border-b border-gray-700 relative z-40 inline-flex items-center gap-2 cursor-pointer"
-        onMouseEnter={handleCategoryEnter}
-        onMouseLeave={handleCategoryLeave}
-      >
-        <div className="flex items-center gap-2 cursor-pointer">
-          <span className="text-lg font-semibold">☰</span>
-          <h2 className="text-base font-medium">
-            Danh mục sản phẩm
-          </h2>
-        </div>
-        {/* Dropdown menu */}
-        {isCategoryOpen && (
-          <div className="absolute top-full left-0 w-64 bg-gray-700 shadow-lg z-50 rounded-md">
-            <ul className="py-2">
-              {categories.map((category) => (
-                <li
-                  key={category.id}
-                  className="px-4 py-2 hover:bg-gray-600 cursor-pointer text-sm"
-                >
-                  {category.name}
-                </li>
-              ))}
-            </ul>
-          </div>  
-        )}
-      </div>
+            <div className="flex items-center gap-2 cursor-pointer">
+              <span className="text-lg font-semibold">☰</span>
+              <h2 className="text-base font-medium">
+                Danh mục sản phẩm
+              </h2>
+            </div>
+            {/* Dropdown menu */}
+            {isCategoryOpen && (
+              <div className="absolute top-full left-0 w-64 bg-gray-700 shadow-lg z-50 rounded-md">
+                <ul className="py-2">
+                  {categories.map((category) => (
+                    <li
+                      key={category.id}
+                      className="px-4 py-2 hover:bg-gray-600 cursor-pointer text-sm"
+                    >
+                      {category.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </>)}
     </header>
   );
 }

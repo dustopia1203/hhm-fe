@@ -1,39 +1,14 @@
-import Logout from "@/components/features/Logout";
-import useProfileStore from "@/stores/useProfileStore";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { FaBell } from "react-icons/fa6";
-import { RxAvatar } from "react-icons/rx";
+import Header from "@/components/features/Header";
+import withAuth from "@/components/hocs/withAuth";
 
 export const Route = createFileRoute('/admin-dashboard')({
-  component: RouteComponent,
+  component: withAuth(RouteComponent, ["ALL:MANAGE"]),
 });
 
 function RouteComponent() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const profile = useProfileStore((state) => state.profile);
-  const navigate = useNavigate();
-
-  let timeoutId: NodeJS.Timeout;
-
-  const handleMouseEnter = () => {
-    clearTimeout(timeoutId);
-    setIsMenuOpen(true);
-  };
-
-  const handleMouseLeave = () => {
-    timeoutId = setTimeout(() => {
-      setIsMenuOpen(false);
-    }, 200);
-  };
-
-  useEffect(() => {
-    if (!profile || !profile.grantedPrivileges.includes("ALL:MANAGE")) {
-      navigate({ to: "/" });
-    }
-  }, [profile, navigate]);
   return (
-    <div className="flex h-screen w-full">
+    <div className="flex h-screen w-full py-6 pt-10">
       {/* Sidebar */}
       <aside className="w-64 bg-gray-800 text-white flex flex-col">
         <div className="p-4 text-lg font-bold border-b border-gray-700">HHMShop</div>
@@ -61,45 +36,7 @@ function RouteComponent() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Topbar */}
-        <div className="shadow-md flex justify-between items-center text-gray-400 text-sm py-2 px-6 bg-gray-800">
-          <Link to="#" className="text-gray-500 hover:underline">
-            Hỗ trợ
-          </Link>
-          {profile ? (
-            <div className="relative flex items-center space-x-4">
-              <FaBell className="text-gray-300 cursor-pointer" size={20} />
-              <div
-                className="relative"
-                onMouseEnter={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
-              >
-                <RxAvatar size={24} className="cursor-pointer" />
-                {isMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-40 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-50">
-                    <ul className="py-2">
-                      <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Đơn mua</li>
-                      <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Tài khoản</li>
-                      <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">
-                        <Logout />
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="space-x-2">
-              <Link to="/login" className="text-gray-500 hover:underline">
-                Đăng nhập
-              </Link>
-              <span>|</span>
-              <Link to="/register" className="text-gray-500 hover:underline">
-                Đăng ký
-              </Link>
-            </div>
-          )}
-        </div>
-
+        <Header />
         {/* Dashboard Content */}
         <main className="p-6 bg-gray-100 flex-1">
           {/* Statistics */}
