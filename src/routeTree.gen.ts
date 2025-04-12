@@ -11,7 +11,7 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as AdminDashboardImport } from './routes/adminDashboard'
+import { Route as AdminDashboardImport } from './routes/admin-dashboard'
 import { Route as IndexImport } from './routes/index'
 import { Route as authVerifyAccountImport } from './routes/(auth)/verify-account'
 import { Route as authRegisterImport } from './routes/(auth)/register'
@@ -20,8 +20,8 @@ import { Route as authLoginImport } from './routes/(auth)/login'
 // Create/Update Routes
 
 const AdminDashboardRoute = AdminDashboardImport.update({
-  id: '/adminDashboard',
-  path: '/adminDashboard',
+  id: '/admin-dashboard',
+  path: '/admin-dashboard',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -60,10 +60,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/adminDashboard': {
-      id: '/adminDashboard'
-      path: '/adminDashboard'
-      fullPath: '/adminDashboard'
+    '/admin-dashboard': {
+      id: '/admin-dashboard'
+      path: '/admin-dashboard'
+      fullPath: '/admin-dashboard'
       preLoaderRoute: typeof AdminDashboardImport
       parentRoute: typeof rootRoute
     }
@@ -95,7 +95,7 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/adminDashboard': typeof AdminDashboardRoute
+  '/admin-dashboard': typeof AdminDashboardRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
@@ -103,7 +103,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/adminDashboard': typeof AdminDashboardRoute
+  '/admin-dashboard': typeof AdminDashboardRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
@@ -112,7 +112,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/adminDashboard': typeof AdminDashboardRoute
+  '/admin-dashboard': typeof AdminDashboardRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
   '/(auth)/verify-account': typeof authVerifyAccountRoute
@@ -122,16 +122,16 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/adminDashboard'
+    | '/admin-dashboard'
     | '/login'
     | '/register'
     | '/verify-account'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/adminDashboard' | '/login' | '/register' | '/verify-account'
+  to: '/' | '/admin-dashboard' | '/login' | '/register' | '/verify-account'
   id:
     | '__root__'
     | '/'
-    | '/adminDashboard'
+    | '/admin-dashboard'
     | '/(auth)/login'
     | '/(auth)/register'
     | '/(auth)/verify-account'
@@ -165,7 +165,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/adminDashboard",
+        "/admin-dashboard",
         "/(auth)/login",
         "/(auth)/register",
         "/(auth)/verify-account"
@@ -174,8 +174,8 @@ export const routeTree = rootRoute
     "/": {
       "filePath": "index.tsx"
     },
-    "/adminDashboard": {
-      "filePath": "adminDashboard.tsx"
+    "/admin-dashboard": {
+      "filePath": "admin-dashboard.tsx"
     },
     "/(auth)/login": {
       "filePath": "(auth)/login.tsx"

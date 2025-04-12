@@ -1,6 +1,6 @@
 function Footer() {
   return (
-    <footer className="bg-gray-800 text-white py-4 w-full">
+    <footer className="bg-gray-800 text-white py-8 w-screen bottom-0 left-0">
       <div className="max-w-screen-xl mx-auto grid grid-cols-3 gap-4 px-4">
         {/* Logo and Google Map */}
         <div>

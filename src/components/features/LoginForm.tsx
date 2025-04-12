@@ -20,7 +20,7 @@ function LoginForm() {
   const profile = useProfileStore(state => state.profile);
 
   if (profile?.username === "admin") {
-    navigate({ to: "/adminDashboard" });
+    navigate({ to: "/admin-dashboard" });
   }
   else if (profile) {
     navigate({ to: "/" });
@@ -51,7 +51,7 @@ function LoginForm() {
           setProfile(profileData);
           // Kiểm tra vai trò của tài khoản
           if (profileData.username === "admin") {
-            navigate({ to: "/adminDashboard" });
+            navigate({ to: "/admin-dashboard" });
           } else {
             navigate({ to: "/" });
           }

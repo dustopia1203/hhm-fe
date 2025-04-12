@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { FaBell } from "react-icons/fa6";
 import { RxAvatar } from "react-icons/rx";
 
-export const Route = createFileRoute('/adminDashboard')({
+export const Route = createFileRoute('/admin-dashboard')({
   component: RouteComponent,
 });
 
@@ -28,11 +28,10 @@ function RouteComponent() {
   };
 
   useEffect(() => {
-    if (!profile || profile.username !== "admin") {
+    if (!profile || !profile.grantedPrivileges.includes("ALL:MANAGE")) {
       navigate({ to: "/" });
     }
   }, [profile, navigate]);
-
   return (
     <div className="flex h-screen w-full">
       {/* Sidebar */}
