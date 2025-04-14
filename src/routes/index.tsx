@@ -8,9 +8,11 @@ export const Route = createFileRoute('/')({
 function RouteComponent() {
   return (
     <>
-      <div className="">
-        <Header />
-        <h1>HOME</h1>
+      <div className="flex flex-col min-h-screen w-full">
+        <Header/>
+        <main className="flex-1 px-6">
+          <h1>HOME</h1>
+        </main>
       </div>
     </>
   );

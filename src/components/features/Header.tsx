@@ -24,10 +24,10 @@ function Header() {
   };
 
   return (
-    <header className="shadow-md bg-gray-800 fixed top-0 left-0 w-full z-50">
+    <header className="shadow-md bg-gray-800 top-0 left-0 w-full z-50">
       {/* Top bar */}
       <div className="shadow-md flex justify-between items-center text-gray-400 text-sm py-2 px-48">
-        <Link to="#" className="text-gray-500 hover:underline">
+        <Link to="/support" className="text-gray-500 hover:underline">
           Hỗ trợ
         </Link>
         {/* Checking logged in */}
@@ -95,10 +95,10 @@ function Header() {
         </form>
         {/* Shipping + Cart */}
         <div className="flex items-center space-x-4">
-          <Link to="#">
+          <Link to="/shipping">
             <FaTruck className="text-gray-300 cursor-pointer" size={24}/>
           </Link>
-          <Link to="#">
+          <Link to="/cart">
             <FiShoppingCart className="text-gray-300 cursor-pointer" size={22}/>
           </Link>
         </div>
