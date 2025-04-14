@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
-import { FaMapLocationDot } from "react-icons/fa6";
 
 function Footer() {
   return (
@@ -14,11 +13,16 @@ function Footer() {
               <img src="/vite.svg" alt="HHMShop Logo" className="h-8 w-8" />
               <span className="text-lg font-bold text-white">HHMShop</span>
             </div>
-            <div className="border border-gray-700 rounded-lg h-32 flex items-center justify-center bg-gray-700">
-              <div className="flex flex-col items-center">
-                <FaMapLocationDot className="text-gray-300 mb-2" size={24} />
-                <span className="text-sm">Google Map</span>
-              </div>
+            <div className="rounded-lg h-32 overflow-hidden">
+              {/* Google Map Embed */}
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3725.2924008216164!2d105.78741649999999!3d20.980913!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135accdd8a1ad71%3A0xa2f9b16036648187!2zSOG7jWMgdmnhu4duIEPDtG5nIG5naOG7hyBCxrB1IGNow61uaCB2aeG7hW4gdGjDtG5n!5e0!3m2!1svi!2s!4v1744640011823!5m2!1svi!2s"
+                className="w-full h-full"
+                style={{border: 0}}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="HHMShop Location"
+              ></iframe>
             </div>
           </div>
 
