@@ -5,12 +5,15 @@ import { RxAvatar } from "react-icons/rx";
 import { Link } from "@tanstack/react-router";
 import useProfileStore from "@stores/useProfileStore.ts";
 import Logout from "./Logout.tsx";
+import Categories from "./Categories.tsx";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   const profile = useProfileStore(state => state.profile)
   let timeoutId: NodeJS.Timeout;
+  let categoryTimeoutId: NodeJS.Timeout;
 
   const handleMouseEnter = () => {
     clearTimeout(timeoutId);
@@ -20,6 +23,17 @@ function Header() {
   const handleMouseLeave = () => {
     timeoutId = setTimeout(() => {
       setIsMenuOpen(false);
+    }, 200);
+  };
+
+  const handleCategoryMouseEnter = () => {
+    clearTimeout(categoryTimeoutId);
+    setIsCategoryOpen(true);
+  };
+
+  const handleCategoryMouseLeave = () => {
+    categoryTimeoutId = setTimeout(() => {
+      setIsCategoryOpen(false);
     }, 200);
   };
 
@@ -72,12 +86,14 @@ function Header() {
             </div>
           )}
       </div>
+
       {/* Main header */}
       <div className="container mx-auto flex items-center justify-between py-4 px-48">
         <div className="flex items-center space-x-2">
           <img src="/vite.svg" alt="HHMShop Logo" className="h-8 w-8"/>
           <Link to="/" className="text-lg font-bold text-white">HHMShop</Link>
         </div>
+
         {/* Search bar */}
         <form className="flex-1 mx-6 relative">
           <input
@@ -93,6 +109,7 @@ function Header() {
             <FiSearch size={20}/>
           </button>
         </form>
+
         {/* Shipping + Cart */}
         <div className="flex items-center space-x-4">
           <Link to="/shipping">
@@ -103,6 +120,13 @@ function Header() {
           </Link>
         </div>
       </div>
+
+      {/* Categories */}
+      <Categories
+        isOpen={isCategoryOpen}
+        onMouseEnter={handleCategoryMouseEnter}
+        onMouseLeave={handleCategoryMouseLeave}
+      />
     </header>
   );
 }
