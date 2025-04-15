@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiSearch, FiShoppingCart } from "react-icons/fi";
+import { FiSearch, FiShoppingCart, FiUser } from "react-icons/fi";
 import { FaBell, FaTruck } from "react-icons/fa6";
 import { RxAvatar } from "react-icons/rx";
 import { Link } from "@tanstack/react-router";
@@ -56,8 +56,17 @@ function Header() {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
-                {/* Avatar */}
-                <RxAvatar size={24} className="cursor-pointer"/>
+                {/* Avatar - conditionally render based on profile.avatarUrl */}
+                {profile.avatarUrl ? (
+                  <img
+                    src={profile.avatarUrl}
+                    alt="Avatar"
+                    className="h-6 w-6 rounded-full cursor-pointer object-cover"
+                  />
+                ) : (
+                  <RxAvatar size={24} className="cursor-pointer text-gray-300"/>
+                )}
+
                 {/* Menu when hover */}
                 {isMenuOpen && (
                   <div
@@ -87,7 +96,7 @@ function Header() {
           )}
       </div>
 
-      {/* Main header */}
+      {/* Rest of header remains unchanged */}
       <div className="container mx-auto flex items-center justify-between py-4 px-48">
         <div className="flex items-center space-x-2">
           <img src="/vite.svg" alt="HHMShop Logo" className="h-8 w-8"/>

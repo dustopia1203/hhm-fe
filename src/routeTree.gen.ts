@@ -12,6 +12,8 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
+import { Route as ProductsIndexImport } from './routes/products/index'
+import { Route as ProductsProductIdImport } from './routes/products/$productId'
 import { Route as authVerifyAccountImport } from './routes/(auth)/verify-account'
 import { Route as authRegisterImport } from './routes/(auth)/register'
 import { Route as authLoginImport } from './routes/(auth)/login'
@@ -21,6 +23,18 @@ import { Route as authLoginImport } from './routes/(auth)/login'
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProductsIndexRoute = ProductsIndexImport.update({
+  id: '/products/',
+  path: '/products/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProductsProductIdRoute = ProductsProductIdImport.update({
+  id: '/products/$productId',
+  path: '/products/$productId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -74,6 +88,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authVerifyAccountImport
       parentRoute: typeof rootRoute
     }
+    '/products/$productId': {
+      id: '/products/$productId'
+      path: '/products/$productId'
+      fullPath: '/products/$productId'
+      preLoaderRoute: typeof ProductsProductIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/products/': {
+      id: '/products/'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof ProductsIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -84,6 +112,8 @@ export interface FileRoutesByFullPath {
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
+  '/products/$productId': typeof ProductsProductIdRoute
+  '/products': typeof ProductsIndexRoute
 }
 
 export interface FileRoutesByTo {
@@ -91,6 +121,8 @@ export interface FileRoutesByTo {
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
+  '/products/$productId': typeof ProductsProductIdRoute
+  '/products': typeof ProductsIndexRoute
 }
 
 export interface FileRoutesById {
@@ -99,19 +131,35 @@ export interface FileRoutesById {
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
   '/(auth)/verify-account': typeof authVerifyAccountRoute
+  '/products/$productId': typeof ProductsProductIdRoute
+  '/products/': typeof ProductsIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/verify-account'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/verify-account'
+    | '/products/$productId'
+    | '/products'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register' | '/verify-account'
+  to:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/verify-account'
+    | '/products/$productId'
+    | '/products'
   id:
     | '__root__'
     | '/'
     | '/(auth)/login'
     | '/(auth)/register'
     | '/(auth)/verify-account'
+    | '/products/$productId'
+    | '/products/'
   fileRoutesById: FileRoutesById
 }
 
@@ -120,6 +168,8 @@ export interface RootRouteChildren {
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
   authVerifyAccountRoute: typeof authVerifyAccountRoute
+  ProductsProductIdRoute: typeof ProductsProductIdRoute
+  ProductsIndexRoute: typeof ProductsIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -127,6 +177,8 @@ const rootRouteChildren: RootRouteChildren = {
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
   authVerifyAccountRoute: authVerifyAccountRoute,
+  ProductsProductIdRoute: ProductsProductIdRoute,
+  ProductsIndexRoute: ProductsIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -142,7 +194,9 @@ export const routeTree = rootRoute
         "/",
         "/(auth)/login",
         "/(auth)/register",
-        "/(auth)/verify-account"
+        "/(auth)/verify-account",
+        "/products/$productId",
+        "/products/"
       ]
     },
     "/": {
@@ -156,6 +210,12 @@ export const routeTree = rootRoute
     },
     "/(auth)/verify-account": {
       "filePath": "(auth)/verify-account.tsx"
+    },
+    "/products/$productId": {
+      "filePath": "products/$productId.tsx"
+    },
+    "/products/": {
+      "filePath": "products/index.tsx"
     }
   }
 }
