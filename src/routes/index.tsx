@@ -203,7 +203,9 @@ function RouteComponent() {
           <div className="container mx-auto px-6 lg:px-48 py-6">
             <div className="bg-gray-800 rounded-3xl p-6 shadow-md">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-white">Flash Sale</h2>
+                <h2 className="text-red-500 text-lg font-bold flex items-center">
+                  <span className="mr-2">⚡FLASH SALE</span>
+                </h2>
                 <Link to="/flash-sale" className="flex items-center text-sm text-gray-400 hover:text-white">
                   Xem tất cả <FiChevronRight className="ml-1"/>
                 </Link>
