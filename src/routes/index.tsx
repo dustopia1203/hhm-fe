@@ -3,7 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 import Header from "@components/features/Header.tsx";
 import Footer from "@components/features/Footer.tsx";
 import ProductCard from "@components/features/ProductCard.tsx";
-import { FiChevronRight, FiMessageCircle, FiChevronLeft, FiChevronRight as FiChevronRightIcon } from "react-icons/fi";
+import { FiChevronRight, FiChevronLeft, FiChevronRight as FiChevronRightIcon } from "react-icons/fi";
+import { BiSolidMessageRoundedDetail } from "react-icons/bi";
 
 export const Route = createFileRoute('/')({
   component: RouteComponent
@@ -235,7 +236,7 @@ function RouteComponent() {
           {/* Chat Button */}
           <div className="fixed bottom-6 right-6 z-50">
             <button className="bg-gray-800 text-white p-4 rounded-full shadow-lg hover:bg-gray-700 transition-colors">
-              <FiMessageCircle size={24}/>
+              <BiSolidMessageRoundedDetail size={24}/>
             </button>
           </div>
         </main>
