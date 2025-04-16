@@ -7,11 +7,17 @@ import ReviewCard from '../../components/features/ReviewCard';
 
 export const Route = createFileRoute('/products/$productId')({
   component: RouteComponent,
+  loader: async ({ params }) => {
+    return {
+      id: params.productId
+    }
+  }
 })
 
 function RouteComponent() {
   const [currentPage, setCurrentPage] = useState(1);
   const reviewsPerPage = 5;
+  const { id } = Route.useLoaderData();
 
   // Mock product data
   const productData = {

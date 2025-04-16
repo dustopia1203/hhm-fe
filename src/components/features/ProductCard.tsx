@@ -23,14 +23,16 @@ function ProductCard(
     reviewCount,
     salePercent,
     salePrice
-
   }: ProductCardProps
 ) {
   const hasDiscount = salePercent !== undefined && salePercent > 0;
 
   return (
     <Link
-      to={`/products/${id}`}
+      to="/products/$productId"
+      params={{
+        productId: id
+      }}
       className="block bg-gray-800 rounded-2xl shadow-md hover:shadow-lg transition-shadow p-4"
     >
       <div className="aspect-square bg-gray-700 rounded-xl mb-3 overflow-hidden relative">
