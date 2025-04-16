@@ -1,6 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { Link } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import Header from '@components/features/Header'
 import Footer from '@components/features/Footer'
 import { FaStar } from 'react-icons/fa'
