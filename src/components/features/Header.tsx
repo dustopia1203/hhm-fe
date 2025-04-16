@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FiSearch, FiShoppingCart } from "react-icons/fi";
-import { FaBell, FaTruck } from "react-icons/fa6";
+import { FaBell } from "react-icons/fa6";
+import { BsReceiptCutoff } from "react-icons/bs";
 import { RxAvatar } from "react-icons/rx";
 import { Link } from "@tanstack/react-router";
 import useProfileStore from "@stores/useProfileStore.ts";
@@ -105,10 +106,10 @@ function Header() {
           </button>
         </form>
 
-        {/* Shipping + Cart */}
+        {/* Orders + Cart */}
         <div className="flex items-center space-x-4">
-          <Link to="/shipping">
-            <FaTruck className="text-gray-300 cursor-pointer" size={24}/>
+          <Link to="/orders">
+            <BsReceiptCutoff className="text-gray-300 cursor-pointer" size={24}/>
           </Link>
           <Link to="/cart">
             <FiShoppingCart className="text-gray-300 cursor-pointer" size={22}/>
