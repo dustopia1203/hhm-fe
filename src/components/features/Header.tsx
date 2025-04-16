@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiSearch, FiShoppingCart, FiUser } from "react-icons/fi";
+import { FiSearch, FiShoppingCart } from "react-icons/fi";
 import { FaBell, FaTruck } from "react-icons/fa6";
 import { RxAvatar } from "react-icons/rx";
 import { Link } from "@tanstack/react-router";

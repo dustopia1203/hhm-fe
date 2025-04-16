@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { FiStar } from "react-icons/fi";
-import { cn } from "../../lib/utils";
+import { cn } from "@/lib/utils.ts";
 
 interface ProductCardProps {
   id: string;
