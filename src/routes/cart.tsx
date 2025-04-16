@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from "react";
-import { FiMinus, FiPlus, FiX } from "react-icons/fi";
+import { FiMinus, FiPlus } from "react-icons/fi";
+import { FaTrashAlt } from "react-icons/fa";
 import Header from "@components/features/Header";
 import Footer from "@components/features/Footer";
 
@@ -166,15 +167,16 @@ function RouteComponent() {
   return (
     <>
       <div className="flex flex-col min-h-screen w-full bg-gray-900">
-        <Header />
+        <Header/>
 
         {/* Main content */}
         <div className="w-full text-white px-48 py-6">
           <h1 className="text-2xl font-bold mb-6">Giỏ hàng</h1>
 
           {/* Header row */}
-          <div className="border border-gray-800 rounded-lg p-3 mb-4 grid grid-cols-[auto_2fr_1fr_1fr_1fr_auto] gap-4 items-center bg-gray-800">
-            <div className="pl-2">
+          <div
+            className="border border-gray-800 rounded-lg p-3 mb-4 grid grid-cols-[auto_2fr_1fr_1fr_1fr_auto] gap-4 items-center bg-gray-800">
+            <div className="px-1">
               <input
                 type="checkbox"
                 className="h-4 w-4 accent-gray-600"
@@ -276,7 +278,7 @@ function RouteComponent() {
                       onClick={() => removeItem(item.id)}
                       className="text-gray-400 hover:text-white p-1"
                     >
-                      <FiX size={20}/>
+                      <FaTrashAlt size={20}/>
                     </button>
                   </div>
                 </div>
@@ -309,7 +311,8 @@ function RouteComponent() {
                   checked={method.selected}
                   onChange={() => selectShippingMethod(method.id)}
                 />
-                <div className="h-14 w-14 bg-gray-800 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
+                <div
+                  className="h-14 w-14 bg-gray-800 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
                   <img
                     src={method.id === "express" ? "/images/shipping/express.png" : "/images/shipping/standard.png"}
                     alt={method.name}
@@ -395,13 +398,14 @@ function RouteComponent() {
 
           {/* Checkout Button */}
           <div className="flex justify-end">
-            <button className="bg-white text-gray-900 font-bold py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors">
+            <button
+              className="bg-white text-gray-900 font-bold py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors">
               Đặt hàng
             </button>
           </div>
         </div>
 
-        <Footer />
+        <Footer/>
       </div>
     </>
   )
