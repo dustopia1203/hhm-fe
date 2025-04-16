@@ -5,15 +5,12 @@ import { RxAvatar } from "react-icons/rx";
 import { Link } from "@tanstack/react-router";
 import useProfileStore from "@stores/useProfileStore.ts";
 import Logout from "./Logout.tsx";
-import Categories from "./Categories.tsx";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   const profile = useProfileStore(state => state.profile)
   let timeoutId: NodeJS.Timeout;
-  let categoryTimeoutId: NodeJS.Timeout;
 
   const handleMouseEnter = () => {
     clearTimeout(timeoutId);
@@ -23,17 +20,6 @@ function Header() {
   const handleMouseLeave = () => {
     timeoutId = setTimeout(() => {
       setIsMenuOpen(false);
-    }, 200);
-  };
-
-  const handleCategoryMouseEnter = () => {
-    clearTimeout(categoryTimeoutId);
-    setIsCategoryOpen(true);
-  };
-
-  const handleCategoryMouseLeave = () => {
-    categoryTimeoutId = setTimeout(() => {
-      setIsCategoryOpen(false);
     }, 200);
   };
 
@@ -129,13 +115,6 @@ function Header() {
           </Link>
         </div>
       </div>
-
-      {/* Categories */}
-      <Categories
-        isOpen={isCategoryOpen}
-        onMouseEnter={handleCategoryMouseEnter}
-        onMouseLeave={handleCategoryMouseLeave}
-      />
     </header>
   );
 }

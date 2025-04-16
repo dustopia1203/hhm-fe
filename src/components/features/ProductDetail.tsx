@@ -1,6 +1,14 @@
 import { useState } from "react";
-import { FiShoppingCart, FiStar } from "react-icons/fi";
+import { FiChevronRight, FiShoppingCart, FiStar } from "react-icons/fi";
 import { IoChevronBackOutline, IoChevronForwardOutline } from "react-icons/io5";
+import { Link } from "@tanstack/react-router";
+
+// Define recursive Category type
+interface Category {
+  id: string;
+  name: string;
+  subcategory?: Category; // Nested subcategory (recursive structure)
+}
 
 interface ProductDetailProps {
   name: string;
@@ -9,7 +17,36 @@ interface ProductDetailProps {
   reviewCount: number;
   soldCount: number;
   images: string[];
+  category?: Category;
 }
+
+// Recursive component to render the category breadcrumb
+const CategoryBreadcrumb = ({ category, productName }: { category: Category, productName: string }) => {
+  if (!category) return null;
+
+  return (
+    <>
+      <Link
+        to={`/category/${category.id}`}
+        className="text-gray-400 hover:text-white"
+      >
+        {category.name}
+      </Link>
+
+      {category.subcategory ? (
+        <>
+          <FiChevronRight className="inline mx-2 text-gray-500" />
+          <CategoryBreadcrumb category={category.subcategory} productName={productName} />
+        </>
+      ) : (
+        <>
+          <FiChevronRight className="inline mx-2 text-gray-500" />
+          <span className="text-white">{productName}</span>
+        </>
+      )}
+    </>
+  );
+};
 
 function ProductDetail(
   {
@@ -18,7 +55,8 @@ function ProductDetail(
     rating,
     reviewCount,
     soldCount,
-    images
+    images,
+    category
   }: ProductDetailProps
 ) {
   const [mainImage, setMainImage] = useState(0);
@@ -41,6 +79,13 @@ function ProductDetail(
 
   return (
     <div className="rounded-3xl border border-gray-700 bg-gray-800 p-6 shadow-md">
+      {/* Category breadcrumb navigation */}
+      {category && (
+        <div className="mb-4 text-sm">
+          <CategoryBreadcrumb category={category} productName={name} />
+        </div>
+      )}
+
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Left side - Image gallery */}
         <div className="w-full lg:w-1/2">

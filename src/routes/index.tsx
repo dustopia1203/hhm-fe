@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Header from "@components/features/Header.tsx";
 import Footer from "@components/features/Footer.tsx";
 import ProductCard from "@components/features/ProductCard.tsx";
-import { FiChevronRight, FiChevronLeft, FiChevronRight as FiChevronRightIcon } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiChevronRight as FiChevronRightIcon } from "react-icons/fi";
 import { BiSolidMessageRoundedDetail } from "react-icons/bi";
+import Categories from "@components/features/Categories.tsx";
 
 export const Route = createFileRoute('/')({
   component: RouteComponent
@@ -12,6 +13,7 @@ export const Route = createFileRoute('/')({
 
 function RouteComponent() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   // Banner images - replace with your actual images
   const banners = [
@@ -104,6 +106,19 @@ function RouteComponent() {
     }
   ];
 
+  let categoryTimeoutId: NodeJS.Timeout;
+
+  const handleCategoryMouseEnter = () => {
+    clearTimeout(categoryTimeoutId);
+    setIsCategoryOpen(true);
+  };
+
+  const handleCategoryMouseLeave = () => {
+    categoryTimeoutId = setTimeout(() => {
+      setIsCategoryOpen(false);
+    }, 200);
+  };
+
   // Auto-advance slides
   useEffect(() => {
     const interval = setInterval(() => {
@@ -129,6 +144,11 @@ function RouteComponent() {
     <>
       <div className="flex flex-col min-h-screen w-full bg-gray-900">
         <Header/>
+        <Categories
+          isOpen={isCategoryOpen}
+          onMouseEnter={handleCategoryMouseEnter}
+          onMouseLeave={handleCategoryMouseLeave}
+        />
         <main className="flex-1">
           {/* Hero Banner */}
           <div className="container mx-auto px-6 lg:px-48 py-6">
