@@ -110,10 +110,10 @@ function Header() {
 
         {/* Orders + Cart */}
         <div className="flex items-center space-x-4">
-          <Link to="/orders">
+          <Link to="/my/orders">
             <BsReceiptCutoff className="text-gray-300 cursor-pointer" size={24}/>
           </Link>
-          <Link to="/cart">
+          <Link to="/my/cart">
             <FiShoppingCart className="text-gray-300 cursor-pointer" size={22}/>
           </Link>
         </div>

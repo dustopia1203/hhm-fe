@@ -2,8 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from "react";
 import { FiMinus, FiPlus } from "react-icons/fi";
 import { FaTrashAlt } from "react-icons/fa";
-import Header from "@components/features/Header";
-import Footer from "@components/features/Footer";
+import Header from "@components/features/Header.tsx";
+import Footer from "@components/features/Footer.tsx";
 
 interface CartItem {
   id: string;
@@ -25,7 +25,7 @@ interface ShippingMethod {
   selected: boolean;
 }
 
-export const Route = createFileRoute('/cart')({
+export const Route = createFileRoute('/my/cart')({
   component: RouteComponent,
 })
 

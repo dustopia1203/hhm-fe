@@ -11,28 +11,16 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as OrdersImport } from './routes/orders'
-import { Route as CartImport } from './routes/cart'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProductsIndexImport } from './routes/products/index'
 import { Route as ProductsProductIdImport } from './routes/products/$productId'
+import { Route as MyOrdersImport } from './routes/my/orders'
+import { Route as MyCartImport } from './routes/my/cart'
 import { Route as authVerifyAccountImport } from './routes/(auth)/verify-account'
 import { Route as authRegisterImport } from './routes/(auth)/register'
 import { Route as authLoginImport } from './routes/(auth)/login'
 
 // Create/Update Routes
-
-const OrdersRoute = OrdersImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const CartRoute = CartImport.update({
-  id: '/cart',
-  path: '/cart',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
@@ -49,6 +37,18 @@ const ProductsIndexRoute = ProductsIndexImport.update({
 const ProductsProductIdRoute = ProductsProductIdImport.update({
   id: '/products/$productId',
   path: '/products/$productId',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MyOrdersRoute = MyOrdersImport.update({
+  id: '/my/orders',
+  path: '/my/orders',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MyCartRoute = MyCartImport.update({
+  id: '/my/cart',
+  path: '/my/cart',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -81,20 +81,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/cart': {
-      id: '/cart'
-      path: '/cart'
-      fullPath: '/cart'
-      preLoaderRoute: typeof CartImport
-      parentRoute: typeof rootRoute
-    }
-    '/orders': {
-      id: '/orders'
-      path: '/orders'
-      fullPath: '/orders'
-      preLoaderRoute: typeof OrdersImport
-      parentRoute: typeof rootRoute
-    }
     '/(auth)/login': {
       id: '/(auth)/login'
       path: '/login'
@@ -114,6 +100,20 @@ declare module '@tanstack/react-router' {
       path: '/verify-account'
       fullPath: '/verify-account'
       preLoaderRoute: typeof authVerifyAccountImport
+      parentRoute: typeof rootRoute
+    }
+    '/my/cart': {
+      id: '/my/cart'
+      path: '/my/cart'
+      fullPath: '/my/cart'
+      preLoaderRoute: typeof MyCartImport
+      parentRoute: typeof rootRoute
+    }
+    '/my/orders': {
+      id: '/my/orders'
+      path: '/my/orders'
+      fullPath: '/my/orders'
+      preLoaderRoute: typeof MyOrdersImport
       parentRoute: typeof rootRoute
     }
     '/products/$productId': {
@@ -137,22 +137,22 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/cart': typeof CartRoute
-  '/orders': typeof OrdersRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
+  '/my/cart': typeof MyCartRoute
+  '/my/orders': typeof MyOrdersRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products': typeof ProductsIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/cart': typeof CartRoute
-  '/orders': typeof OrdersRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
+  '/my/cart': typeof MyCartRoute
+  '/my/orders': typeof MyOrdersRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products': typeof ProductsIndexRoute
 }
@@ -160,11 +160,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/cart': typeof CartRoute
-  '/orders': typeof OrdersRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
   '/(auth)/verify-account': typeof authVerifyAccountRoute
+  '/my/cart': typeof MyCartRoute
+  '/my/orders': typeof MyOrdersRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products/': typeof ProductsIndexRoute
 }
@@ -173,31 +173,31 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/cart'
-    | '/orders'
     | '/login'
     | '/register'
     | '/verify-account'
+    | '/my/cart'
+    | '/my/orders'
     | '/products/$productId'
     | '/products'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/cart'
-    | '/orders'
     | '/login'
     | '/register'
     | '/verify-account'
+    | '/my/cart'
+    | '/my/orders'
     | '/products/$productId'
     | '/products'
   id:
     | '__root__'
     | '/'
-    | '/cart'
-    | '/orders'
     | '/(auth)/login'
     | '/(auth)/register'
     | '/(auth)/verify-account'
+    | '/my/cart'
+    | '/my/orders'
     | '/products/$productId'
     | '/products/'
   fileRoutesById: FileRoutesById
@@ -205,22 +205,22 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CartRoute: typeof CartRoute
-  OrdersRoute: typeof OrdersRoute
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
   authVerifyAccountRoute: typeof authVerifyAccountRoute
+  MyCartRoute: typeof MyCartRoute
+  MyOrdersRoute: typeof MyOrdersRoute
   ProductsProductIdRoute: typeof ProductsProductIdRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CartRoute: CartRoute,
-  OrdersRoute: OrdersRoute,
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
   authVerifyAccountRoute: authVerifyAccountRoute,
+  MyCartRoute: MyCartRoute,
+  MyOrdersRoute: MyOrdersRoute,
   ProductsProductIdRoute: ProductsProductIdRoute,
   ProductsIndexRoute: ProductsIndexRoute,
 }
@@ -236,23 +236,17 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/cart",
-        "/orders",
         "/(auth)/login",
         "/(auth)/register",
         "/(auth)/verify-account",
+        "/my/cart",
+        "/my/orders",
         "/products/$productId",
         "/products/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
-    },
-    "/cart": {
-      "filePath": "cart.tsx"
-    },
-    "/orders": {
-      "filePath": "orders.tsx"
     },
     "/(auth)/login": {
       "filePath": "(auth)/login.tsx"
@@ -262,6 +256,12 @@ export const routeTree = rootRoute
     },
     "/(auth)/verify-account": {
       "filePath": "(auth)/verify-account.tsx"
+    },
+    "/my/cart": {
+      "filePath": "my/cart.tsx"
+    },
+    "/my/orders": {
+      "filePath": "my/orders.tsx"
     },
     "/products/$productId": {
       "filePath": "products/$productId.tsx"

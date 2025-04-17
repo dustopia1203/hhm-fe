@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import Header from '@components/features/Header'
-import Footer from '@components/features/Footer'
+import Header from '@components/features/Header.tsx'
+import Footer from '@components/features/Footer.tsx'
 import { FaStar } from 'react-icons/fa'
-import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogClose, DialogContent, DialogTitle } from "@components/ui/dialog.tsx"
 import { X } from "lucide-react"
 import RefundForm from "@components/features/RefundForm.tsx"
 import { toast } from "sonner"
-import ReviewForm from "@components/features/ReviewForm.tsx"; // Make sure to install sonner if not already: pnpm add sonner
+import ReviewForm from "@components/features/ReviewForm.tsx";
 
 // Define types for our orders
 interface OrderProduct {
@@ -27,7 +27,7 @@ interface Order {
   statusText: string
 }
 
-export const Route = createFileRoute('/orders')({
+export const Route = createFileRoute('/my/orders')({
   component: RouteComponent,
 })
 
@@ -386,7 +386,7 @@ function RouteComponent() {
             {tabs.map(tab => (
               <Link
                 key={tab.type}
-                to="/orders"
+                to="/my/orders"
                 search={{ tab: tab.type }}
                 className={`flex-1 py-4 px-2 ${
                   orderType === tab.type
