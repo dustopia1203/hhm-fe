@@ -147,7 +147,9 @@ function RouteComponent() {
   };
 
   // Calculate summary values
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cartItems
+    .filter(item => item.selected)
+    .reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   // Calculate shipping based on selected method (just one method now)
   const selectedShippingMethod = shippingMethods.find(m => m.selected);
