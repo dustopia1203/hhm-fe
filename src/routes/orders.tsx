@@ -3,10 +3,11 @@ import { useState } from 'react'
 import Header from '@components/features/Header'
 import Footer from '@components/features/Footer'
 import { FaStar } from 'react-icons/fa'
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogClose, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { X } from "lucide-react"
 import RefundForm from "@components/features/RefundForm.tsx"
-import { toast } from "sonner" // Make sure to install sonner if not already: pnpm add sonner
+import { toast } from "sonner"
+import ReviewForm from "@components/features/ReviewForm.tsx"; // Make sure to install sonner if not already: pnpm add sonner
 
 // Define types for our orders
 interface OrderProduct {
@@ -34,8 +35,9 @@ function RouteComponent() {
   const search = Route.useSearch()
   const orderType = search.tab || '1'
 
-  // Dialog state
-  const [dialogOpen, setDialogOpen] = useState(false)
+  // Dialog states
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false)
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<OrderProduct | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -186,12 +188,18 @@ function RouteComponent() {
   // Filter orders based on orderType
   const filteredOrders = ordersState.filter(order => {
     switch (orderType) {
-      case '1': return order.status === 'pending'
-      case '2': return order.status === 'shipping' || order.status === 'delivered' || order.status === 'refund_progressing'
-      case '3': return order.status === 'completed' || order.status === 'reviewed'
-      case '4': return order.status === 'cancelled'
-      case '5': return order.status === 'refund'
-      default: return true
+      case '1':
+        return order.status === 'pending'
+      case '2':
+        return order.status === 'shipping' || order.status === 'delivered' || order.status === 'refund_progressing'
+      case '3':
+        return order.status === 'completed' || order.status === 'reviewed'
+      case '4':
+        return order.status === 'cancelled'
+      case '5':
+        return order.status === 'refund'
+      default:
+        return true
     }
   })
 
@@ -207,7 +215,13 @@ function RouteComponent() {
   // Open refund dialog
   const handleRefundClick = (product: OrderProduct) => {
     setSelectedProduct(product)
-    setDialogOpen(true)
+    setRefundDialogOpen(true)
+  }
+
+  // Open review dialog
+  const handleReviewClick = (product: OrderProduct) => {
+    setSelectedProduct(product)
+    setReviewDialogOpen(true)
   }
 
   // Handle refund form submission
@@ -244,14 +258,59 @@ function RouteComponent() {
       })
 
       setIsSubmitting(false)
-      setDialogOpen(false)
+      setRefundDialogOpen(false)
+    }, 1500)
+  }
+
+  // Handle review form submission
+  const handleReviewSubmit = (data: {
+    orderItemId: string
+    rating: number
+    comment: string
+    images: File[]
+  }) => {
+    setIsSubmitting(true)
+
+    // Simulate API call
+    setTimeout(() => {
+      // Update the order status to reviewed
+      setOrdersState(prevOrders =>
+        prevOrders.map(order => {
+          // Check if this order contains the product being reviewed
+          const containsProduct = order.products.some(p => p.id === data.orderItemId)
+          if (containsProduct && order.status === 'completed') {
+            // Update the order status
+            return {
+              ...order,
+              status: 'reviewed',
+              statusText: 'Đã đánh giá'
+            }
+          }
+          return order
+        })
+      )
+
+      // Show success message
+      toast.success("Cảm ơn bạn đã đánh giá", {
+        description: `Bạn đã đánh giá ${data.rating} sao cho sản phẩm này`
+      })
+
+      setIsSubmitting(false)
+      setReviewDialogOpen(false)
     }, 1500)
   }
 
   // Handle dialog close
-  const handleDialogClose = () => {
+  const handleRefundDialogClose = () => {
     if (!isSubmitting) {
-      setDialogOpen(false)
+      setRefundDialogOpen(false)
+    }
+  }
+
+  // Handle review dialog close
+  const handleReviewDialogClose = () => {
+    if (!isSubmitting) {
+      setReviewDialogOpen(false)
     }
   }
 
@@ -278,8 +337,11 @@ function RouteComponent() {
         )
       case 'completed': // Show review button only for completed orders, not for reviewed ones
         return (
-          <button className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 border border-gray-700 flex items-center">
-            <FaStar className="mr-2 text-yellow-400" />
+          <button
+            className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 border border-gray-700 flex items-center"
+            onClick={() => handleReviewClick(product)}
+          >
+            <FaStar className="mr-2 text-yellow-400"/>
             Đánh giá sản phẩm
           </button>
         )
@@ -315,7 +377,7 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-900">
-      <Header />
+      <Header/>
 
       <main className="flex-grow py-6 max-w-6xl mx-auto w-full px-4">
         {/* Navigation Tabs */}
@@ -350,10 +412,11 @@ function RouteComponent() {
 
               {/* Products */}
               {order.products.map(product => (
-                <div key={product.id} className="flex items-center p-4 gap-4 border-b border-gray-700/30 last:border-b-0">
+                <div key={product.id}
+                     className="flex items-center p-4 gap-4 border-b border-gray-700/30 last:border-b-0">
                   <div className="h-20 w-20 bg-gray-800 rounded-lg overflow-hidden">
                     <div className="h-full w-full flex items-center justify-center bg-blue-100/10">
-                      <img src={product.image} alt={product.name} className="max-h-16 max-w-16" />
+                      <img src={product.image} alt={product.name} className="max-h-16 max-w-16"/>
                     </div>
                   </div>
 
@@ -396,10 +459,10 @@ function RouteComponent() {
         </div>
       </main>
 
-      <Footer />
+      <Footer/>
 
       {/* Refund Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
+      <Dialog open={refundDialogOpen} onOpenChange={handleRefundDialogClose}>
         <DialogContent
           className="bg-gray-900 border border-gray-800 text-white sm:max-w-[550px] p-0 overflow-hidden"
           onInteractOutside={(e) => {
@@ -416,7 +479,7 @@ function RouteComponent() {
               className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 disabled:pointer-events-none"
               disabled={isSubmitting}
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4"/>
               <span className="sr-only">Close</span>
             </DialogClose>
           </div>
@@ -432,7 +495,49 @@ function RouteComponent() {
                   quantity={selectedProduct.quantity}
                   productImage={selectedProduct.image}
                   onSubmit={handleRefundSubmit}
-                  onClose={handleDialogClose}
+                  onClose={handleRefundDialogClose}
+                />
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Review Dialog */}
+      <Dialog open={reviewDialogOpen} onOpenChange={handleReviewDialogClose}>
+        <DialogContent
+          className="bg-gray-900 border border-gray-800 text-white sm:max-w-[550px] p-0 overflow-hidden"
+          onInteractOutside={(e) => {
+            if (isSubmitting) {
+              e.preventDefault();
+            }
+          }}
+        >
+          <div className="sticky top-0 z-20 bg-gray-900 px-6 pt-6 pb-2 border-b border-gray-800 shadow-md">
+            <DialogTitle className="text-xl font-bold text-white mb-1">
+              Đánh giá sản phẩm
+            </DialogTitle>
+            <DialogClose
+              className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 disabled:pointer-events-none"
+              disabled={isSubmitting}
+            >
+              <X className="h-4 w-4"/>
+              <span className="sr-only">Close</span>
+            </DialogClose>
+          </div>
+
+          {/* Use a scrollable container for the content */}
+          <div className="overflow-y-auto scrollbar-hide max-h-[calc(90vh-80px)]">
+            {selectedProduct && (
+              <div className="px-6 py-6">
+                <ReviewForm
+                  orderItemId={selectedProduct.id}
+                  productName={selectedProduct.name}
+                  price={selectedProduct.price}
+                  quantity={selectedProduct.quantity}
+                  productImage={selectedProduct.image}
+                  onSubmit={handleReviewSubmit}
+                  onClose={handleReviewDialogClose}
                 />
               </div>
             )}
