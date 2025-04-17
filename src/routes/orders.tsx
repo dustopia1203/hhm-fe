@@ -1,7 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState } from 'react'
 import Header from '@components/features/Header'
 import Footer from '@components/features/Footer'
 import { FaStar } from 'react-icons/fa'
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { X } from "lucide-react"
+import RefundForm from "@components/features/RefundForm.tsx"
+import { toast } from "sonner" // Make sure to install sonner if not already: pnpm add sonner
 
 // Define types for our orders
 interface OrderProduct {
@@ -17,7 +22,7 @@ interface Order {
   id: string
   shop: string
   products: OrderProduct[]
-  status: 'pending' | 'shipping' | 'delivered' | 'completed' | 'cancelled' | 'refund' | 'reviewed'
+  status: 'pending' | 'shipping' | 'delivered' | 'completed' | 'cancelled' | 'refund' | 'reviewed' | 'refund_progressing'
   statusText: string
 }
 
@@ -27,10 +32,15 @@ export const Route = createFileRoute('/orders')({
 
 function RouteComponent() {
   const search = Route.useSearch()
-  const orderType = search.tab || '1'  // Changed from order_type to tab
+  const orderType = search.tab || '1'
 
-  // Mock orders data with updated statuses
-  const orders: Order[] = [
+  // Dialog state
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<OrderProduct | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Orders state - allows us to update the status
+  const [ordersState, setOrdersState] = useState<Order[]>([
     {
       id: 'order1',
       shop: 'TTGShop',
@@ -153,15 +163,32 @@ function RouteComponent() {
       ],
       status: 'reviewed',
       statusText: 'Đã đánh giá'
+    },
+    // New order with refund_progressing status
+    {
+      id: 'order9',
+      shop: 'TTGShop',
+      products: [
+        {
+          id: 'product11',
+          name: 'Sony WH-1000XM5',
+          image: '/images/products/headphones.jpg',
+          originalPrice: 399.99,
+          price: 349.99,
+          quantity: 1
+        }
+      ],
+      status: 'refund_progressing',
+      statusText: 'Đang xử lý hoàn tiền'
     }
-  ]
+  ])
 
   // Filter orders based on orderType
-  const filteredOrders = orders.filter(order => {
+  const filteredOrders = ordersState.filter(order => {
     switch (orderType) {
       case '1': return order.status === 'pending'
-      case '2': return order.status === 'shipping' || order.status === 'delivered' // Include both shipping and delivered
-      case '3': return order.status === 'completed' || order.status === 'reviewed' // Include both completed and reviewed
+      case '2': return order.status === 'shipping' || order.status === 'delivered' || order.status === 'refund_progressing'
+      case '3': return order.status === 'completed' || order.status === 'reviewed'
       case '4': return order.status === 'cancelled'
       case '5': return order.status === 'refund'
       default: return true
@@ -177,13 +204,76 @@ function RouteComponent() {
     { type: '5', label: 'Trả hàng/Hoàn tiền' }
   ]
 
+  // Open refund dialog
+  const handleRefundClick = (product: OrderProduct) => {
+    setSelectedProduct(product)
+    setDialogOpen(true)
+  }
+
+  // Handle refund form submission
+  const handleRefundSubmit = (data: {
+    orderItemId: string
+    reason: string
+    notes: string
+    images: File[]
+  }) => {
+    setIsSubmitting(true)
+
+    // Simulate API call
+    setTimeout(() => {
+      // Update the order status to refund_progressing
+      setOrdersState(prevOrders =>
+        prevOrders.map(order => {
+          // Check if this order contains the product being refunded
+          const containsProduct = order.products.some(p => p.id === data.orderItemId)
+          if (containsProduct && order.status === 'delivered') {
+            // Update the order status
+            return {
+              ...order,
+              status: 'refund_progressing',
+              statusText: 'Đang xử lý hoàn tiền'
+            }
+          }
+          return order
+        })
+      )
+
+      // Show success message
+      toast.success("Yêu cầu hoàn tiền đã được gửi", {
+        description: "Bạn sẽ nhận được phản hồi trong 24 giờ tới"
+      })
+
+      setIsSubmitting(false)
+      setDialogOpen(false)
+    }, 1500)
+  }
+
+  // Handle dialog close
+  const handleDialogClose = () => {
+    if (!isSubmitting) {
+      setDialogOpen(false)
+    }
+  }
+
   // Render actions buttons based on order status
-  const renderActions = (order: Order) => {
+  const renderActions = (order: Order, product: OrderProduct) => {
     switch (order.status) {
       case 'delivered': // Only delivered orders have refund button in tab 2
         return (
-          <button className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 border border-gray-600">
+          <button
+            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 border border-gray-600"
+            onClick={() => handleRefundClick(product)}
+          >
             Trả hàng/Hoàn tiền
+          </button>
+        )
+      case 'refund_progressing': // Disabled refund button for refund_progressing status
+        return (
+          <button
+            className="px-4 py-2 bg-gray-600 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed"
+            disabled
+          >
+            Đang xử lý hoàn tiền
           </button>
         )
       case 'completed': // Show review button only for completed orders, not for reviewed ones
@@ -216,16 +306,18 @@ function RouteComponent() {
         return 'text-red-300'
       case 'refund':
         return 'text-purple-300'
+      case 'refund_progressing':
+        return 'text-orange-300'
       default:
         return 'text-gray-300'
     }
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gray-900">
       <Header />
 
-      <main className="flex-grow py-6 max-w-6xl mx-auto w-full">
+      <main className="flex-grow py-6 max-w-6xl mx-auto w-full px-4">
         {/* Navigation Tabs */}
         <div className="border border-gray-800 rounded-lg overflow-hidden mb-6">
           <div className="flex flex-wrap text-center">
@@ -233,7 +325,7 @@ function RouteComponent() {
               <Link
                 key={tab.type}
                 to="/orders"
-                search={{ tab: tab.type }}  // Changed from order_type to tab
+                search={{ tab: tab.type }}
                 className={`flex-1 py-4 px-2 ${
                   orderType === tab.type
                     ? 'text-blue-500 border-b-2 border-blue-500'
@@ -286,11 +378,13 @@ function RouteComponent() {
               ))}
 
               {/* Actions */}
-              {renderActions(order) && (
-                <div className="flex justify-end p-4 border-t border-gray-800">
-                  {renderActions(order)}
-                </div>
-              )}
+              <div className="flex justify-end p-4 border-t border-gray-800">
+                {order.products.map(product => (
+                  <div key={`action-${product.id}`}>
+                    {renderActions(order, product)}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
 
@@ -303,6 +397,35 @@ function RouteComponent() {
       </main>
 
       <Footer />
+
+      {/* Refund Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
+        <DialogContent className="bg-gray-900 border border-gray-800 text-white sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-white">
+              Trả hàng/Hoàn tiền
+            </DialogTitle>
+            <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </DialogClose>
+          </DialogHeader>
+
+          {selectedProduct && (
+            <div className="pt-2">
+              <RefundForm
+                orderItemId={selectedProduct.id}
+                productName={selectedProduct.name}
+                price={selectedProduct.price}
+                quantity={selectedProduct.quantity}
+                productImage={selectedProduct.image}
+                onSubmit={handleRefundSubmit}
+                onClose={handleDialogClose}
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

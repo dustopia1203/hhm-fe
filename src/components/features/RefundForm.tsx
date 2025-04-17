@@ -6,16 +6,27 @@ interface RefundFormProps {
   productName: string
   price: number
   quantity: number
-  productImage?: string  // Optional since it wasn't explicitly mentioned
+  productImage?: string
+  onSubmit?: (data: {
+    orderItemId: string
+    reason: string
+    notes: string
+    images: File[]
+  }) => void
+  onClose?: () => void
 }
 
-const RefundForm: React.FC<RefundFormProps> = ({
-                                                 orderItemId,
-                                                 productName,
-                                                 price,
-                                                 quantity,
-                                                 productImage = '/placeholder-image.jpg',  // Default image if not provided
-                                               }) => {
+function RefundForm(
+  {
+    orderItemId,
+    productName,
+    price,
+    quantity,
+    productImage = '/placeholder-image.jpg',
+    onSubmit,
+    onClose
+  }: RefundFormProps
+) {
   const [reason, setReason] = useState("")
   const [notes, setNotes] = useState("")
   const [images, setImages] = useState<File[]>([])
@@ -35,23 +46,37 @@ const RefundForm: React.FC<RefundFormProps> = ({
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Mock submission
-    setTimeout(() => {
+    const formData = {
+      orderItemId,
+      reason,
+      notes,
+      images
+    }
+
+    // If onSubmit prop exists, call it with form data
+    if (onSubmit) {
+      onSubmit(formData)
+    } else {
+      // Fallback to default behavior (for backward compatibility)
       console.log('Submitted refund request:', {
-        orderItemId,
-        reason,
-        notes,
+        ...formData,
         imageCount: images.length
       })
-      setIsSubmitting(false)
-      // Here you could redirect or show a success message
-    }, 1000)
+
+      // Reset submission state after a delay
+      setTimeout(() => {
+        setIsSubmitting(false)
+      }, 1000)
+    }
   }
 
   const handleCancel = () => {
-    // Handle cancel action internally
-    console.log('Refund request canceled')
-    // Here you could navigate back or reset the form
+    if (onClose) {
+      onClose()
+    } else {
+      // Fallback behavior
+      console.log('Refund request canceled')
+    }
   }
 
   return (
@@ -118,13 +143,14 @@ const RefundForm: React.FC<RefundFormProps> = ({
                   onClick={() => removeImage(index)}
                   className="absolute top-1 right-1 h-5 w-5 bg-gray-900/80 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100"
                 >
-                  <FiX size={12} />
+                  <FiX size={12}/>
                 </button>
               </div>
             ))}
 
-            <label className="h-20 w-20 border border-gray-700 rounded-lg flex flex-col items-center justify-center cursor-pointer bg-gray-800 hover:bg-gray-750">
-              <FiPlus className="text-gray-400 mb-1" size={18} />
+            <label
+              className="h-20 w-20 border border-gray-700 rounded-lg flex flex-col items-center justify-center cursor-pointer bg-gray-800 hover:bg-gray-750">
+              <FiPlus className="text-gray-400 mb-1" size={18}/>
               <span className="text-xs text-gray-400 text-center">Thêm hình ảnh</span>
               <input
                 type="file"
