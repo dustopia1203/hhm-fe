@@ -142,7 +142,7 @@ function RouteComponent() {
 
   return (
     <>
-      <div className="flex flex-col min-h-screen w-full bg-gray-900">
+      <div className="flex flex-col min-h-screen w-full">
         <Header/>
         <Categories
           isOpen={isCategoryOpen}

@@ -222,7 +222,7 @@ function RouteComponent() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-900">
+    <div className="flex flex-col min-h-screen">
       <Header />
 
       <main className="flex-grow py-6 max-w-6xl mx-auto w-full">

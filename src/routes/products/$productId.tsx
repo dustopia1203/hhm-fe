@@ -113,7 +113,7 @@ function RouteComponent() {
 
   return (
     <>
-      <div className="flex flex-col min-h-screen w-full bg-gray-900">
+      <div className="flex flex-col min-h-screen w-full">
         <Header />
         <div className="container mx-auto px-48 py-8">
           {/* Product Detail Component */}
