@@ -3,6 +3,8 @@ import useProfileStore from "@stores/useProfileStore.ts";
 import React from "react";
 
 function validatePrivileges(requiredPrivileges: string[], userPrivileges: string[]): boolean {
+  if (requiredPrivileges.length === 0) return true;
+
   return requiredPrivileges.some(requiredPrivilege =>
     userPrivileges.some((userPrivilege: string) => {
       if (!requiredPrivilege.includes("_") || !userPrivilege.includes("_")) return false;

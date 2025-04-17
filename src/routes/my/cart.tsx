@@ -4,6 +4,7 @@ import { FiMinus, FiPlus } from "react-icons/fi";
 import { FaTrashAlt } from "react-icons/fa";
 import Header from "@components/features/Header.tsx";
 import Footer from "@components/features/Footer.tsx";
+import withAuth from "@components/hocs/withAuth.tsx";
 
 interface CartItem {
   id: string;
@@ -26,7 +27,7 @@ interface ShippingMethod {
 }
 
 export const Route = createFileRoute('/my/cart')({
-  component: RouteComponent,
+  component: withAuth(RouteComponent, []),
 })
 
 function RouteComponent() {
