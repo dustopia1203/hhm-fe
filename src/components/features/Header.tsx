@@ -27,7 +27,7 @@ function Header() {
   return (
     <header className="shadow-md bg-gray-800 top-0 left-0 w-full z-50">
       {/* Top bar */}
-      <div className="shadow-md flex justify-between items-center text-gray-400 text-sm py-2 px-48">
+      <div className="relative container mx-auto flex items-center justify-between py-4 px-48 text-gray-400 text-sm">
         <Link to="/support" className="text-gray-500 hover:underline">
           Hỗ trợ
         </Link>
@@ -81,9 +81,11 @@ function Header() {
               </Link>
             </div>
           )}
+
+        <div className="absolute bottom-0 left-48 right-48 h-[1px] bg-gray-700"></div>
+
       </div>
 
-      {/* Rest of header remains unchanged */}
       <div className="container mx-auto flex items-center justify-between py-4 px-48">
         <div className="flex items-center space-x-2">
           <img src="/vite.svg" alt="HHMShop Logo" className="h-8 w-8"/>
