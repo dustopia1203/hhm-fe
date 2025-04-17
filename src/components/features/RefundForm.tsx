@@ -81,10 +81,6 @@ function RefundForm(
 
   return (
     <div className="bg-gray-900 rounded-lg border border-gray-800">
-      <div className="border-b border-gray-800 p-4">
-        <h2 className="text-xl font-medium text-white">Trả hàng/Hoàn tiền</h2>
-      </div>
-
       {/* Product Information */}
       <div className="p-4 border-b border-gray-800">
         <div className="flex items-center">

@@ -400,30 +400,43 @@ function RouteComponent() {
 
       {/* Refund Dialog */}
       <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
-        <DialogContent className="bg-gray-900 border border-gray-800 text-white sm:max-w-[550px]">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-white">
+        <DialogContent
+          className="bg-gray-900 border border-gray-800 text-white sm:max-w-[550px] p-0 overflow-hidden"
+          onInteractOutside={(e) => {
+            if (isSubmitting) {
+              e.preventDefault();
+            }
+          }}
+        >
+          <div className="sticky top-0 z-20 bg-gray-900 px-6 pt-6 pb-2 border-b border-gray-800 shadow-md">
+            <DialogTitle className="text-xl font-bold text-white mb-1">
               Trả hàng/Hoàn tiền
             </DialogTitle>
-            <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+            <DialogClose
+              className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 disabled:pointer-events-none"
+              disabled={isSubmitting}
+            >
               <X className="h-4 w-4" />
               <span className="sr-only">Close</span>
             </DialogClose>
-          </DialogHeader>
+          </div>
 
-          {selectedProduct && (
-            <div className="pt-2">
-              <RefundForm
-                orderItemId={selectedProduct.id}
-                productName={selectedProduct.name}
-                price={selectedProduct.price}
-                quantity={selectedProduct.quantity}
-                productImage={selectedProduct.image}
-                onSubmit={handleRefundSubmit}
-                onClose={handleDialogClose}
-              />
-            </div>
-          )}
+          {/* Use a scrollable container for the content */}
+          <div className="overflow-y-auto scrollbar-hide max-h-[calc(90vh-80px)]">
+            {selectedProduct && (
+              <div className="px-6 py-6">
+                <RefundForm
+                  orderItemId={selectedProduct.id}
+                  productName={selectedProduct.name}
+                  price={selectedProduct.price}
+                  quantity={selectedProduct.quantity}
+                  productImage={selectedProduct.image}
+                  onSubmit={handleRefundSubmit}
+                  onClose={handleDialogClose}
+                />
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
