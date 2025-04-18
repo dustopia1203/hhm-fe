@@ -1,6 +1,5 @@
-import { useNavigate } from "@tanstack/react-router";
 import useProfileStore from "@stores/useProfileStore.ts";
-import React from "react";
+import { redirect } from "@tanstack/react-router";
 
 function validatePrivileges(requiredPrivileges: string[], userPrivileges: string[]): boolean {
   if (requiredPrivileges.length === 0) return true;
@@ -20,23 +19,20 @@ function validatePrivileges(requiredPrivileges: string[], userPrivileges: string
   )
 }
 
-function withAuth<T extends object>(
-  WrappedComponent: React.ComponentType<T>,
-  requiredPrivileges: string[]
-) {
-  return (props: T) => {
-    const navigate = useNavigate();
-    const profile = useProfileStore(state => state.profile);
-    const userPrivileges = profile?.grantedPrivileges || [];
+function auth(requiredPrivileges: string[]) {
+  const profile = useProfileStore.getState().profile;
+  const userPrivileges = profile?.grantedPrivileges || [];
 
-    const isAccepted = validatePrivileges(requiredPrivileges, userPrivileges);
+  const isAccepted = validatePrivileges(requiredPrivileges, userPrivileges);
 
-    if (!profile || !isAccepted) {
-      navigate({ to: "/login" });
-    }
+  console.log(profile)
+  console.log(isAccepted)
 
-    return <WrappedComponent {...props} />;
-  };
+  if (!profile || !isAccepted) {
+    throw redirect({ to: "/login" });
+  }
+
+  return;
 }
 
-export default withAuth;
+export default auth;

@@ -28,9 +28,17 @@ function Header() {
     <header className="shadow-md bg-gray-800 top-0 left-0 w-full z-50">
       {/* Top bar */}
       <div className="relative container mx-auto flex items-center justify-between py-4 px-48 text-gray-400 text-sm">
-        <Link to="/support" className="text-gray-500 hover:underline">
-          Hỗ trợ
-        </Link>
+        <div className="space-x-2">
+          <Link to="/my/shop" className="text-gray-500 hover:underline">
+            Kênh người bán
+          </Link>
+
+          <span>|</span>
+
+          <Link to="/support" className="text-gray-500 hover:underline">
+            Hỗ trợ
+          </Link>
+        </div>
         {/* Checking logged in */}
         {profile ?
           // Logged in -> notification + avatar

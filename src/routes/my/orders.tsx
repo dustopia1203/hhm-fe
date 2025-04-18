@@ -8,7 +8,6 @@ import { X } from "lucide-react"
 import RefundForm from "@components/features/RefundForm.tsx"
 import { toast } from "sonner"
 import ReviewForm from "@components/features/ReviewForm.tsx";
-import withAuth from "@components/hocs/withAuth.tsx";
 
 // Define types for our orders
 interface OrderProduct {
@@ -29,7 +28,7 @@ interface Order {
 }
 
 export const Route = createFileRoute('/my/orders')({
-  component: withAuth(RouteComponent, []),
+  component: RouteComponent,
 })
 
 function RouteComponent() {
