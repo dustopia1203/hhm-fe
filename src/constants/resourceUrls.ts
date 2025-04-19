@@ -13,6 +13,10 @@ const resourceUrls: ResourceUrls = {
         LOGIN: "/api/account/authenticate",
         REFRESH_TOKEN: "/api/account/refresh-token",
         GET_PROFILE: "/api/account/profile",
+    },
+    SHOP_RESOURCE: {
+        GET_MY_SHOP: "/api/shops/my",
+        CREATE_MY_SHOP: "/api/shops"
     }
 }
 
