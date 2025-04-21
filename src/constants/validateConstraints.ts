@@ -71,6 +71,12 @@ const validateConstraints: ValidateConstraints = {
       value: /^(\+[0-9]+[- .]*)?(\([0-9]+\)[- .]*)?([0-9][0-9- .]+[0-9])$/,
       message: "Số điện thoại sai định dạng"
     }
+  },
+  ADDRESS: {
+    MAX_LENGTH: {
+      value: 200,
+      message: "Địa chỉ tối đa 200 ký tự"
+    }
   }
 }
 

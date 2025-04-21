@@ -10,20 +10,20 @@ import useProfileStore from "@stores/useProfileStore.ts";
 
 const schema = z.object({
   email: z.string()
-    .max(validateConstraints.EMAIL.MAX_LENGTH.value, validateConstraints.EMAIL.MAX_LENGTH.message)
-    .regex(validateConstraints.EMAIL.FORMAT.value, validateConstraints.EMAIL.FORMAT.message),
+    .max(validateConstraints.EMAIL.MAX_LENGTH.value as number, validateConstraints.EMAIL.MAX_LENGTH.message)
+    .regex(validateConstraints.EMAIL.FORMAT.value as RegExp, validateConstraints.EMAIL.FORMAT.message),
   username: z.string()
-    .min(validateConstraints.USERNAME.MIN_LENGTH.value, validateConstraints.USERNAME.MIN_LENGTH.message)
-    .max(validateConstraints.USERNAME.MAX_LENGTH.value, validateConstraints.USERNAME.MAX_LENGTH.message)
-    .regex(validateConstraints.USERNAME.FORMAT.value, validateConstraints.USERNAME.FORMAT.message),
+    .min(validateConstraints.USERNAME.MIN_LENGTH.value as number, validateConstraints.USERNAME.MIN_LENGTH.message)
+    .max(validateConstraints.USERNAME.MAX_LENGTH.value as number, validateConstraints.USERNAME.MAX_LENGTH.message)
+    .regex(validateConstraints.USERNAME.FORMAT.value as RegExp, validateConstraints.USERNAME.FORMAT.message),
   password: z.string()
-    .min(validateConstraints.PASSWORD.MIN_LENGTH.value, validateConstraints.PASSWORD.MIN_LENGTH.message)
-    .max(validateConstraints.PASSWORD.MAX_LENGTH.value, validateConstraints.PASSWORD.MAX_LENGTH.message)
-    .regex(validateConstraints.PASSWORD.FORMAT.value, validateConstraints.PASSWORD.FORMAT.message),
+    .min(validateConstraints.PASSWORD.MIN_LENGTH.value as number, validateConstraints.PASSWORD.MIN_LENGTH.message)
+    .max(validateConstraints.PASSWORD.MAX_LENGTH.value as number, validateConstraints.PASSWORD.MAX_LENGTH.message)
+    .regex(validateConstraints.PASSWORD.FORMAT.value as RegExp, validateConstraints.PASSWORD.FORMAT.message),
   confirmPassword: z.string()
-    .min(validateConstraints.PASSWORD.MIN_LENGTH.value, validateConstraints.PASSWORD.MIN_LENGTH.message)
-    .max(validateConstraints.PASSWORD.MAX_LENGTH.value, validateConstraints.PASSWORD.MAX_LENGTH.message)
-    .regex(validateConstraints.PASSWORD.FORMAT.value, validateConstraints.PASSWORD.FORMAT.message),
+    .min(validateConstraints.PASSWORD.MIN_LENGTH.value as number, validateConstraints.PASSWORD.MIN_LENGTH.message)
+    .max(validateConstraints.PASSWORD.MAX_LENGTH.value as number, validateConstraints.PASSWORD.MAX_LENGTH.message)
+    .regex(validateConstraints.PASSWORD.FORMAT.value as RegExp, validateConstraints.PASSWORD.FORMAT.message),
   referralCode: z.string(),
   acceptPrivacy: z.boolean(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -34,7 +34,12 @@ const schema = z.object({
 type RegisterForm = z.infer<typeof schema>
 
 function RegisterForm() {
-  const { register, handleSubmit, control, formState: { errors } } = useForm<RegisterForm>({ resolver: zodResolver(schema) })
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors }
+  } = useForm<RegisterForm>({ resolver: zodResolver(schema) })
   const navigate = useNavigate();
   const mutation = useRegisterApi();
   const acceptPrivacyChecked = useWatch({ name: "acceptPrivacy", control });
@@ -160,7 +165,7 @@ function RegisterForm() {
               className="form-checkbox bg-gray-700 border-gray-600 mt-1"/>
             <span className="ml-2 text-gray-400">
                 Tôi hoàn toàn đồng ý với
-                <Link to="#" className="text-gray-500 hover:underline"> điều khoản và chính sách </Link>
+                <Link to="/policy" className="text-gray-500 hover:underline"> điều khoản và chính sách </Link>
                 của HHMShop
               </span>
           </div>

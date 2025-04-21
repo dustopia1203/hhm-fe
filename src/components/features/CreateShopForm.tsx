@@ -1,31 +1,25 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { FiPlus, FiX } from 'react-icons/fi';
 import validateConstraints from "@constants/validateConstraints.ts";
 
-// Validation schema
 const schema = z.object({
   name: z.string()
-    .min(3, "Tên shop phải có ít nhất 3 ký tự")
-    .max(validateConstraints.NAME.MAX_LENGTH.value, validateConstraints.NAME.MAX_LENGTH.message),
+    .min(1, "Tên cửa hàng không được để trống")
+    .max(validateConstraints.NAME.MAX_LENGTH.value as number, validateConstraints.NAME.MAX_LENGTH.message),
   address: z.string()
-    .min(10, "Địa chỉ phải có ít nhất 10 ký tự")
-    .max(200, "Địa chỉ không được quá 200 ký tự"),
-  description: z.string().optional(),
-  phoneNumber: z.string()
-    .max(validateConstraints.PHONE.MAX_LENGTH.value, validateConstraints.PHONE.MAX_LENGTH.message)
-    .regex(validateConstraints.PHONE.FORMAT.value, validateConstraints.PHONE.FORMAT.message)
-    .optional()
+    .min(1, "Địa chỉ cửa hàng không được để trống")
+    .max(validateConstraints.ADDRESS.MAX_LENGTH.value as number, validateConstraints.ADDRESS.MAX_LENGTH.message)
 });
 
-type AddShopForm = z.infer<typeof schema>;
+type CreateShopForm = z.infer<typeof schema>;
 
 function CreateShopForm() {
-  const { register, handleSubmit, formState: { errors } } = useForm<AddShopForm>({
+  const { register, handleSubmit, formState: { errors } } = useForm<CreateShopForm>({
     resolver: zodResolver(schema)
   });
   const navigate = useNavigate();
@@ -42,7 +36,7 @@ function CreateShopForm() {
     setAvatar(null);
   };
 
-  const onSubmit: SubmitHandler<AddShopForm> = async (data) => {
+  const onSubmit: SubmitHandler<CreateShopForm> = async (data) => {
     setIsSubmitting(true);
 
     try {
@@ -50,8 +44,6 @@ function CreateShopForm() {
       const formData = new FormData();
       formData.append('name', data.name);
       formData.append('address', data.address);
-      if (data.description) formData.append('description', data.description);
-      if (data.phoneNumber) formData.append('phoneNumber', data.phoneNumber);
       if (avatar) formData.append('avatar', avatar);
 
       // Here you would make the API call to create the shop
@@ -144,12 +136,13 @@ function CreateShopForm() {
                   onClick={removeAvatar}
                   className="absolute top-1 right-1 h-5 w-5 bg-gray-900/80 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100"
                 >
-                  <FiX size={12} />
+                  <FiX size={12}/>
                 </button>
               </div>
             ) : (
-              <label className="h-24 w-24 border border-gray-700 rounded-lg flex flex-col items-center justify-center cursor-pointer bg-gray-800 hover:bg-gray-750">
-                <FiPlus className="text-gray-400 mb-1" size={18} />
+              <label
+                className="h-24 w-24 border border-gray-700 rounded-lg flex flex-col items-center justify-center cursor-pointer bg-gray-800 hover:bg-gray-750">
+                <FiPlus className="text-gray-400 mb-1" size={18}/>
                 <span className="text-xs text-gray-400 text-center">Thêm ảnh</span>
                 <input
                   type="file"

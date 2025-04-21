@@ -5,14 +5,15 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 // Get my shop API
 interface ShopDetailResponse {
   data: {
-    id: string,
-    name: string,
-    address: string,
-    avatarUrl: string,
-    productCount: number,
-    reviewCount: number,
-    rating: number,
-    status: 'ACTIVE' | 'INACTIVE',
+    id: string;
+    name: string;
+    address: string;
+    avatarUrl: string;
+    productCount: number;
+    reviewCount: number;
+    rating: number;
+    createdAt: number;
+    status: 'ACTIVE' | 'INACTIVE';
   }
 }
 

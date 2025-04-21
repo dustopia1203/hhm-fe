@@ -1,4 +1,5 @@
 import axios from 'axios';
+import useProfileStore from "@stores/useProfileStore.ts";
 
 const baseUrl = "http://localhost:8080";
 
@@ -59,6 +60,8 @@ authClient.interceptors.response.use(
       } catch (error) {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
+
+        useProfileStore.getState().clearProfile();
 
         return Promise.reject(error);
       }

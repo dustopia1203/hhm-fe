@@ -80,16 +80,16 @@ function useActiveAccountApi() {
 // Get account profile API
 interface AccountProfileResponse {
   data: {
-    username: string,
-    grantedPrivileges: [string],
-    firstName: string,
-    lastName: string,
-    middleName: string,
-    phone: string,
-    dateOfBirth: number,
-    avatarUrl: string,
-    gender: "MALE" | "FEMALE" | "OTHER",
-    address: string,
+    username: string;
+    grantedPrivileges: [string];
+    firstName: string;
+    lastName: string;
+    middleName: string;
+    phone: string;
+    dateOfBirth: number;
+    avatarUrl: string;
+    gender: "MALE" | "FEMALE" | "OTHER";
+    address: string;
   }
 }
 
