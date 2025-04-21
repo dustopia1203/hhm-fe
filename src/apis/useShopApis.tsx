@@ -18,7 +18,7 @@ interface ShopDetailResponse {
 }
 
 async function getMyShop(): Promise<ShopDetailResponse> {
-  const response = await authClient.get(resourceUrls.SHOP_RESOURCES.GET_MY_SHOP);
+  const response = await authClient.get(resourceUrls.SHOP_RESOURCE.GET_MY_SHOP);
 
   return response.data;
 }
@@ -48,7 +48,7 @@ interface ShopCreateOrUpdateResponse {
 }
 
 async function createMyShop(data: ShopCreateOrUpdateRequest): Promise<ShopCreateOrUpdateResponse> {
-  const response = await authClient.post(resourceUrls.SHOP_RESOURCES.CREATE_MY_SHOP, data);
+  const response = await authClient.post(resourceUrls.SHOP_RESOURCE.CREATE_MY_SHOP, data);
 
   return response.data;
 }
