@@ -10,7 +10,7 @@ export const Route = createFileRoute('/my/shop/')({
 
 function RouteComponent() {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-900">
+    <div className="flex flex-col w-full min-h-screen bg-gray-900">
       <ShopHeader/>
 
       <main className="flex-grow py-12 container mx-auto px-4">
