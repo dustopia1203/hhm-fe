@@ -50,12 +50,14 @@ function RouteComponent() {
 
   // Mock shop data
   const shopData = {
-    shopName: "Official Sony Store",
-    reviewCount: 1000,
+    id: "sony-store",
+    name: "Official Sony Store",
+    address: "123 Electronics Avenue, District 1, HCMC",
+    avatarUrl: "/images/shops/sony-logo.png",
     productCount: 100000,
-    joinedYears: 10,
-    shopId: "sony-store",
-    avatarUrl: "/images/shops/sony-logo.png"
+    reviewCount: 1000,
+    rating: 4.8,
+    createdAt: Date.now() - (10 * 365 * 24 * 60 * 60 * 1000) // 10 years ago
   };
 
   // Mock review data
