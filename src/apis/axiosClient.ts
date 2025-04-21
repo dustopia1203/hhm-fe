@@ -1,7 +1,7 @@
 import axios from 'axios';
 import useProfileStore from "@stores/useProfileStore.ts";
 
-const baseUrl = "http://localhost:8080";
+const baseUrl = import.meta.env.VITE_REACT_SERVER_URL;
 
 const publicClient = axios.create({
   baseURL: baseUrl,
