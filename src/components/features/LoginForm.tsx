@@ -2,8 +2,8 @@ import { FaFacebook, FaGoogle } from "react-icons/fa";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useGetAccountProfileApi, useLoginApi } from "@apis/useAccountApis.tsx";
-import useProfileStore from "@stores/useProfileStore.ts";
+import { useLoginApi } from "@apis/useAccountApis.tsx";
+import { useEffect, useState } from "react";
 
 interface LoginForm {
   credential: string;
@@ -15,15 +15,16 @@ function LoginForm() {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
   const navigate = useNavigate();
   const mutationLogin = useLoginApi();
-  const queryProfile = useGetAccountProfileApi({ enabled: false });
-  const setProfile = useProfileStore(state => state.setProfile);
-  const profile = useProfileStore(state => state.profile);
+  const [isLoading, setIsLoading] = useState(false);
 
-  if (profile) {
-    navigate({ to: "/" });
-  }
+  useEffect(() => {
+    if (localStorage.getItem("access_token")) {
+      navigate({ to: "/" });
+    }
+  }, [navigate]);
 
   const onSubmit: SubmitHandler<LoginForm> = async (data) => {
+    setIsLoading(true);
     try {
       const responseData = await mutationLogin.mutateAsync(data);
 
@@ -41,12 +42,6 @@ function LoginForm() {
         localStorage.setItem("access_token", responseData.data.accessToken);
         localStorage.setItem("refresh_token", responseData.data.refreshToken);
 
-        const accountProfileResponse = await queryProfile.refetch();
-
-        if (accountProfileResponse) {
-          setProfile(accountProfileResponse.data.data);
-        }
-
         setTimeout(() => navigate({ to: "/" }), 500);
       }
     } catch (error: any) {
@@ -59,6 +54,8 @@ function LoginForm() {
           }
         }
       );
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -79,6 +76,7 @@ function LoginForm() {
               type="text"
               id="username"
               className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
+              disabled={isLoading}
             />
             {errors.credential && <p className="text-sm text-red-500">{errors.credential.message}</p>}
           </div>
@@ -93,6 +91,7 @@ function LoginForm() {
               type="password"
               id="password"
               className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
+              disabled={isLoading}
             />
             {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
           </div>
@@ -102,6 +101,7 @@ function LoginForm() {
                 {...register("rememberMe")}
                 type="checkbox"
                 className="form-checkbox bg-gray-700 border-gray-600"
+                disabled={isLoading}
               />
               <span className="ml-2">Lưu tài khoản</span>
             </label>
@@ -112,7 +112,9 @@ function LoginForm() {
           <div className="mb-4">
             <button
               type="submit"
-              className="w-full bg-gray-700 text-white py-2 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">
+              className="w-full bg-gray-700 text-white py-2 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:bg-gray-500 disabled:cursor-not-allowed"
+              disabled={isLoading}
+            >
               Đăng nhập
             </button>
           </div>
@@ -120,13 +122,17 @@ function LoginForm() {
           <div className="text-center mb-4 text-gray-400">Hoặc đăng nhập với</div>
           <div className="flex justify-center space-x-4 mb-4">
             <button
-              className="bg-gray-700 p-2 rounded-full w-10 h-10 flex items-center justify-center text-blue-500 hover:bg-gray-600 hover:text-blue-400 focus:ring-2 focus:ring-gray-500">
+              className="bg-gray-700 p-2 rounded-full w-10 h-10 flex items-center justify-center text-blue-500 hover:bg-gray-600 hover:text-blue-400 focus:ring-2 focus:ring-gray-500"
+              disabled={isLoading}
+            >
               <Link to="#">
                 <FaFacebook/>
               </Link>
             </button>
             <button
-              className="bg-gray-700 p-2 rounded-full w-10 h-10 flex items-center justify-center text-red-500 hover:bg-gray-600 hover:text-gray-300 focus:ring-2 focus:ring-gray-500">
+              className="bg-gray-700 p-2 rounded-full w-10 h-10 flex items-center justify-center text-red-500 hover:bg-gray-600 hover:text-gray-300 focus:ring-2 focus:ring-gray-500"
+              disabled={isLoading}
+            >
               <Link to="#">
                 <FaGoogle/>
               </Link>
@@ -141,7 +147,7 @@ function LoginForm() {
         </form>
       </div>
     </>
-  )
+  );
 }
 
 export default LoginForm;

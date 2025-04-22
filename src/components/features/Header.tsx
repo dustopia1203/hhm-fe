@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiSearch, FiShoppingCart } from "react-icons/fi";
 import { FaBell } from "react-icons/fa6";
 import { BsReceiptCutoff } from "react-icons/bs";
@@ -6,12 +6,27 @@ import { RxAvatar } from "react-icons/rx";
 import { Link } from "@tanstack/react-router";
 import useProfileStore from "@stores/useProfileStore.ts";
 import Logout from "./Logout.tsx";
+import { useGetAccountProfileApi } from "@apis/useAccountApis.tsx";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { profile, setProfile } = useProfileStore();
+  const { refetch } = useGetAccountProfileApi({ enabled: false });
 
-  const profile = useProfileStore(state => state.profile)
   let timeoutId: NodeJS.Timeout;
+
+  useEffect(() => {
+    if (!profile) {
+      const fetchProfile = async () => {
+        const result = await refetch();
+        if (result.data?.data) {
+          setProfile(result.data.data);
+        }
+      };
+
+      fetchProfile();
+    }
+  }, []);
 
   const handleMouseEnter = () => {
     clearTimeout(timeoutId);

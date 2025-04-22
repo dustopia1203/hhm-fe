@@ -6,7 +6,7 @@ import { useRegisterApi } from "@apis/useAccountApis.tsx";
 import validateConstraints from "@constants/validateConstraints.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import useProfileStore from "@stores/useProfileStore.ts";
+import { useEffect, useState } from "react";
 
 const schema = z.object({
   email: z.string()
@@ -31,7 +31,7 @@ const schema = z.object({
   path: ["confirmPassword"]
 });
 
-type RegisterForm = z.infer<typeof schema>
+type RegisterForm = z.infer<typeof schema>;
 
 function RegisterForm() {
   const {
@@ -39,18 +39,20 @@ function RegisterForm() {
     handleSubmit,
     control,
     formState: { errors }
-  } = useForm<RegisterForm>({ resolver: zodResolver(schema) })
+  } = useForm<RegisterForm>({ resolver: zodResolver(schema) });
   const navigate = useNavigate();
   const mutation = useRegisterApi();
   const acceptPrivacyChecked = useWatch({ name: "acceptPrivacy", control });
+  const [isLoading, setIsLoading] = useState(false); // Loading state
 
-  const profile = useProfileStore(state => state.profile);
-
-  if (profile) {
-    navigate({ to: "/" });
-  }
+  useEffect(() => {
+    if (localStorage.getItem("access_token")) {
+      navigate({ to: "/" });
+    }
+  }, [navigate]);
 
   const onSubmit: SubmitHandler<RegisterForm> = async (data) => {
+    setIsLoading(true); // Start loading
     try {
       const responseData = await mutation.mutateAsync(data);
 
@@ -82,8 +84,10 @@ function RegisterForm() {
           }
         }
       );
+    } finally {
+      setIsLoading(false); // Stop loading
     }
-  }
+  };
 
   return (
     <>
@@ -102,6 +106,7 @@ function RegisterForm() {
               type="email"
               id="email"
               className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
+              disabled={isLoading} // Disable input while loading
             />
             {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
           </div>
@@ -116,6 +121,7 @@ function RegisterForm() {
               type="text"
               id="username"
               className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
+              disabled={isLoading} // Disable input while loading
             />
             {errors.username && <p className="text-sm text-red-500">{errors.username.message}</p>}
           </div>
@@ -130,6 +136,7 @@ function RegisterForm() {
               type="password"
               id="password"
               className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
+              disabled={isLoading} // Disable input while loading
             />
             {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
           </div>
@@ -144,6 +151,7 @@ function RegisterForm() {
               type="password"
               id="confirm-password"
               className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
+              disabled={isLoading} // Disable input while loading
             />
             {errors.confirmPassword && <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>}
           </div>
@@ -156,23 +164,27 @@ function RegisterForm() {
               type="text"
               id="referral-code"
               className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
+              disabled={isLoading} // Disable input while loading
             />
           </div>
           <div className="flex items-start mb-4">
             <input
               {...register("acceptPrivacy")}
               type="checkbox"
-              className="form-checkbox bg-gray-700 border-gray-600 mt-1"/>
+              className="form-checkbox bg-gray-700 border-gray-600 mt-1"
+              disabled={isLoading} // Disable checkbox while loading
+            />
             <span className="ml-2 text-gray-400">
-                Tôi hoàn toàn đồng ý với
-                <Link to="/policy" className="text-gray-500 hover:underline"> điều khoản và chính sách </Link>
-                của HHMShop
-              </span>
+              Tôi hoàn toàn đồng ý với
+              <Link to="/policy" className="text-gray-500 hover:underline"> điều khoản và chính sách </Link>
+              của HHMShop
+            </span>
           </div>
           <div className="mb-4">
             <button
-              disabled={!acceptPrivacyChecked}
-              className="w-full bg-gray-700 text-white py-2 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:bg-gray-400 disabled:cursor-not-allowed">
+              disabled={!acceptPrivacyChecked || isLoading} // Disable button while loading
+              className="w-full bg-gray-700 text-white py-2 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
               Đăng ký
             </button>
           </div>
@@ -180,15 +192,19 @@ function RegisterForm() {
           <div className="text-center mb-4 text-gray-400">Hoặc đăng ký bằng</div>
           <div className="flex justify-center space-x-4 mb-4">
             <button
-              className="bg-gray-700 p-2 rounded-full w-10 h-10 flex items-center justify-center text-blue-500 hover:bg-gray-600 hover:text-blue-400 focus:ring-2 focus:ring-gray-500">
+              className="bg-gray-700 p-2 rounded-full w-10 h-10 flex items-center justify-center text-blue-500 hover:bg-gray-600 hover:text-blue-400 focus:ring-2 focus:ring-gray-500"
+              disabled={isLoading} // Disable social login buttons while loading
+            >
               <Link to="#">
-                <FaFacebook/>
+                <FaFacebook />
               </Link>
             </button>
             <button
-              className="bg-gray-700 p-2 rounded-full w-10 h-10 flex items-center justify-center text-red-500 hover:bg-gray-600 hover:text-gray-300 focus:ring-2 focus:ring-gray-500">
+              className="bg-gray-700 p-2 rounded-full w-10 h-10 flex items-center justify-center text-red-500 hover:bg-gray-600 hover:text-gray-300 focus:ring-2 focus:ring-gray-500"
+              disabled={isLoading} // Disable social login buttons while loading
+            >
               <Link to="#">
-                <FaGoogle/>
+                <FaGoogle />
               </Link>
             </button>
           </div>
@@ -201,7 +217,7 @@ function RegisterForm() {
         </form>
       </div>
     </>
-  )
+  );
 }
 
 export default RegisterForm;
