@@ -34,7 +34,7 @@ function useGetMyShopApi() {
 interface ShopCreateOrUpdateRequest {
   name: string,
   address: string,
-  avatarUrl: string
+  avatarUrl: string | null
 }
 
 interface ShopCreateOrUpdateResponse {
@@ -42,7 +42,7 @@ interface ShopCreateOrUpdateResponse {
     id: string,
     name: string,
     address: string,
-    avatarUrl: string,
+    avatarUrl: string | null,
     status: 'ACTIVE' | 'INACTIVE',
   }
 }

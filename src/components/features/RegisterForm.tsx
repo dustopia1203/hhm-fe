@@ -49,7 +49,8 @@ function RegisterForm() {
     if (localStorage.getItem("access_token")) {
       navigate({ to: "/" });
     }
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onSubmit: SubmitHandler<RegisterForm> = async (data) => {
     setIsLoading(true); // Start loading

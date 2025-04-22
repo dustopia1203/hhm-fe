@@ -21,7 +21,8 @@ function LoginForm() {
     if (localStorage.getItem("access_token")) {
       navigate({ to: "/" });
     }
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onSubmit: SubmitHandler<LoginForm> = async (data) => {
     setIsLoading(true);

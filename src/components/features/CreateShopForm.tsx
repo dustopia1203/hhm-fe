@@ -6,6 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { FiPlus, FiX } from 'react-icons/fi';
 import validateConstraints from "@constants/validateConstraints.ts";
+import uploadFile from "@utils/cloudinary.ts";
+import { useCreateMyShopApi } from "@apis/useShopApis";
 
 const schema = z.object({
   name: z.string()
@@ -25,6 +27,7 @@ function CreateShopForm() {
   const navigate = useNavigate();
   const [avatar, setAvatar] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { mutateAsync } = useCreateMyShopApi();
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -40,40 +43,33 @@ function CreateShopForm() {
     setIsSubmitting(true);
 
     try {
-      // Create form data to handle file upload
-      const formData = new FormData();
-      formData.append('name', data.name);
-      formData.append('address', data.address);
-      if (avatar) formData.append('avatar', avatar);
+      let avatarUrl = null;
 
-      // Here you would make the API call to create the shop
-      // For now we'll just simulate a successful response
-      console.log('Form data submitted:', {
-        ...data,
-        avatarFile: avatar ? avatar.name : 'No avatar'
+      if (avatar) {
+        avatarUrl = await uploadFile(avatar);
+      }
+
+      await mutateAsync({
+        name: data.name,
+        address: data.address,
+        avatarUrl
       });
 
-      // Simulate API delay
-      setTimeout(() => {
-        toast.success(
-          "Tạo shop thành công",
-          {
-            cancel: {
-              label: "X",
-              onClick: () => toast.dismiss
-            }
+      toast.success(
+        "Tạo cửa hàng thành công",
+        {
+          cancel: {
+            label: "X",
+            onClick: () => toast.dismiss
           }
-        );
+        }
+      );
 
-        // Navigate to shop page after success
-        setTimeout(() => navigate({ to: "/my/shop" }), 500);
-        setIsSubmitting(false);
-      }, 1500);
-
+      navigate({ to: "/my/shop" });
+      setTimeout(() => window.location.reload(), 500);
     } catch (error: any) {
-      setIsSubmitting(false);
       toast.error(
-        error.message || "Có lỗi xảy ra khi tạo shop",
+        error.response?.data?.message || "Có lỗi xảy ra khi tạo cửa hàng",
         {
           cancel: {
             label: "X",
@@ -100,6 +96,7 @@ function CreateShopForm() {
             type="text"
             id="name"
             className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
+            disabled={isSubmitting}
           />
           {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
         </div>
@@ -114,6 +111,7 @@ function CreateShopForm() {
             type="text"
             id="address"
             className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
+            disabled={isSubmitting}
           />
           {errors.address && <p className="text-sm text-red-500">{errors.address.message}</p>}
         </div>
@@ -135,13 +133,14 @@ function CreateShopForm() {
                   type="button"
                   onClick={removeAvatar}
                   className="absolute top-1 right-1 h-5 w-5 bg-gray-900/80 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100"
+                  disabled={isSubmitting}
                 >
                   <FiX size={12}/>
                 </button>
               </div>
             ) : (
               <label
-                className="h-24 w-24 border border-gray-700 rounded-lg flex flex-col items-center justify-center cursor-pointer bg-gray-800 hover:bg-gray-750">
+                className={`h-24 w-24 border border-gray-700 rounded-lg flex flex-col items-center justify-center cursor-pointer bg-gray-800 hover:bg-gray-750 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 <FiPlus className="text-gray-400 mb-1" size={18}/>
                 <span className="text-xs text-gray-400 text-center">Thêm ảnh</span>
                 <input
@@ -149,10 +148,10 @@ function CreateShopForm() {
                   accept="image/*"
                   className="hidden"
                   onChange={handleAvatarUpload}
+                  disabled={isSubmitting}
                 />
               </label>
             )}
-
           </div>
         </div>
 
@@ -163,7 +162,7 @@ function CreateShopForm() {
             disabled={isSubmitting}
             className="w-full bg-gray-700 text-white py-2 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? 'Đang xử lý...' : 'Tạo shop'}
+            Tạo cửa hàng
           </button>
         </div>
 
