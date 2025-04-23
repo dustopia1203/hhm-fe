@@ -45,11 +45,14 @@ authClient.interceptors.response.use(
 
       try {
         const refreshToken = localStorage.getItem("refresh_token");
+        const rememberMeString = localStorage.getItem("remember_me");
+
+        const rememberMe = rememberMeString === "true";
 
         if (!refreshToken) {
           return Promise.reject(error);
         } else {
-          const { data } = await axios.post(`${baseUrl}/refresh-token`, { refreshToken });
+          const { data } = await publicClient.post(`${baseUrl}/refresh-token`, { refreshToken, rememberMe });
 
           localStorage.setItem("access_token", data.accessToken);
 

@@ -14,7 +14,11 @@ const resourceUrls: ResourceUrls = {
         REFRESH_TOKEN: "/api/account/refresh-token",
         GET_PROFILE: "/api/account/profile",
     },
+    PRODUCT_RESOURCE: {
+      GET_PRODUCT_BY_ID: "/api/products/{id}"
+    },
     SHOP_RESOURCE: {
+        GET_SHOP_BY_ID: "/api/shops/{id}",
         GET_MY_SHOP: "/api/shops/my",
         CREATE_MY_SHOP: "/api/shops"
     }

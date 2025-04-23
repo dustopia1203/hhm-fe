@@ -1,31 +1,26 @@
 import { Link } from "@tanstack/react-router";
-import { FiUser, FiStar } from "react-icons/fi";
+import { FiStar, FiUser } from "react-icons/fi";
+import { useGetShopByIdApi } from "@apis/useShopApis.tsx";
+import Loader from "@components/common/Loader.tsx";
 
 interface ShopProfileCardProps {
   id: string;
-  name: string;
-  address: string;
-  avatarUrl?: string;
-  productCount: number;
-  reviewCount: number;
-  rating: number;
-  createdAt: number;
 }
 
-function ShopProfileCard(
-  {
-    id,
-    name,
-    address,
-    avatarUrl,
-    productCount,
-    reviewCount,
-    rating,
-    createdAt
-  }: ShopProfileCardProps
-) {
-  // Calculate years since shop was created
-  const joinedYears = Math.floor((Date.now() - createdAt) / (365 * 24 * 60 * 60 * 1000));
+function ShopProfileCard({ id }: ShopProfileCardProps) {
+  const { data, isLoading, error } = useGetShopByIdApi(id);
+
+  if (isLoading || error || !data) {
+    return (
+      <div className="rounded-3xl border border-gray-700 bg-gray-800 p-6 shadow-md w-full">
+        <Loader/>
+      </div>
+    );
+  }
+
+  const shop = data.data;
+
+  const joinedYears = Math.floor((Date.now() - shop.createdAt) / (365 * 24 * 60 * 60 * 1000));
 
   return (
     <div className="rounded-3xl border border-gray-700 bg-gray-800 p-6 shadow-md w-full">
@@ -35,10 +30,10 @@ function ShopProfileCard(
         {/* Column 1-2: Avatar + Shop name (spanning 2 columns) */}
         <div className="col-span-2 flex items-center gap-4">
           <div className="h-12 w-12 rounded-full bg-gray-700 flex items-center justify-center">
-            {avatarUrl ? (
+            {shop.avatarUrl ? (
               <img
-                src={avatarUrl}
-                alt={`${name} avatar`}
+                src={shop.avatarUrl}
+                alt={`${shop.name} avatar`}
                 className="h-full w-full rounded-full object-cover"
               />
             ) : (
@@ -47,13 +42,14 @@ function ShopProfileCard(
           </div>
           <div className="flex flex-col">
             <div className="flex">
-              <span className="text-white font-medium pr-2">{name}</span>
+              <span className="text-white font-medium pr-2">{shop.name}</span>
               <div className="flex items-center">
-                <FiStar className={`h-4 w-4 ${rating >= 1 ? "fill-yellow-400 text-yellow-400" : "text-gray-500"}`} />
-                <span className="text-yellow-400 ml-1 text-sm">{rating.toFixed(1)}</span>
+                <FiStar
+                  className={`h-4 w-4 ${shop.rating >= 1 ? "fill-yellow-400 text-yellow-400" : "text-gray-500"}`}/>
+                <span className="text-yellow-400 ml-1 text-sm">{shop.rating.toFixed(1)}</span>
               </div>
             </div>
-            <span className="text-xs text-gray-400">{address}</span>
+            <span className="text-xs text-gray-400">{shop.address}</span>
           </div>
         </div>
 
@@ -61,7 +57,7 @@ function ShopProfileCard(
         <div className="flex items-center justify-start space-x-4">
           <span className="text-gray-400">Reviews</span>
           <div className="flex items-center">
-            <span className="text-white mr-2">{reviewCount.toLocaleString()}</span>
+            <span className="text-white mr-2">{shop.reviewCount.toLocaleString()}</span>
           </div>
         </div>
 
@@ -85,7 +81,7 @@ function ShopProfileCard(
         {/* Column 3: Products + Count */}
         <div className="flex items-center justify-start space-x-4">
           <span className="text-gray-400">Products</span>
-          <span className="text-white">{productCount.toLocaleString()}</span>
+          <span className="text-white">{shop.productCount.toLocaleString()}</span>
         </div>
 
         {/* Column 4: Empty */}

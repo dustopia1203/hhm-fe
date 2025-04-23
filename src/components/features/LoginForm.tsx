@@ -42,6 +42,7 @@ function LoginForm() {
 
         localStorage.setItem("access_token", responseData.data.accessToken);
         localStorage.setItem("refresh_token", responseData.data.refreshToken);
+        localStorage.setItem("remember_me", String(data.rememberMe));
 
         setTimeout(() => navigate({ to: "/" }), 500);
       }

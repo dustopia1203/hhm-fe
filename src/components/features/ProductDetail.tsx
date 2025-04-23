@@ -3,27 +3,25 @@ import { FiChevronRight, FiShoppingCart, FiStar } from "react-icons/fi";
 import { IoChevronBackOutline, IoChevronForwardOutline } from "react-icons/io5";
 import { Link } from "@tanstack/react-router";
 
-// Define recursive Category type
-interface Category {
+interface CategoryResponse {
   id: string;
   name: string;
-  subcategory?: Category; // Nested subcategory (recursive structure)
+  subCategories?: CategoryResponse[];
 }
 
 interface ProductDetailProps {
   name: string;
-  price: number;
-  rating: number;
-  reviewCount: number;
-  soldCount: number;
   images: string[];
-  category?: Category;
-  salePrice?: number; // Add sale price
-  salePercent?: number; // Add sale percent
+  price: number;
+  salePrice?: number;
+  salePercent?: number;
+  soldCount: number;
+  reviewCount: number;
+  rating: number;
+  category: CategoryResponse;
 }
 
-// Recursive component to render the category breadcrumb
-const CategoryBreadcrumb = ({ category, productName }: { category: Category, productName: string }) => {
+const CategoryBreadcrumb = ({ category, productName }: { category: CategoryResponse, productName: string }) => {
   if (!category) return null;
 
   return (
@@ -35,14 +33,14 @@ const CategoryBreadcrumb = ({ category, productName }: { category: Category, pro
         {category.name}
       </Link>
 
-      {category.subcategory ? (
+      {category.subCategories ? (
         <>
-          <FiChevronRight className="inline mx-2 text-gray-500" />
-          <CategoryBreadcrumb category={category.subcategory} productName={productName} />
+          <FiChevronRight className="inline mx-2 text-gray-500"/>
+          <CategoryBreadcrumb category={category.subCategories[0]} productName={productName}/>
         </>
       ) : (
         <>
-          <FiChevronRight className="inline mx-2 text-gray-500" />
+          <FiChevronRight className="inline mx-2 text-gray-500"/>
           <span className="text-white">{productName}</span>
         </>
       )}
@@ -53,23 +51,24 @@ const CategoryBreadcrumb = ({ category, productName }: { category: Category, pro
 function ProductDetail(
   {
     name,
-    price,
-    rating,
-    reviewCount,
-    soldCount,
     images,
-    category,
+    price,
     salePrice,
-    salePercent
-  }: ProductDetailProps
+    salePercent,
+    soldCount,
+    reviewCount,
+    rating,
+    category,
+  }:
+  ProductDetailProps
 ) {
   const [mainImage, setMainImage] = useState(0);
   const [startIndex, setStartIndex] = useState(0);
 
-  // Check if the product is on sale
   const hasDiscount = salePercent !== undefined && salePercent > 0 && salePrice !== undefined;
 
-  // Function to navigate through main images directly
+  console.log(category);
+
   const navigateMainImage = (direction: 'prev' | 'next') => {
     if (direction === 'prev' && mainImage > 0) {
       setMainImage(mainImage - 1);
@@ -86,10 +85,10 @@ function ProductDetail(
 
   return (
     <div className="rounded-3xl border border-gray-700 bg-gray-800 p-6 shadow-md">
-      {/* Category breadcrumb navigation */}
+      {/* CategoryResponse breadcrumb navigation */}
       {category && (
         <div className="mb-4 text-sm">
-          <CategoryBreadcrumb category={category} productName={name} />
+          <CategoryBreadcrumb category={category} productName={name}/>
         </div>
       )}
 
@@ -118,14 +117,14 @@ function ProductDetail(
                 className="h-10 w-10 bg-black bg-opacity-50 rounded-full flex items-center justify-center text-white hover:bg-opacity-70 transition-all"
                 disabled={mainImage === 0}
               >
-                <IoChevronBackOutline size={24} />
+                <IoChevronBackOutline size={24}/>
               </button>
               <button
                 onClick={() => navigateMainImage('next')}
                 className="h-10 w-10 bg-black bg-opacity-50 rounded-full flex items-center justify-center text-white hover:bg-opacity-70 transition-all"
                 disabled={mainImage === images.length - 1}
               >
-                <IoChevronForwardOutline size={24} />
+                <IoChevronForwardOutline size={24}/>
               </button>
             </div>
           </div>

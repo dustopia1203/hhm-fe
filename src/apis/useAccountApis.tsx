@@ -9,18 +9,7 @@ interface LoginRequest {
   rememberMe: boolean;
 }
 
-interface LoginResponse {
-  data: {
-    accessToken: string;
-    refreshToken: string;
-    accessTokenExpiresIn: bigint;
-    refreshTokenExpiresIn: bigint;
-    accessTokenExpiredAt: string;
-    refreshTokenExpiredAt: string;
-  }
-}
-
-async function login(data: LoginRequest): Promise<LoginResponse> {
+async function login(data: LoginRequest) {
   const response = await publicClient.post(resourceUrls.ACCOUNT_RESOURCE.LOGIN, data);
 
   return response.data;
@@ -39,11 +28,7 @@ interface RegisterRequest {
   password: string;
 }
 
-interface RegisterResponse {
-  data: boolean;
-}
-
-async function register(data: RegisterRequest): Promise<RegisterResponse> {
+async function register(data: RegisterRequest) {
   const response = await publicClient.post(resourceUrls.ACCOUNT_RESOURCE.REGISTER, data);
 
   return response.data;
@@ -61,11 +46,7 @@ interface ActiveAccountRequest {
   activationCode: string;
 }
 
-interface ActiveAccountResponse {
-  data: boolean;
-}
-
-async function activeAccount(data: ActiveAccountRequest): Promise<ActiveAccountResponse> {
+async function activeAccount(data: ActiveAccountRequest) {
   const response = await publicClient.post(resourceUrls.ACCOUNT_RESOURCE.ACTIVE_ACCOUNT, data);
 
   return response.data;
@@ -78,28 +59,13 @@ function useActiveAccountApi() {
 }
 
 // Get account profile API
-interface AccountProfileResponse {
-  data: {
-    username: string;
-    grantedPrivileges: [string];
-    firstName: string;
-    lastName: string;
-    middleName: string;
-    phone: string;
-    dateOfBirth: number;
-    avatarUrl: string;
-    gender: "MALE" | "FEMALE" | "OTHER";
-    address: string;
-  }
-}
-
-async function getAccountProfile(): Promise<AccountProfileResponse> {
+async function getAccountProfile() {
   const response = await authClient.get(resourceUrls.ACCOUNT_RESOURCE.GET_PROFILE);
 
   return response.data;
 }
 
-function useGetAccountProfileApi(options?: { enabled?: boolean   }) {
+function useGetAccountProfileApi(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["accountProfile"],
     queryFn: getAccountProfile,

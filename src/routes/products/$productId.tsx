@@ -6,6 +6,9 @@ import ShopProfileCard from '../../components/features/ShopProfileCard';
 import ReviewCard from '../../components/features/ReviewCard';
 import Header from "@components/features/Header.tsx";
 import Footer from "@components/features/Footer.tsx";
+import { useGetProductById } from "@apis/useProductApis.tsx";
+import Loader from "@components/common/Loader.tsx";
+import NotFound from "@components/common/NotFound.tsx";
 
 export const Route = createFileRoute('/products/$productId')({
   component: RouteComponent,
@@ -17,48 +20,10 @@ export const Route = createFileRoute('/products/$productId')({
 })
 
 function RouteComponent() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const reviewsPerPage = 5;
   const { id } = Route.useLoaderData();
-
-  // Mock product data with recursive category structure
-  const productData = {
-    name: "Sony PlayStation 5 Digital Edition Console",
-    price: 499.99,
-    rating: 4.8,
-    reviewCount: 100,
-    soldCount: 1000,
-    images: [
-      "/images/products/ps5-1.jpg",
-      "/images/products/ps5-2.jpg",
-      "/images/products/ps5-3.jpg",
-      "/images/products/ps5-4.jpg",
-    ],
-    category: {
-      id: "electronics",
-      name: "Đồ điện tử",
-      subcategory: {
-        id: "gaming",
-        name: "Thiết bị chơi game",
-        subcategory: {
-          id: "consoles",
-          name: "Máy chơi game"
-        }
-      }
-    }
-  };
-
-  // Mock shop data
-  const shopData = {
-    id: "sony-store",
-    name: "Official Sony Store",
-    address: "123 Electronics Avenue, District 1, HCMC",
-    avatarUrl: "/images/shops/sony-logo.png",
-    productCount: 100000,
-    reviewCount: 1000,
-    rating: 4.8,
-    createdAt: Date.now() - (10 * 365 * 24 * 60 * 60 * 1000) // 10 years ago
-  };
+  const [reviewPage, setReviewPage] = useState(1);
+  const reviewsPerPage = 5;
+  const { data, isLoading, error } = useGetProductById(id);
 
   // Mock review data
   const reviews = [
@@ -105,63 +70,63 @@ function RouteComponent() {
     }
   ];
 
-  // Calculate displayed reviews based on pagination
   const displayedReviews = reviews.slice(
-    (currentPage - 1) * reviewsPerPage,
-    currentPage * reviewsPerPage
+    (reviewPage - 1) * reviewsPerPage,
+    reviewPage * reviewsPerPage
   );
 
   const totalPages = Math.ceil(reviews.length / reviewsPerPage);
 
+  if (isLoading) {
+    return (
+      <Loader/>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <NotFound/>
+    );
+  }
+
   return (
     <>
       <div className="flex flex-col min-h-screen w-full">
-        <Header />
-        <div className="container mx-auto px-48 py-8">
+        <Header/>
+        <main className="container mx-auto px-4 md:px-8 lg:px-24 xl:px-48 py-8">
           {/* Product Detail Component */}
-          <ProductDetail {...productData} />
+          <ProductDetail
+            name={data.data.name}
+            images={data.data.images}
+            price={data.data.price}
+            salePrice={data.data.salePrice}
+            salePercent={data.data.salePercent}
+            soldCount={data.data.soldCount}
+            reviewCount={data.data.reviewCount}
+            rating={data.data.rating}
+            category={data.data.category}
+          />
 
           {/* Shop Profile Card */}
-          <div className="mt-6">
-            <ShopProfileCard {...shopData} />
-          </div>
-
-          {/* Product Details */}
-          <div className="mt-8 mb-6">
-            <h2 className="text-xl font-bold text-white mb-4">Detail</h2>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                <div className="text-gray-400">Category</div>
-                <div className="text-white md:col-span-3">
-                  {productData.category.name} &gt; {productData.category.subcategory?.name} &gt; {productData.category.subcategory?.subcategory?.name}
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                <div className="text-gray-400">Name</div>
-                <div className="text-white md:col-span-3">{productData.name}</div>
-              </div>
-            </div>
-          </div>
+          <section className="mt-6 mb-6">
+            <ShopProfileCard id={data.data.shopId}/>
+          </section>
 
           {/* Description */}
-          <div className="mb-10">
+          <section className="mb-10">
             <h2 className="text-xl font-bold text-white mb-4">Description</h2>
             <p className="text-gray-300 whitespace-pre-line">
-              Experience lightning-fast loading with an ultra-high speed SSD, deeper immersion with support for haptic feedback, adaptive triggers and 3D Audio, and an all-new generation of incredible PlayStation games.
-
-              Lightning Speed: Harness the power of a custom CPU, GPU, and SSD with Integrated I/O that rewrite the rules of what a PlayStation console can do.
-
-              Stunning Games: Marvel at incredible graphics and experience new PS5 features.
+              {data.data.description}
             </p>
-          </div>
+          </section>
 
           {/* Reviews */}
-          <div>
+          <section>
             <h2 className="text-xl font-bold text-white mb-6">Reviews</h2>
             <div className="space-y-6">
               {displayedReviews.map((review, index) => (
                 <ReviewCard
-                  key={index}
+                  key={`review-${index}-${reviewPage}`}
                   username={review.username}
                   rating={review.rating}
                   date={review.date}
@@ -174,26 +139,29 @@ function RouteComponent() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center mt-8 space-x-2">
+              <nav aria-label="Reviews pagination" className="flex justify-center items-center mt-8 space-x-2">
                 <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className={`p-2 rounded-md ${
-                    currentPage === 1
+                  onClick={() => setReviewPage(Math.max(1, reviewPage - 1))}
+                  disabled={reviewPage === 1}
+                  aria-label="Previous page"
+                  className={`p-2 rounded-md transition-colors ${
+                    reviewPage === 1
                       ? 'text-gray-500 cursor-not-allowed'
                       : 'text-white hover:bg-gray-700'
                   }`}
                 >
-                  <FiChevronLeft size={20} />
+                  <FiChevronLeft size={20}/>
                 </button>
 
                 {[...Array(totalPages)].map((_, i) => (
                   <button
                     key={i}
-                    onClick={() => setCurrentPage(i + 1)}
-                    className={`w-8 h-8 rounded-md flex items-center justify-center ${
-                      currentPage === i + 1
-                        ? 'bg-white text-gray-800'
+                    onClick={() => setReviewPage(i + 1)}
+                    aria-label={`Page ${i + 1}`}
+                    aria-current={reviewPage === i + 1 ? "page" : undefined}
+                    className={`w-8 h-8 rounded-md flex items-center justify-center transition-colors ${
+                      reviewPage === i + 1
+                        ? 'bg-white text-gray-800 font-medium'
                         : 'text-gray-300 hover:bg-gray-700'
                     }`}
                   >
@@ -202,21 +170,22 @@ function RouteComponent() {
                 ))}
 
                 <button
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className={`p-2 rounded-md ${
-                    currentPage === totalPages
+                  onClick={() => setReviewPage(Math.min(totalPages, reviewPage + 1))}
+                  disabled={reviewPage === totalPages}
+                  aria-label="Next page"
+                  className={`p-2 rounded-md transition-colors ${
+                    reviewPage === totalPages
                       ? 'text-gray-500 cursor-not-allowed'
                       : 'text-white hover:bg-gray-700'
                   }`}
                 >
-                  <FiChevronRight size={20} />
+                  <FiChevronRight size={20}/>
                 </button>
-              </div>
+              </nav>
             )}
-          </div>
-        </div>
-        <Footer />
+          </section>
+        </main>
+        <Footer/>
       </div>
     </>
   );

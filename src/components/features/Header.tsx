@@ -18,9 +18,21 @@ function Header() {
   useEffect(() => {
     if (!profile) {
       const fetchProfile = async () => {
-        const result = await refetch();
-        if (result.data?.data) {
-          setProfile(result.data.data);
+        const accessToken = localStorage.getItem("access_token");
+
+        if (accessToken) {
+          try {
+            const result = await refetch();
+            if (result.data?.data) {
+              setProfile(result.data.data);
+            }
+          } catch (error) {
+            console.error("Failed to fetch profile:", error);
+
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("refresh_token");
+            localStorage.removeItem("remember_me");
+          }
         }
       };
 
