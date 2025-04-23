@@ -67,8 +67,6 @@ function ProductDetail(
 
   const hasDiscount = salePercent !== undefined && salePercent > 0 && salePrice !== undefined;
 
-  console.log(category);
-
   const navigateMainImage = (direction: 'prev' | 'next') => {
     if (direction === 'prev' && mainImage > 0) {
       setMainImage(mainImage - 1);
