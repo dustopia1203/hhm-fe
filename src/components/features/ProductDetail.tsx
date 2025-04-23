@@ -176,15 +176,15 @@ function ProductDetail(
             {hasDiscount ? (
               <>
                 <div className="text-3xl font-bold text-red-500">
-                  ${salePrice.toFixed(2)}
+                  ₫{salePrice.toFixed(2)}
                 </div>
                 <div className="ml-3 text-lg text-gray-400 line-through">
-                  ${price.toFixed(2)}
+                  ₫{price.toFixed(2)}
                 </div>
               </>
             ) : (
               <div className="text-3xl font-bold text-white">
-                ${price.toFixed(2)}
+                ₫{price.toFixed(2)}
               </div>
             )}
           </div>

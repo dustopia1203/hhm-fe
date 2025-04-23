@@ -49,8 +49,22 @@ function useCreateMyShopApi() {
   })
 }
 
+// Update my shop API
+async function updateMyShop(data: ShopCreateOrUpdateRequest) {
+  const response = await authClient.put(resourceUrls.SHOP_RESOURCE.UPDATE_MY_SHOP, data);
+
+  return response.data;
+}
+
+function useUpdateMyShopApi() {
+  return useMutation({
+    mutationFn: updateMyShop
+  })
+}
+
 export {
   useGetShopByIdApi,
   useGetMyShopApi,
-  useCreateMyShopApi
+  useCreateMyShopApi,
+  useUpdateMyShopApi
 }

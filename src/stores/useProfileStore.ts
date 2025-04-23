@@ -1,4 +1,5 @@
-import { create } from "zustand/react";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface AccountProfile {
   username: string,
@@ -19,10 +20,17 @@ interface ProfileStore {
   clearProfile: () => void;
 }
 
-const useProfileStore = create<ProfileStore>((set) => ({
-  profile: null,
-  setProfile: (profile: AccountProfile) => set({ profile }),
-  clearProfile: () => set({ profile: null })
-}))
+const useProfileStore = create<ProfileStore>()(
+  persist(
+    (set) => ({
+      profile: null,
+      setProfile: (profile: AccountProfile) => set({ profile }),
+      clearProfile: () => set({ profile: null }),
+    }),
+    {
+      name: 'profile-storage'
+    }
+  )
+);
 
 export default useProfileStore;

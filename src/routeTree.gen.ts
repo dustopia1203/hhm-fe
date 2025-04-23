@@ -20,6 +20,8 @@ import { Route as authVerifyAccountImport } from './routes/(auth)/verify-account
 import { Route as authRegisterImport } from './routes/(auth)/register'
 import { Route as authLoginImport } from './routes/(auth)/login'
 import { Route as MyShopIndexImport } from './routes/my/shop/index'
+import { Route as MyShopSettingsImport } from './routes/my/shop/settings'
+import { Route as MyShopProductsImport } from './routes/my/shop/products'
 
 // Create/Update Routes
 
@@ -74,6 +76,18 @@ const authLoginRoute = authLoginImport.update({
 const MyShopIndexRoute = MyShopIndexImport.update({
   id: '/my/shop/',
   path: '/my/shop/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MyShopSettingsRoute = MyShopSettingsImport.update({
+  id: '/my/shop/settings',
+  path: '/my/shop/settings',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MyShopProductsRoute = MyShopProductsImport.update({
+  id: '/my/shop/products',
+  path: '/my/shop/products',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -137,6 +151,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductsIndexImport
       parentRoute: typeof rootRoute
     }
+    '/my/shop/products': {
+      id: '/my/shop/products'
+      path: '/my/shop/products'
+      fullPath: '/my/shop/products'
+      preLoaderRoute: typeof MyShopProductsImport
+      parentRoute: typeof rootRoute
+    }
+    '/my/shop/settings': {
+      id: '/my/shop/settings'
+      path: '/my/shop/settings'
+      fullPath: '/my/shop/settings'
+      preLoaderRoute: typeof MyShopSettingsImport
+      parentRoute: typeof rootRoute
+    }
     '/my/shop/': {
       id: '/my/shop/'
       path: '/my/shop'
@@ -158,6 +186,8 @@ export interface FileRoutesByFullPath {
   '/my/orders': typeof MyOrdersRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products': typeof ProductsIndexRoute
+  '/my/shop/products': typeof MyShopProductsRoute
+  '/my/shop/settings': typeof MyShopSettingsRoute
   '/my/shop': typeof MyShopIndexRoute
 }
 
@@ -170,6 +200,8 @@ export interface FileRoutesByTo {
   '/my/orders': typeof MyOrdersRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products': typeof ProductsIndexRoute
+  '/my/shop/products': typeof MyShopProductsRoute
+  '/my/shop/settings': typeof MyShopSettingsRoute
   '/my/shop': typeof MyShopIndexRoute
 }
 
@@ -183,6 +215,8 @@ export interface FileRoutesById {
   '/my/orders': typeof MyOrdersRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products/': typeof ProductsIndexRoute
+  '/my/shop/products': typeof MyShopProductsRoute
+  '/my/shop/settings': typeof MyShopSettingsRoute
   '/my/shop/': typeof MyShopIndexRoute
 }
 
@@ -197,6 +231,8 @@ export interface FileRouteTypes {
     | '/my/orders'
     | '/products/$productId'
     | '/products'
+    | '/my/shop/products'
+    | '/my/shop/settings'
     | '/my/shop'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -208,6 +244,8 @@ export interface FileRouteTypes {
     | '/my/orders'
     | '/products/$productId'
     | '/products'
+    | '/my/shop/products'
+    | '/my/shop/settings'
     | '/my/shop'
   id:
     | '__root__'
@@ -219,6 +257,8 @@ export interface FileRouteTypes {
     | '/my/orders'
     | '/products/$productId'
     | '/products/'
+    | '/my/shop/products'
+    | '/my/shop/settings'
     | '/my/shop/'
   fileRoutesById: FileRoutesById
 }
@@ -232,6 +272,8 @@ export interface RootRouteChildren {
   MyOrdersRoute: typeof MyOrdersRoute
   ProductsProductIdRoute: typeof ProductsProductIdRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
+  MyShopProductsRoute: typeof MyShopProductsRoute
+  MyShopSettingsRoute: typeof MyShopSettingsRoute
   MyShopIndexRoute: typeof MyShopIndexRoute
 }
 
@@ -244,6 +286,8 @@ const rootRouteChildren: RootRouteChildren = {
   MyOrdersRoute: MyOrdersRoute,
   ProductsProductIdRoute: ProductsProductIdRoute,
   ProductsIndexRoute: ProductsIndexRoute,
+  MyShopProductsRoute: MyShopProductsRoute,
+  MyShopSettingsRoute: MyShopSettingsRoute,
   MyShopIndexRoute: MyShopIndexRoute,
 }
 
@@ -265,6 +309,8 @@ export const routeTree = rootRoute
         "/my/orders",
         "/products/$productId",
         "/products/",
+        "/my/shop/products",
+        "/my/shop/settings",
         "/my/shop/"
       ]
     },
@@ -291,6 +337,12 @@ export const routeTree = rootRoute
     },
     "/products/": {
       "filePath": "products/index.tsx"
+    },
+    "/my/shop/products": {
+      "filePath": "my/shop/products.tsx"
+    },
+    "/my/shop/settings": {
+      "filePath": "my/shop/settings.tsx"
     },
     "/my/shop/": {
       "filePath": "my/shop/index.tsx"
