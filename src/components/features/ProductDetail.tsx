@@ -18,6 +18,8 @@ interface ProductDetailProps {
   soldCount: number;
   images: string[];
   category?: Category;
+  salePrice?: number; // Add sale price
+  salePercent?: number; // Add sale percent
 }
 
 // Recursive component to render the category breadcrumb
@@ -56,11 +58,16 @@ function ProductDetail(
     reviewCount,
     soldCount,
     images,
-    category
+    category,
+    salePrice,
+    salePercent
   }: ProductDetailProps
 ) {
   const [mainImage, setMainImage] = useState(0);
   const [startIndex, setStartIndex] = useState(0);
+
+  // Check if the product is on sale
+  const hasDiscount = salePercent !== undefined && salePercent > 0 && salePrice !== undefined;
 
   // Function to navigate through main images directly
   const navigateMainImage = (direction: 'prev' | 'next') => {
@@ -96,6 +103,13 @@ function ProductDetail(
               alt={name}
               className="w-full h-full object-cover"
             />
+
+            {/* Sale badge */}
+            {hasDiscount && (
+              <div className="absolute top-4 right-4 bg-red-600 text-white text-sm font-bold px-3 py-1 rounded-md">
+                -{salePercent}%
+              </div>
+            )}
 
             {/* Navigation arrows overlaid on main image */}
             <div className="absolute inset-0 flex items-center justify-between px-4">
@@ -160,8 +174,22 @@ function ProductDetail(
             <span className="text-gray-400">{soldCount} sold</span>
           </div>
 
-          <div className="text-3xl font-bold text-white mb-6">
-            ${price.toFixed(2)}
+          {/* Price display - show sale price if available */}
+          <div className="flex items-center mb-6">
+            {hasDiscount ? (
+              <>
+                <div className="text-3xl font-bold text-red-500">
+                  ${salePrice.toFixed(2)}
+                </div>
+                <div className="ml-3 text-lg text-gray-400 line-through">
+                  ${price.toFixed(2)}
+                </div>
+              </>
+            ) : (
+              <div className="text-3xl font-bold text-white">
+                ${price.toFixed(2)}
+              </div>
+            )}
           </div>
 
           <div className="flex space-x-4">
