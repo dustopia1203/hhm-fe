@@ -42,10 +42,11 @@ async function getCategoryTreeById(id: string) {
   return response.data;
 }
 
-function useGetCategoryTreeById(id: string) {
+function useGetCategoryTreeById(id: string, options?: { enabled: boolean }) {
   return useQuery({
     queryKey: ["category/tree", id],
-    queryFn: () => getCategoryTreeById(id)
+    queryFn: () => getCategoryTreeById(id),
+    enabled: !!id && (options?.enabled === true),
   });
 }
 
