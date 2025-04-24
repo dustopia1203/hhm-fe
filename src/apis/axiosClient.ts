@@ -38,9 +38,8 @@ authClient.interceptors.response.use(
   response => response,
   async (error) => {
     const config = error.config;
-    const response = error.response;
 
-    if (response.data.code === 403002 && !config._retry) {
+    if (!config._retry) {
       config._retry = true;
 
       try {

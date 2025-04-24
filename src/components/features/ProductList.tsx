@@ -1,10 +1,18 @@
-import { FiPlus, FiEdit, FiTrash2, FiPackage, FiSearch, FiEye, FiArrowLeft, FiArrowRight } from "react-icons/fi";
-import { useState, useEffect } from "react";
+import { FiArrowLeft, FiArrowRight, FiEdit, FiEye, FiPackage, FiPlus, FiSearch, FiTrash2 } from "react-icons/fi";
+import { useEffect, useState } from "react";
 import Loader from "@components/common/Loader.tsx";
 import { Link } from "@tanstack/react-router";
-import { useSearchProducts, useActiveMyShopProductApi, useInactiveMyShopProductApi, useDeleteMyShopProductApi } from "@apis/useProductApis.ts";
+import {
+  useActiveMyShopProductApi,
+  useDeleteMyShopProductApi,
+  useInactiveMyShopProductApi,
+  useSearchProducts
+} from "@apis/useProductApis.ts";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { Dialog, DialogContent } from "@components/ui/dialog";
+import CreateProductForm from "@components/features/CreateProductForm.tsx";
+import UpdateProductForm from "@components/features/UpdateProductForm.tsx";
 
 interface ProductListProps {
   shopId: string;
@@ -24,19 +32,24 @@ interface ProductListProps {
   }) => void;
 }
 
-function ProductList({
-                       shopId,
-                       keyword,
-                       sortBy,
-                       sortOrder,
-                       status,
-                       pageIndex,
-                       pageSize,
-                       onSearchChange
-                     }: ProductListProps) {
+function ProductList(
+  {
+    shopId,
+    keyword,
+    sortBy,
+    sortOrder,
+    status,
+    pageIndex,
+    pageSize,
+    onSearchChange
+  }: ProductListProps
+) {
   const [searchInput, setSearchInput] = useState(keyword);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
+  const [editProductId, setEditProductId] = useState<string | null>(null);
 
   // Query client for cache invalidation
   const queryClient = useQueryClient();
@@ -208,6 +221,11 @@ function ProductList({
     }
   };
 
+  const handleEditProduct = (productId: string) => {
+    setEditProductId(productId);
+    setIsUpdateDialogOpen(true);
+  };
+
   const handleBulkActivate = async () => {
     if (selectedProducts.length === 0) {
       toast.error("Vui lòng chọn sản phẩm", {
@@ -361,12 +379,13 @@ function ProductList({
             <option value="INACTIVE">Ngừng hoạt động</option>
           </select>
         </div>
-        <Link to="/my/shop/products/new">
-          <button className="h-[38px] flex items-center px-4 bg-gray-700 text-white rounded-lg hover:bg-gray-600">
-            <FiPackage className="mr-1"/>
-            <FiPlus/>
-          </button>
-        </Link>
+        <button
+          onClick={() => setIsCreateDialogOpen(true)}
+          className="h-[38px] flex items-center px-4 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+        >
+          <FiPackage className="mr-1"/>
+          <FiPlus/>
+        </button>
       </div>
 
       {/* Bulk actions */}
@@ -476,14 +495,12 @@ function ProductList({
                             <FiEye/>
                           </button>
                         </Link>
-                        <Link
-                          to="/my/shop/products/$productId/edit"
-                          params={{ productId: product.id }}
+                        <button
+                          onClick={() => handleEditProduct(product.id)}
+                          className="px-2 py-1 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
                         >
-                          <button className="px-2 py-1 bg-gray-700 text-white rounded-lg hover:bg-gray-600">
-                            <FiEdit/>
-                          </button>
-                        </Link>
+                          <FiEdit/>
+                        </button>
                         <button
                           className="px-2 py-1 bg-red-600 text-white rounded-lg hover:bg-red-500"
                           onClick={() => handleDeleteProduct(product.id)}
@@ -601,6 +618,37 @@ function ProductList({
           )}
         </>
       )}
+
+      {/* Add product dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="bg-gray-800 border-gray-700 text-white">
+          <div className="overflow-y-auto scrollbar-hide max-h-[calc(90vh-80px)]">
+            <CreateProductForm
+              onClose={() => setIsCreateDialogOpen(false)}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update product dialog */}
+      <Dialog
+        open={isUpdateDialogOpen}
+        onOpenChange={(open) => {
+          setIsUpdateDialogOpen(open);
+          if (!open) setEditProductId(null);
+        }}
+      >
+        <DialogContent className="bg-gray-800 border-gray-700 text-white">
+          <div className="overflow-y-auto scrollbar-hide max-h-[calc(90vh-80px)]">
+            {editProductId && (
+              <UpdateProductForm
+                productId={editProductId}
+                onClose={() => setIsUpdateDialogOpen(false)}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
