@@ -7,7 +7,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
-  quantity: number;
+  amount: number;
   isActive: boolean;
   imageUrl: string;
   createdAt: string;
@@ -142,9 +142,6 @@ function ProductList({
             <table className="w-full bg-gray-800 rounded-lg overflow-hidden">
               <thead>
               <tr className="bg-gray-700 text-white">
-                <th className="px-6 py-3 text-left">
-                  <input type="checkbox" className="h-4 w-4 accent-gray-600"/>
-                </th>
                 <th className="px-6 py-3 text-left">#</th>
                 <th className="px-6 py-3 text-left"></th>
                 <th className="px-6 py-3 text-left">Tên sản phẩm</th>
@@ -158,9 +155,6 @@ function ProductList({
               {products.length > 0 ? (
                 products.map((product, index) => (
                   <tr key={product.id} className="border-b border-gray-700 text-gray-300">
-                    <td className="px-6 py-3">
-                      <input type="checkbox" className="h-4 w-4 accent-gray-600"/>
-                    </td>
                     <td className="px-6 py-3">{pageIndex * pageSize + index + 1}</td>
                     <td className="px-6 py-3">
                       <img
@@ -171,7 +165,7 @@ function ProductList({
                     </td>
                     <td className="px-6 py-3">{product.name}</td>
                     <td className="px-6 py-3">₫{product.price.toLocaleString()}</td>
-                    <td className="px-6 py-3">{product.quantity}</td>
+                    <td className="px-6 py-3">{product.amount}</td>
                     <td className="px-6 py-3 text-center">
                       <div className="flex justify-center">
                         <label className="relative inline-flex items-center cursor-pointer">
