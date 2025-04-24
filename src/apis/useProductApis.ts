@@ -1,6 +1,6 @@
-import { publicClient } from "@apis/axiosClient.ts";
+import { authClient, publicClient } from "@apis/axiosClient.ts";
 import resourceUrls from "@constants/resourceUrls.ts";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { prepareParams, serializeParams } from "@utils/searchUtils.ts";
 
 // Search API
@@ -50,7 +50,91 @@ function useGetProductById(id: string) {
   })
 }
 
+// Create product api
+interface ProductCreateOrUpdateRequest {
+  shopId: string,
+  categoryId: string,
+  name: string,
+  description: string,
+  contentUrls: string,
+  price: number,
+  amount: number
+}
+
+async function createMyShopProduct(data: ProductCreateOrUpdateRequest) {
+  const response = await authClient.post(resourceUrls.PRODUCT_RESOURCE.CREATE_MY_SHOP_PRODUCT, data);
+
+  return response.data;
+}
+
+function useCreateMyShopProductApi() {
+  return useMutation({
+    mutationFn: createMyShopProduct
+  })
+}
+
+// Update my shop product API
+async function updateMyShopProduct(id: string, data: ProductCreateOrUpdateRequest) {
+  const response = await authClient.put(resourceUrls.PRODUCT_RESOURCE.UPDATE_MY_SHOP_PRODUCT.replace("{id}", id), data);
+
+  return response.data;
+}
+
+function useUpdateMyShopProductApi(id: string) {
+  return useMutation({
+    mutationFn: (data: ProductCreateOrUpdateRequest) => updateMyShopProduct(id, data)
+  })
+}
+
+// Active my shop product API
+interface IdsRequest {
+  ids: string[]
+}
+
+async function activeMyShopProduct(data: IdsRequest) {
+  const response = await authClient.put(resourceUrls.PRODUCT_RESOURCE.ACTIVE_MY_SHOP_PRODUCT, data);
+
+  return response.data;
+}
+
+function useActiveMyShopProductApi() {
+  return useMutation({
+    mutationFn: activeMyShopProduct
+  })
+}
+
+// Inactive my shop product API
+async function inactiveMyShopProduct(data: IdsRequest) {
+  const response = await authClient.put(resourceUrls.PRODUCT_RESOURCE.INACTIVE_MY_SHOP_PRODUCT, data);
+
+  return response.data;
+}
+
+function useInactiveMyShopProductApi() {
+  return useMutation({
+    mutationFn: inactiveMyShopProduct
+  })
+}
+
+// Delete my shop product API
+async function deleteMyShopProduct(data: IdsRequest) {
+  const response = await authClient.delete(resourceUrls.PRODUCT_RESOURCE.DELETE_MY_SHOP_PRODUCT, { data });
+
+  return response.data;
+}
+
+function useDeleteMyShopProductApi() {
+  return useMutation({
+    mutationFn: deleteMyShopProduct
+  })
+}
+
 export {
   useSearchProducts,
-  useGetProductById
+  useGetProductById,
+  useCreateMyShopProductApi,
+  useUpdateMyShopProductApi,
+  useActiveMyShopProductApi,
+  useInactiveMyShopProductApi,
+  useDeleteMyShopProductApi
 }

@@ -4,8 +4,6 @@ import ShopSidebar from "@components/features/ShopSidebar.tsx";
 import Footer from "@components/features/Footer.tsx";
 import useShopStore from "@stores/useShopStore.ts";
 import ProductList from "@components/features/ProductList.tsx";
-import { useSearchProducts } from "@apis/useProductApis.ts";
-import { toast } from "sonner";
 import auth from "@utils/auth.ts";
 
 export const Route = createFileRoute('/my/shop/products')({
@@ -34,27 +32,6 @@ function RouteComponent() {
     sortOrder = 'DESC',
     status
   } = Route.useSearch();
-
-  const { data, isLoading, error } = useSearchProducts({
-    keyword,
-    pageIndex,
-    pageSize,
-    sortBy,
-    sortOrder,
-    shopIds: shop ? [shop.id] : undefined,
-    status
-  });
-
-  if (error) {
-    toast.error(
-      error.message, {
-        cancel: {
-          label: "X",
-          onClick: () => toast.dismiss(),
-        },
-      }
-    );
-  }
 
   if (!shop) {
     navigate({ to: "/my/shop" });
@@ -93,15 +70,13 @@ function RouteComponent() {
 
         <div className="flex-1 p-6 overflow-auto">
           <ProductList
-            products={data?.data || []}
-            isLoading={isLoading}
+            shopId={shop.id}
             keyword={keyword || ''}
             sortBy={sortBy}
             sortOrder={sortOrder}
             status={status}
             pageIndex={pageIndex}
             pageSize={pageSize}
-            totalItems={data?.total || 0}
             onSearchChange={handleSearchChange}
           />
         </div>

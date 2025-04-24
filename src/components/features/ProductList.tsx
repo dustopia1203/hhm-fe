@@ -2,27 +2,18 @@ import { FiPlus, FiEdit, FiTrash2, FiPackage, FiSearch, FiEye, FiArrowLeft, FiAr
 import { useState, useEffect } from "react";
 import Loader from "@components/common/Loader.tsx";
 import { Link } from "@tanstack/react-router";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  amount: number;
-  isActive: boolean;
-  imageUrl: string;
-  createdAt: string;
-}
+import { useSearchProducts, useActiveMyShopProductApi, useInactiveMyShopProductApi, useDeleteMyShopProductApi } from "@apis/useProductApis.ts";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ProductListProps {
-  products: Product[];
-  isLoading: boolean;
+  shopId: string;
   keyword: string;
   sortBy: string;
   sortOrder: "ASC" | "DESC";
   status?: "ACTIVE" | "INACTIVE";
   pageIndex: number;
   pageSize: number;
-  totalItems: number;
   onSearchChange: (params: {
     keyword?: string;
     pageIndex?: number;
@@ -34,18 +25,55 @@ interface ProductListProps {
 }
 
 function ProductList({
-                       products,
-                       isLoading,
+                       shopId,
                        keyword,
                        sortBy,
                        sortOrder,
                        status,
                        pageIndex,
                        pageSize,
-                       totalItems,
                        onSearchChange
                      }: ProductListProps) {
   const [searchInput, setSearchInput] = useState(keyword);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Query client for cache invalidation
+  const queryClient = useQueryClient();
+
+  // Fetch products data
+  const {
+    data,
+    isLoading,
+    error
+  } = useSearchProducts({
+    keyword,
+    pageIndex,
+    pageSize,
+    sortBy,
+    sortOrder,
+    shopIds: [shopId],
+    status
+  });
+
+  // API mutations
+  const activeMutation = useActiveMyShopProductApi();
+  const inactiveMutation = useInactiveMyShopProductApi();
+  const deleteMutation = useDeleteMyShopProductApi();
+
+  // Show error toast if query fails
+  useEffect(() => {
+    if (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Không thể tải danh sách sản phẩm", {
+          cancel: {
+            label: "X",
+            onClick: () => toast.dismiss(),
+          },
+        }
+      );
+    }
+  }, [error]);
 
   useEffect(() => {
     setSearchInput(keyword || '');
@@ -86,9 +114,216 @@ function ProductList({
     if (sortBy === 'price' && sortOrder === 'DESC') return 'priceDesc';
     return 'newest';
   };
+
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value as "ACTIVE" | "INACTIVE" | "ALL";
     onSearchChange({ status: value === "ALL" ? undefined : value });
+  };
+
+  const handleSelectProduct = (productId: string) => {
+    setSelectedProducts(prev => {
+      if (prev.includes(productId)) {
+        return prev.filter(id => id !== productId);
+      } else {
+        return [...prev, productId];
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedProducts.length === (data?.data?.length || 0)) {
+      setSelectedProducts([]);
+    } else {
+      setSelectedProducts(data?.data?.map(product => product.id) || []);
+    }
+  };
+
+  const handleStatusToggle = async (productId: string, currentStatus: "ACTIVE" | "INACTIVE") => {
+    try {
+      setIsProcessing(true);
+
+      if (currentStatus === "ACTIVE") {
+        await inactiveMutation.mutateAsync({ ids: [productId] });
+        toast.success("Đã ngừng hoạt động sản phẩm", {
+          cancel: {
+            label: "X",
+            onClick: () => toast.dismiss(),
+          },
+        });
+      } else {
+        await activeMutation.mutateAsync({ ids: [productId] });
+        toast.success("Đã kích hoạt sản phẩm", {
+          cancel: {
+            label: "X",
+            onClick: () => toast.dismiss(),
+          },
+        });
+      }
+
+      // Invalidate product search query to refresh the list
+      queryClient.invalidateQueries({ queryKey: ["product/search"] });
+    } catch (error) {
+      toast.error("Không thể thay đổi trạng thái sản phẩm. Vui lòng thử lại sau.", {
+        cancel: {
+          label: "X",
+          onClick: () => toast.dismiss(),
+        },
+      });
+      console.error("Error toggling product status:", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
+      try {
+        setIsProcessing(true);
+        await deleteMutation.mutateAsync({ ids: [productId] });
+        toast.success("Đã xóa sản phẩm thành công", {
+          cancel: {
+            label: "X",
+            onClick: () => toast.dismiss(),
+          },
+        });
+
+        // Invalidate product search query to refresh the list
+        queryClient.invalidateQueries({ queryKey: ["product/search"] });
+
+        // If we're on the last page and there's only one product, go to previous page
+        if ((data?.data?.length || 0) === 1 && pageIndex > 0) {
+          onSearchChange({ pageIndex: pageIndex - 1 });
+        }
+      } catch (error) {
+        toast.error("Không thể xóa sản phẩm. Vui lòng thử lại sau.", {
+          cancel: {
+            label: "X",
+            onClick: () => toast.dismiss(),
+          },
+        });
+        console.error("Error deleting product:", error);
+      } finally {
+        setIsProcessing(false);
+      }
+    }
+  };
+
+  const handleBulkActivate = async () => {
+    if (selectedProducts.length === 0) {
+      toast.error("Vui lòng chọn sản phẩm", {
+        cancel: {
+          label: "X",
+          onClick: () => toast.dismiss(),
+        },
+      });
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      await activeMutation.mutateAsync({ ids: selectedProducts });
+      toast.success(`Đã kích hoạt ${selectedProducts.length} sản phẩm`, {
+        cancel: {
+          label: "X",
+          onClick: () => toast.dismiss(),
+        },
+      });
+
+      // Clear selection and refresh data
+      setSelectedProducts([]);
+      queryClient.invalidateQueries({ queryKey: ["product/search"] });
+    } catch (error) {
+      toast.error("Không thể kích hoạt sản phẩm. Vui lòng thử lại sau.", {
+        cancel: {
+          label: "X",
+          onClick: () => toast.dismiss(),
+        },
+      });
+      console.error("Error activating products:", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleBulkDeactivate = async () => {
+    if (selectedProducts.length === 0) {
+      toast.error("Vui lòng chọn sản phẩm", {
+        cancel: {
+          label: "X",
+          onClick: () => toast.dismiss(),
+        },
+      });
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      await inactiveMutation.mutateAsync({ ids: selectedProducts });
+      toast.success(`Đã ngừng hoạt động ${selectedProducts.length} sản phẩm`, {
+        cancel: {
+          label: "X",
+          onClick: () => toast.dismiss(),
+        },
+      });
+
+      // Clear selection and refresh data
+      setSelectedProducts([]);
+      queryClient.invalidateQueries({ queryKey: ["product/search"] });
+    } catch (error) {
+      toast.error("Không thể ngừng hoạt động sản phẩm. Vui lòng thử lại sau.", {
+        cancel: {
+          label: "X",
+          onClick: () => toast.dismiss(),
+        },
+      });
+      console.error("Error deactivating products:", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedProducts.length === 0) {
+      toast.error("Vui lòng chọn sản phẩm", {
+        cancel: {
+          label: "X",
+          onClick: () => toast.dismiss(),
+        },
+      });
+      return;
+    }
+
+    if (window.confirm(`Bạn có chắc chắn muốn xóa ${selectedProducts.length} sản phẩm đã chọn không?`)) {
+      try {
+        setIsProcessing(true);
+        await deleteMutation.mutateAsync({ ids: selectedProducts });
+        toast.success(`Đã xóa ${selectedProducts.length} sản phẩm`, {
+          cancel: {
+            label: "X",
+            onClick: () => toast.dismiss(),
+          },
+        });
+
+        // Clear selection and refresh data
+        setSelectedProducts([]);
+        queryClient.invalidateQueries({ queryKey: ["product/search"] });
+
+        // If we deleted all products on the current page, go to previous page
+        if (selectedProducts.length === (data?.data?.length || 0) && pageIndex > 0) {
+          onSearchChange({ pageIndex: pageIndex - 1 });
+        }
+      } catch (error) {
+        toast.error("Không thể xóa sản phẩm. Vui lòng thử lại sau.", {
+          cancel: {
+            label: "X",
+            onClick: () => toast.dismiss(),
+          },
+        });
+        console.error("Error deleting products:", error);
+      } finally {
+        setIsProcessing(false);
+      }
+    }
   };
 
   return (
@@ -126,13 +361,47 @@ function ProductList({
             <option value="INACTIVE">Ngừng hoạt động</option>
           </select>
         </div>
-        <button className="h-[38px] flex items-center px-4 bg-gray-700 text-white rounded-lg hover:bg-gray-600">
-          <FiPackage className="mr-1"/>
-          <FiPlus/>
-        </button>
+        <Link to="/my/shop/products/new">
+          <button className="h-[38px] flex items-center px-4 bg-gray-700 text-white rounded-lg hover:bg-gray-600">
+            <FiPackage className="mr-1"/>
+            <FiPlus/>
+          </button>
+        </Link>
       </div>
 
-      {isLoading ? (
+      {/* Bulk actions */}
+      {selectedProducts.length > 0 && (
+        <div className="bg-gray-800 p-3 rounded-lg mb-4 flex justify-between items-center">
+          <div className="text-white">
+            Đã chọn {selectedProducts.length} sản phẩm
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={handleBulkActivate}
+              disabled={isProcessing}
+              className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-500 disabled:opacity-50"
+            >
+              Kích hoạt
+            </button>
+            <button
+              onClick={handleBulkDeactivate}
+              disabled={isProcessing}
+              className="px-3 py-1 bg-yellow-600 text-white rounded-lg hover:bg-yellow-500 disabled:opacity-50"
+            >
+              Ngừng hoạt động
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              disabled={isProcessing}
+              className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-500 disabled:opacity-50"
+            >
+              Xóa
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isLoading || isProcessing ? (
         <div className="flex justify-center py-10">
           <Loader/>
         </div>
@@ -142,6 +411,14 @@ function ProductList({
             <table className="w-full bg-gray-800 rounded-lg overflow-hidden">
               <thead>
               <tr className="bg-gray-700 text-white">
+                <th className="px-6 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={data?.data?.length > 0 && selectedProducts.length === data?.data?.length}
+                    onChange={handleSelectAll}
+                    className="h-4 w-4 accent-blue-600 cursor-pointer"
+                  />
+                </th>
                 <th className="px-6 py-3 text-left">#</th>
                 <th className="px-6 py-3 text-left"></th>
                 <th className="px-6 py-3 text-left">Tên sản phẩm</th>
@@ -152,9 +429,17 @@ function ProductList({
               </tr>
               </thead>
               <tbody>
-              {products.length > 0 ? (
-                products.map((product, index) => (
+              {data?.data?.length > 0 ? (
+                data.data.map((product, index) => (
                   <tr key={product.id} className="border-b border-gray-700 text-gray-300">
+                    <td className="px-6 py-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedProducts.includes(product.id)}
+                        onChange={() => handleSelectProduct(product.id)}
+                        className="h-4 w-4 accent-blue-600 cursor-pointer"
+                      />
+                    </td>
                     <td className="px-6 py-3">{pageIndex * pageSize + index + 1}</td>
                     <td className="px-6 py-3">
                       <img
@@ -171,7 +456,9 @@ function ProductList({
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
                             type="checkbox"
-                            defaultChecked={product.isActive}
+                            checked={product.status === "ACTIVE"}
+                            onChange={() => handleStatusToggle(product.id, product.status)}
+                            disabled={isProcessing}
                             className="sr-only peer"
                           />
                           <div
@@ -189,10 +476,19 @@ function ProductList({
                             <FiEye/>
                           </button>
                         </Link>
-                        <button className="px-2 py-1 bg-gray-700 text-white rounded-lg hover:bg-gray-600">
-                          <FiEdit/>
-                        </button>
-                        <button className="px-2 py-1 bg-red-600 text-white rounded-lg hover:bg-red-500">
+                        <Link
+                          to="/my/shop/products/$productId/edit"
+                          params={{ productId: product.id }}
+                        >
+                          <button className="px-2 py-1 bg-gray-700 text-white rounded-lg hover:bg-gray-600">
+                            <FiEdit/>
+                          </button>
+                        </Link>
+                        <button
+                          className="px-2 py-1 bg-red-600 text-white rounded-lg hover:bg-red-500"
+                          onClick={() => handleDeleteProduct(product.id)}
+                          disabled={isProcessing}
+                        >
                           <FiTrash2/>
                         </button>
                       </div>
@@ -211,12 +507,10 @@ function ProductList({
           </div>
 
           {/* Pagination */}
-          {totalItems > 0 && (
+          {(data?.total || 0) > 0 && (
             <div className="flex justify-between items-center mt-6">
               <div className="text-gray-400">
-                Hiển
-                thị {Math.min(pageIndex * pageSize, totalItems)} trên {totalItems} sản
-                phẩm
+                Hiển thị {pageIndex * pageSize + 1} - {Math.min((pageIndex + 1) * pageSize, data?.total || 0)} trên {data?.total || 0} sản phẩm
               </div>
               <div className="flex items-center space-x-2">
                 <button
@@ -226,9 +520,8 @@ function ProductList({
                 >
                   <FiArrowLeft/>
                 </button>
-
                 {/* Page numbers */}
-                {totalItems > pageSize && (
+                {(data?.total || 0) > pageSize && (
                   <div className="flex space-x-1">
                     {/* Always show first page */}
                     {pageIndex > 1 && (
@@ -248,20 +541,20 @@ function ProductList({
                     )}
 
                     {/* Show current page and neighbors */}
-                    {Array.from({ length: Math.min(3, Math.ceil(totalItems / pageSize)) }).map((_, i) => {
+                    {Array.from({ length: Math.min(3, Math.ceil((data?.total || 0) / pageSize)) }).map((_, i) => {
                       const pageNum = pageIndex > 1
                         ? pageIndex - 1 + i
                         : i;
 
                       // Skip if the page would be out of range
-                      if (pageNum < 0 || pageNum >= Math.ceil(totalItems / pageSize)) {
+                      if (pageNum < 0 || pageNum >= Math.ceil((data?.total || 0) / pageSize)) {
                         return null;
                       }
 
                       // Skip if we're showing the first or last page separately
                       if ((pageIndex > 1 && pageNum === 0) ||
-                        (pageNum === Math.ceil(totalItems / pageSize) - 1 &&
-                          pageIndex < Math.ceil(totalItems / pageSize) - 2)) {
+                        (pageNum === Math.ceil((data?.total || 0) / pageSize) - 1 &&
+                          pageIndex < Math.ceil((data?.total || 0) / pageSize) - 2)) {
                         return null;
                       }
 
@@ -279,27 +572,26 @@ function ProductList({
                     })}
 
                     {/* Show ellipsis if needed */}
-                    {pageIndex < Math.ceil(totalItems / pageSize) - 3 && (
+                    {pageIndex < Math.ceil((data?.total || 0) / pageSize) - 3 && (
                       <span className="px-3 py-1 text-gray-400">...</span>
                     )}
 
                     {/* Always show last page */}
-                    {pageIndex < Math.ceil(totalItems / pageSize) - 2 && (
+                    {pageIndex < Math.ceil((data?.total || 0) / pageSize) - 2 && (
                       <button
-                        onClick={() => onSearchChange({ pageIndex: Math.ceil(totalItems / pageSize) - 1 })}
-                        className={`px-3 py-1 rounded-lg ${pageIndex === Math.ceil(totalItems / pageSize) - 1
+                        onClick={() => onSearchChange({ pageIndex: Math.ceil((data?.total || 0) / pageSize) - 1 })}
+                        className={`px-3 py-1 rounded-lg ${pageIndex === Math.ceil((data?.total || 0) / pageSize) - 1
                           ? 'bg-blue-600 text-white'
                           : 'bg-gray-700 text-white hover:bg-gray-600'}`}
                       >
-                        {Math.ceil(totalItems / pageSize)}
+                        {Math.ceil((data?.total || 0) / pageSize)}
                       </button>
                     )}
                   </div>
                 )}
-
                 <button
                   onClick={() => onSearchChange({ pageIndex: pageIndex + 1 })}
-                  disabled={(pageIndex + 1) * pageSize >= totalItems}
+                  disabled={(pageIndex + 1) * pageSize >= (data?.total || 0)}
                   className="px-3 py-1 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FiArrowRight/>

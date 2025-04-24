@@ -20,7 +20,12 @@ const resourceUrls: ResourceUrls = {
   },
   PRODUCT_RESOURCE: {
     SEARCH_PRODUCTS: "/api/products/q",
-    GET_PRODUCT_BY_ID: "/api/products/{id}"
+    GET_PRODUCT_BY_ID: "/api/products/{id}",
+    CREATE_MY_SHOP_PRODUCT: "/api/products/my/shop",
+    UPDATE_MY_SHOP_PRODUCT: "/api/products/my/shop/{id}",
+    ACTIVE_MY_SHOP_PRODUCT: "/api/products/my/shop/active",
+    INACTIVE_MY_SHOP_PRODUCT: "/api/products/my/shop/inactive",
+    DELETE_MY_SHOP_PRODUCT: "/api/products/my/shop"
   },
   SHOP_RESOURCE: {
     GET_SHOP_BY_ID: "/api/shops/{id}",
