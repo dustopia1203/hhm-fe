@@ -40,7 +40,7 @@ authClient.interceptors.response.use(
     const config = error.config;
     const response = error.response;
 
-    if (response.status === 401 && !config._retry) {
+    if (response.data.code === 403002 && !config._retry) {
       config._retry = true;
 
       try {
@@ -52,11 +52,11 @@ authClient.interceptors.response.use(
         if (!refreshToken) {
           return Promise.reject(error);
         } else {
-          const { data } = await publicClient.post(`${baseUrl}/refresh-token`, { refreshToken, rememberMe });
+          const { data } = await publicClient.post("/api/account/refresh-token", { refreshToken, rememberMe });
 
-          localStorage.setItem("access_token", data.accessToken);
+          localStorage.setItem("access_token", data.data.accessToken);
 
-          config.headers.Authorization = `Bearer ${data.accessToken}`;
+          config.headers.Authorization = `Bearer ${data.data.accessToken}`;
 
           return authClient(config);
         }
