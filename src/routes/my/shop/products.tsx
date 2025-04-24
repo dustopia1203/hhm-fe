@@ -4,10 +4,12 @@ import ShopSidebar from "@components/features/ShopSidebar.tsx";
 import Footer from "@components/features/Footer.tsx";
 import useShopStore from "@stores/useShopStore.ts";
 import ProductList from "@components/features/ProductList.tsx";
-import { useSearchProducts } from "@apis/useProductApis.tsx";
+import { useSearchProducts } from "@apis/useProductApis.ts";
 import { toast } from "sonner";
+import auth from "@utils/auth.ts";
 
 export const Route = createFileRoute('/my/shop/products')({
+  beforeLoad: () => auth([]),
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>) => {
     return {

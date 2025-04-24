@@ -4,17 +4,20 @@ import Footer from "@components/features/Footer.tsx";
 import CreateShopForm from "@components/features/CreateShopForm.tsx";
 import ShopHeader from "@components/features/ShopHeader.tsx";
 import ShopSidebar from "@components/features/ShopSidebar.tsx";
-import { useGetMyShopApi } from "@apis/useShopApis";
+import { useGetMyShopApi } from "@apis/useShopApis.ts";
 import useShopStore from "@stores/useShopStore";
 import Loader from "@components/common/Loader.tsx";
 import { RxAvatar } from "react-icons/rx";
+import { toast } from "sonner";
+import auth from "@utils/auth.ts";
 
 export const Route = createFileRoute('/my/shop/')({
+  beforeLoad: () => auth([]),
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { data, isLoading, isFetched } = useGetMyShopApi();
+  const { data, isLoading, error, isFetched } = useGetMyShopApi();
   const { shop, setShop } = useShopStore();
 
   useEffect(() => {
@@ -26,6 +29,17 @@ function RouteComponent() {
 
   if (isLoading) {
     return <Loader/>;
+  }
+
+  if (error) {
+    toast.error(
+      error.message, {
+        cancel: {
+          label: "X",
+          onClick: () => toast.dismiss(),
+        },
+      }
+    );
   }
 
   const shopContent = () => {

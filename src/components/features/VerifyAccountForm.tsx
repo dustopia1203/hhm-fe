@@ -1,6 +1,6 @@
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useState } from "react";
-import { useActiveAccountApi } from "@apis/useAccountApis.tsx";
+import { useActiveAccountApi } from "@apis/useAccountApis.ts";
 import { toast } from "sonner";
 import * as React from "react";
 

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { FiPlus, FiX } from 'react-icons/fi';
 import validateConstraints from "@constants/validateConstraints.ts";
 import uploadFile from "@utils/cloudinary.ts";
-import { useCreateMyShopApi } from "@apis/useShopApis";
+import { useCreateMyShopApi } from "@apis/useShopApis.ts";
 
 const schema = z.object({
   name: z.string()

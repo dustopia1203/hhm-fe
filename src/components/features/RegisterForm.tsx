@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { FaFacebook, FaGoogle } from "react-icons/fa";
 import { SubmitHandler, useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
-import { useRegisterApi } from "@apis/useAccountApis.tsx";
+import { useRegisterApi } from "@apis/useAccountApis.ts";
 import validateConstraints from "@constants/validateConstraints.ts";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";

@@ -6,7 +6,7 @@ import ShopProfileCard from '../../components/features/ShopProfileCard';
 import ReviewCard from '../../components/features/ReviewCard';
 import Header from "@components/features/Header.tsx";
 import Footer from "@components/features/Footer.tsx";
-import { useGetProductById } from "@apis/useProductApis.tsx";
+import { useGetProductById } from "@apis/useProductApis.ts";
 import Loader from "@components/common/Loader.tsx";
 import NotFound from "@components/common/NotFound.tsx";
 

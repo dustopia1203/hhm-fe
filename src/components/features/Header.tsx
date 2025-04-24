@@ -6,7 +6,7 @@ import { RxAvatar } from "react-icons/rx";
 import { Link } from "@tanstack/react-router";
 import useProfileStore from "@stores/useProfileStore.ts";
 import Logout from "./Logout.tsx";
-import { useGetAccountProfileApi } from "@apis/useAccountApis.tsx";
+import { useGetAccountProfileApi } from "@apis/useAccountApis.ts";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

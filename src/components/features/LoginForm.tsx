@@ -2,7 +2,7 @@ import { FaFacebook, FaGoogle } from "react-icons/fa";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useLoginApi } from "@apis/useAccountApis.tsx";
+import { useLoginApi } from "@apis/useAccountApis.ts";
 import { useEffect, useState } from "react";
 
 interface LoginForm {

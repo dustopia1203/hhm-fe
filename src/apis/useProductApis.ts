@@ -1,6 +1,7 @@
 import { publicClient } from "@apis/axiosClient.ts";
 import resourceUrls from "@constants/resourceUrls.ts";
 import { useQuery } from "@tanstack/react-query";
+import { prepareParams, serializeParams } from "@utils/searchUtils.ts";
 
 // Search API
 interface ProductSearchRequest {
@@ -16,40 +17,12 @@ interface ProductSearchRequest {
 }
 
 async function searchProducts(request: ProductSearchRequest) {
-  const params: Record<string, any> = { ...request };
-
-  if (request.shopIds && request.shopIds.length > 0) {
-    if (request.shopIds.length === 1) {
-      params.shopIds = request.shopIds[0];
-    }
-  }
-
-  if (request.ids && request.ids.length === 1) {
-    params.ids = request.ids[0];
-  }
-
-  if (request.categoryIds && request.categoryIds.length === 1) {
-    params.categoryIds = request.categoryIds[0];
-  }
+  const params = prepareParams(request)
 
   const response = await publicClient.get(resourceUrls.PRODUCT_RESOURCE.SEARCH_PRODUCTS, {
     params,
     paramsSerializer: {
-      serialize: (params) => {
-        const parts: string[] = [];
-
-        Object.entries(params).forEach(([key, value]) => {
-          if (Array.isArray(value)) {
-            value.forEach(item => {
-              parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(item)}`);
-            });
-          } else if (value !== undefined && value !== null) {
-            parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
-          }
-        });
-
-        return parts.join('&');
-      }
+      serialize: serializeParams
     }
   });
 

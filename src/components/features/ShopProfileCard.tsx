@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { FiStar, FiUser } from "react-icons/fi";
-import { useGetShopByIdApi } from "@apis/useShopApis.tsx";
+import { useGetShopByIdApi } from "@apis/useShopApis.ts";
 import Loader from "@components/common/Loader.tsx";
 
 interface ShopProfileCardProps {

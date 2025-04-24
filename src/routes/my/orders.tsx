@@ -8,8 +8,8 @@ import { X } from "lucide-react"
 import RefundForm from "@components/features/RefundForm.tsx"
 import { toast } from "sonner"
 import ReviewForm from "@components/features/ReviewForm.tsx";
+import auth from "@utils/auth.ts";
 
-// Define types for our orders
 interface OrderProduct {
   id: string
   name: string
@@ -28,7 +28,13 @@ interface Order {
 }
 
 export const Route = createFileRoute('/my/orders')({
+  beforeLoad: () => auth([]),
   component: RouteComponent,
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      tab: search.tab as string | null
+    }
+  }
 })
 
 function RouteComponent() {
