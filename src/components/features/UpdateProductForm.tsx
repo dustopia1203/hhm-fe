@@ -3,7 +3,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { FiLoader, FiPlus, FiX } from 'react-icons/fi';
+import { FiPlus, FiX } from 'react-icons/fi';
 import validateConstraints from "@constants/validateConstraints.ts";
 import uploadFile from "@utils/cloudinary.ts";
 import { useGetProductById, useUpdateMyShopProductApi } from "@apis/useProductApis.ts";
