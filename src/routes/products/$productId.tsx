@@ -96,6 +96,7 @@ function RouteComponent() {
         <main className="container mx-auto px-4 md:px-8 lg:px-24 xl:px-48 py-8">
           {/* Product Detail Component */}
           <ProductDetail
+            id={data.data.id}
             name={data.data.name}
             images={data.data.images}
             price={data.data.price}

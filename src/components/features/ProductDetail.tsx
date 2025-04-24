@@ -2,6 +2,8 @@ import { useState } from "react";
 import { FiChevronRight, FiShoppingCart, FiStar } from "react-icons/fi";
 import { IoChevronBackOutline, IoChevronForwardOutline } from "react-icons/io5";
 import { Link } from "@tanstack/react-router";
+import { useAddMyCartApi } from "@apis/useCartApis.ts";
+import { toast } from "sonner";
 
 interface CategoryResponse {
   id: string;
@@ -10,6 +12,7 @@ interface CategoryResponse {
 }
 
 interface ProductDetailProps {
+  id: string;
   name: string;
   images: string[];
   price: number;
@@ -50,6 +53,7 @@ const CategoryBreadcrumb = ({ category, productName }: { category: CategoryRespo
 
 function ProductDetail(
   {
+    id,
     name,
     images,
     price,
@@ -64,6 +68,7 @@ function ProductDetail(
 ) {
   const [mainImage, setMainImage] = useState(0);
   const [startIndex, setStartIndex] = useState(0);
+  const { mutateAsync } = useAddMyCartApi();
 
   const hasDiscount = salePercent !== undefined && salePercent > 0 && salePrice !== undefined;
 
@@ -78,6 +83,39 @@ function ProductDetail(
       if (mainImage + 1 >= startIndex + 4) {
         setStartIndex(Math.min(images.length - 4, mainImage - 2));
       }
+    }
+  };
+
+  const handleAddToCart = async () => {
+    try {
+      const responseData = await mutateAsync({
+        productId: id,
+        amount: 1
+      });
+
+      if (responseData) {
+        toast.success(
+          `${name} được thêm vào giỏ hàng!`,
+          {
+            cancel: {
+              label: "X",
+              onClick: () => toast.dismiss(),
+            },
+          }
+        );
+      }
+    } catch (error: any) {
+      toast.error(
+        "Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng",
+        {
+          cancel: {
+            label: "X",
+            onClick: () => toast.dismiss(),
+          },
+        }
+      );
+
+      console.log(error)
     }
   };
 
@@ -191,6 +229,7 @@ function ProductDetail(
 
           <div className="flex space-x-4">
             <button
+              onClick={handleAddToCart}
               className="flex-1 flex items-center justify-center py-3 px-6 rounded-lg border border-gray-600 bg-gray-700 text-white hover:bg-gray-600 transition-colors">
               <FiShoppingCart className="mr-2"/>
               Add to cart
