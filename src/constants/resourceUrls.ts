@@ -14,6 +14,11 @@ const resourceUrls: ResourceUrls = {
     REFRESH_TOKEN: "/api/account/refresh-token",
     GET_PROFILE: "/api/account/profile",
   },
+  CART_RESOURCE: {
+    GET_MY_CART: "/api/carts/my",
+    ADD_MY_CART: "/api/carts/my",
+    DELETE_MY_CART: "/api/carts/my"
+  },
   CATEGORY_RESOURCE: {
     SEARCH_CATEGORIES: "/api/categories/q",
     GET_TREE_BY_ID: "/api/categories/{id}"
