@@ -32,6 +32,9 @@ const resourceUrls: ResourceUrls = {
     INACTIVE_MY_SHOP_PRODUCT: "/api/products/my/shop/inactive",
     DELETE_MY_SHOP_PRODUCT: "/api/products/my/shop"
   },
+  SHIPPING_RESOURCE: {
+    SEARCH_SHIPPING: "/api/shipping/q"
+  },
   SHOP_RESOURCE: {
     GET_SHOP_BY_ID: "/api/shops/{id}",
     GET_MY_SHOP: "/api/shops/my",

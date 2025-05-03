@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { FiPlus, FiX } from 'react-icons/fi';
 import validateConstraints from "@constants/validateConstraints.ts";
 import uploadFile from "@utils/cloudinary.ts";
-import { useGetProductById, useUpdateMyShopProductApi } from "@apis/useProductApis.ts";
+import { useGetProductByIdApi, useUpdateMyShopProductApi } from "@apis/useProductApis.ts";
 import useShopStore from "@stores/useShopStore.ts";
 import CategorySelect from "@components/features/CategorySelect.tsx";
 import { useQueryClient } from "@tanstack/react-query";
@@ -46,7 +46,7 @@ function UpdateProductForm({ productId, onClose }: UpdateProductFormProps) {
   });
 
   // Get existing product data
-  const { data: product, isLoading: isLoadingProduct, error: productError } = useGetProductById(productId);
+  const { data: product, isLoading: isLoadingProduct, error: productError } = useGetProductByIdApi(productId);
 
   // State for images
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);

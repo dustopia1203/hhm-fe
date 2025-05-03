@@ -6,7 +6,7 @@ import ShopProfileCard from '../../components/features/ShopProfileCard';
 import ReviewCard from '../../components/features/ReviewCard';
 import Header from "@components/features/Header.tsx";
 import Footer from "@components/features/Footer.tsx";
-import { useGetProductById } from "@apis/useProductApis.ts";
+import { useGetProductByIdApi } from "@apis/useProductApis.ts";
 import Loader from "@components/common/Loader.tsx";
 import NotFound from "@components/common/NotFound.tsx";
 
@@ -23,7 +23,7 @@ function RouteComponent() {
   const { id } = Route.useLoaderData();
   const [reviewPage, setReviewPage] = useState(1);
   const reviewsPerPage = 5;
-  const { data, isLoading, error } = useGetProductById(id);
+  const { data, isLoading, error } = useGetProductByIdApi(id);
 
   // Mock review data
   const reviews = [

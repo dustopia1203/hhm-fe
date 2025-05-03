@@ -29,7 +29,7 @@ async function searchProducts(request: ProductSearchRequest) {
   return response.data;
 }
 
-function useSearchProducts(request: ProductSearchRequest) {
+function useSearchProductsApi(request: ProductSearchRequest) {
   return useQuery({
     queryKey: ["product/search", request],
     queryFn: () => searchProducts(request)
@@ -43,7 +43,7 @@ async function getProductById(id: string) {
   return response.data;
 }
 
-function useGetProductById(id: string) {
+function useGetProductByIdApi(id: string) {
   return useQuery({
     queryKey: ["product", id],
     queryFn: () => getProductById(id)
@@ -130,8 +130,8 @@ function useDeleteMyShopProductApi() {
 }
 
 export {
-  useSearchProducts,
-  useGetProductById,
+  useSearchProductsApi,
+  useGetProductByIdApi,
   useCreateMyShopProductApi,
   useUpdateMyShopProductApi,
   useActiveMyShopProductApi,

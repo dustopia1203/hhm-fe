@@ -6,7 +6,7 @@ import {
   useActiveMyShopProductApi,
   useDeleteMyShopProductApi,
   useInactiveMyShopProductApi,
-  useSearchProducts
+  useSearchProductsApi
 } from "@apis/useProductApis.ts";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -59,7 +59,7 @@ function ProductList(
     data,
     isLoading,
     error
-  } = useSearchProducts({
+  } = useSearchProductsApi({
     keyword,
     pageIndex,
     pageSize,
