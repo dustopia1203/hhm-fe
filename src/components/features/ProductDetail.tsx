@@ -21,6 +21,7 @@ interface ProductDetailProps {
   soldCount: number;
   reviewCount: number;
   rating: number;
+  status: 'ACTIVE' | 'INACTIVE';
   category: CategoryResponse;
 }
 
@@ -62,6 +63,7 @@ function ProductDetail(
     soldCount,
     reviewCount,
     rating,
+    status,
     category,
   }:
   ProductDetailProps
@@ -230,11 +232,16 @@ function ProductDetail(
           <div className="flex space-x-4">
             <button
               onClick={handleAddToCart}
-              className="flex-1 flex items-center justify-center py-3 px-6 rounded-lg border border-gray-600 bg-gray-700 text-white hover:bg-gray-600 transition-colors">
+              className="flex-1 flex items-center justify-center py-3 px-6 rounded-lg border border-gray-600 bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+              disabled={status === 'INACTIVE'}
+            >
               <FiShoppingCart className="mr-2"/>
               Add to cart
             </button>
-            <button className="flex-1 py-3 px-6 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors">
+            <button
+              className="flex-1 py-3 px-6 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+              disabled={status === 'INACTIVE'}
+            >
               Buy now
             </button>
           </div>

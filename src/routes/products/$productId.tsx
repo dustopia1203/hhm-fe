@@ -105,6 +105,7 @@ function RouteComponent() {
             soldCount={data.data.soldCount}
             reviewCount={data.data.reviewCount}
             rating={data.data.rating}
+            status={data.data.status}
             category={data.data.category}
           />
 
