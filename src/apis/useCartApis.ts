@@ -40,7 +40,7 @@ interface IdsRequest {
 }
 
 async function deleteMyCart(data: IdsRequest) {
-  const response = await authClient.post(resourceUrls.CART_RESOURCE.DELETE_MY_CART, { data });
+  const response = await authClient.delete(resourceUrls.CART_RESOURCE.DELETE_MY_CART, { data });
 
   return response.data;
 }

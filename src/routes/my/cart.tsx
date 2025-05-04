@@ -1,28 +1,38 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiMinus, FiPlus } from "react-icons/fi";
 import { FaTrashAlt } from "react-icons/fa";
 import Header from "@components/features/Header.tsx";
 import Footer from "@components/features/Footer.tsx";
 import auth from "@utils/auth.ts";
+import { useGetMyCartApi, useDeleteMyCartApi, useAddMyCartApi } from "@apis/useCartApis.ts";
+import { useSearchShippingApi } from "@apis/useShippingApis.ts";
+import Loader from "@components/common/Loader.tsx";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import useProfileStore from "@stores/useProfileStore.ts";
 
 interface CartItem {
   id: string;
+  productId: string;
   name: string;
   price: number;
-  originalPrice?: number;
+  salePrice?: number;
+  salePercent?: number;
   quantity: number;
   imageUrl: string;
   shop: string;
   stockStatus: string;
-  selected: boolean;  // Added selected property
+  selected: boolean;
 }
 
 interface ShippingMethod {
   id: string;
   name: string;
-  price: number;
+  avatarUrl: string;
   duration: string;
+  price: number;
+  status: 'ACTIVE' | 'INACTIVE';
   selected: boolean;
 }
 
@@ -32,95 +42,150 @@ export const Route = createFileRoute('/my/cart')({
 })
 
 function RouteComponent() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: "1",
-      name: "PlayStation 5",
-      price: 89.99,
-      originalPrice: 100.00,
-      quantity: 1,
-      imageUrl: "/images/products/ps5-1.jpg",
-      shop: "TTGShop",
-      stockStatus: "Còn lại 10 sản phẩm",
-      selected: false
-    },
-    {
-      id: "2",
-      name: "iPhone 16 Pro Max",
-      price: 1000,
-      quantity: 1,
-      imageUrl: "/images/products/iphone-1.jpg",
-      shop: "TTGShop",
-      stockStatus: "Còn lại 10 sản phẩm",
-      selected: false
-    },
-    {
-      id: "3",
-      name: "XBox S",
-      price: 89.99,
-      originalPrice: 100.00,
-      quantity: 1,
-      imageUrl: "/images/products/xbox-1.jpg",
-      shop: "TTGShop",
-      stockStatus: "Còn lại 10 sản phẩm",
-      selected: false
-    },
-    {
-      id: "4",
-      name: "PlayStation 5",
-      price: 89.99,
-      originalPrice: 100.00,
-      quantity: 1,
-      imageUrl: "/images/products/ps5-1.jpg",
-      shop: "GameZone",
-      stockStatus: "Còn lại 5 sản phẩm",
-      selected: false
-    },
-    {
-      id: "5",
-      name: "iPhone 16 Pro Max",
-      price: 1000,
-      quantity: 1,
-      imageUrl: "/images/products/iphone-1.jpg",
-      shop: "GameZone",
-      stockStatus: "Còn lại 8 sản phẩm",
-      selected: false
-    },
-    {
-      id: "6",
-      name: "XBox S",
-      price: 89.99,
-      originalPrice: 100.00,
-      quantity: 1,
-      imageUrl: "/images/products/xbox-1.jpg",
-      shop: "GameZone",
-      stockStatus: "Còn lại 12 sản phẩm",
-      selected: false
-    }
-  ]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [shippingName, setShippingName] = useState("");
+  const [shippingPhone, setShippingPhone] = useState("");
+  const [shippingAddress, setShippingAddress] = useState("");
+  const { data, isLoading, error } = useGetMyCartApi();
+  const deleteCartMutation = useDeleteMyCartApi();
+  const addCartMutation = useAddMyCartApi();
+  const queryClient = useQueryClient();
+  const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
+  const { profile } = useProfileStore();
 
-  // Global shipping methods not tied to any shop
-  const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([
-    { id: "express", name: "Giao hàng nhanh", price: 3.99, duration: "2-3 ngày", selected: true },
-    { id: "standard", name: "Giao hàng tiêu chuẩn", price: 1.99, duration: "3-5 ngày", selected: false },
-    { id: "economy", name: "Giao hàng tiết kiệm", price: 0.99, duration: "5-7 ngày", selected: false }
-  ]);
+  useEffect(() => {
+    if (profile) {
+      const fullName = [profile.firstName, profile.middleName, profile.lastName]
+        .filter(Boolean)
+        .join(" ");
+
+      setShippingName(fullName || "");
+      setShippingPhone(profile.phone || "");
+      setShippingAddress(profile.address || "");
+    }
+  }, [profile]);
+
+  // Fetch shipping methods
+  const { data: shippingData, isLoading: isLoadingShipping } = useSearchShippingApi({
+    status: "ACTIVE",
+    pageSize: 100
+  });
+
+  useEffect(() => {
+    if (shippingData?.data) {
+      const methods = shippingData.data.map((method, index) => ({
+        id: method.id,
+        name: method.name,
+        avatarUrl: method.avatarUrl || `/images/shipping/${method.name.toLowerCase().replace(/\s+/g, '')}.png`,
+        duration: method.duration,
+        price: Number(method.price),
+        status: method.status,
+        selected: index === 0
+      }));
+      setShippingMethods(methods);
+    }
+  }, [shippingData]);
+
+  useEffect(() => {
+    if (data?.data) {
+      const transformedItems = data.data.map(item => ({
+        id: item.id,
+        productId: item.productId,
+        name: item.name,
+        price: Number(item.price),
+        salePrice: item.salePrice ? Number(item.salePrice) : undefined,
+        salePercent: item.salePercent,
+        quantity: item.amount,
+        imageUrl: item.images?.length > 0 ? item.images[0] : "/placeholder.jpg",
+        shop: item.shopName,
+        stockStatus: `Còn lại ${item.leftCount} sản phẩm`,
+        selected: false
+      }));
+      setCartItems(transformedItems);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Không thể tải giỏ hàng",
+        {
+          cancel: {
+            label: "X",
+            onClick: () => toast.dismiss(),
+          },
+        }
+      );
+    }
+  }, [error]);
 
   const [couponCode, setCouponCode] = useState("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("cod");
 
-  const updateQuantity = (id: string, change: number) => {
+  const updateQuantity = async (id: string, change: number) => {
+    const cartItem = cartItems.find(item => item.id === id);
+    if (!cartItem) return;
+
+    const newQuantity = Math.max(1, cartItem.quantity + change);
+
     setCartItems(items =>
       items.map(item =>
         item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + change) }
+          ? { ...item, quantity: newQuantity }
           : item
       )
     );
+
+    try {
+      await addCartMutation.mutateAsync({
+        productId: cartItem.productId,
+        amount: newQuantity
+      });
+
+      toast.success("Số lượng đã được cập nhật", {
+        cancel: {
+          label: "X",
+          onClick: () => toast.dismiss(),
+        },
+      });
+    } catch (error) {
+      setCartItems(items =>
+        items.map(item =>
+          item.id === id
+            ? { ...item, quantity: cartItem.quantity }
+            : item
+        )
+      );
+
+      // Show error message
+      toast.error("Không thể cập nhật số lượng. Vui lòng thử lại sau.", {
+        cancel: {
+          label: "X",
+          onClick: () => toast.dismiss(),
+        },
+      });
+    }
   };
 
-  const removeItem = (id: string) => {
-    setCartItems(items => items.filter(item => item.id !== id));
+  const removeItem = async (id: string) => {
+    try {
+      await deleteCartMutation.mutateAsync({ ids: [id] });
+      setCartItems(items => items.filter(item => item.id !== id));
+      toast.success("Đã xóa sản phẩm khỏi giỏ hàng", {
+        cancel: {
+          label: "X",
+          onClick: () => toast.dismiss(),
+        },
+      });
+      queryClient.invalidateQueries({ queryKey: ["cart/my"] });
+    } catch (error) {
+      toast.error("Không thể xóa sản phẩm. Vui lòng thử lại sau.", {
+        cancel: {
+          label: "X",
+          onClick: () => toast.dismiss(),
+        },
+      });
+    }
   };
 
   const toggleItemSelection = (id: string) => {
@@ -148,265 +213,318 @@ function RouteComponent() {
     );
   };
 
-  // Calculate summary values
   const subtotal = cartItems
     .filter(item => item.selected)
-    .reduce((sum, item) => sum + item.price * item.quantity, 0);
+    .reduce((sum, item) => sum + (item.salePrice || item.price) * item.quantity, 0);
 
-  // Calculate shipping based on selected method (just one method now)
   const selectedShippingMethod = shippingMethods.find(m => m.selected);
   const shipping = selectedShippingMethod ? selectedShippingMethod.price : 0;
 
-  const discount = 100;
-  const total = subtotal + shipping - discount;
+  // const discount = 0;
+  const total = subtotal + shipping;
+    // - discount;
 
   const groupedByShop = cartItems.reduce((groups, item) => {
     (groups[item.shop] = groups[item.shop] || []).push(item);
     return groups;
   }, {} as Record<string, CartItem[]>);
 
-  // Check if all items are selected
   const allSelected = cartItems.length > 0 && cartItems.every(item => item.selected);
+
+  if (isLoading || isLoadingShipping) {
+    return (
+      <div className="flex flex-col min-h-screen w-full">
+        <Header/>
+        <div className="flex-grow flex items-center justify-center">
+          <Loader/>
+        </div>
+        <Footer/>
+      </div>
+    );
+  }
 
   return (
     <>
-      <div className="flex flex-col min-h-screen w-full ">
+      <div className="flex flex-col min-h-screen w-full">
         <Header/>
 
         {/* Main content */}
-        <div className="w-full text-white px-48 py-6">
+        <div className="container text-white mx-auto px-6 lg:px-48 py-6">
           <h1 className="text-2xl font-bold mb-6">Giỏ hàng</h1>
 
-          {/* Header row */}
-          <div
-            className="border border-gray-800 rounded-lg p-3 mb-4 grid grid-cols-[auto_2fr_1fr_1fr_1fr_auto] gap-4 items-center bg-gray-800">
-            <div className="px-1">
-              <input
-                type="checkbox"
-                className="h-4 w-4 accent-gray-600"
-                checked={allSelected}
-                onChange={(e) => toggleAllSelection(e.target.checked)}
-              />
+          {cartItems.length === 0 ? (
+            <div className="text-center py-12 text-gray-400">
+              Giỏ hàng trống
             </div>
-            <div className="text-sm font-medium">Tên sản phẩm</div>
-            <div className="text-sm font-medium">Đơn giá</div>
-            <div className="text-sm font-medium">Số lượng</div>
-            <div className="text-sm font-medium">Số tiền</div>
-            <div></div>
-          </div>
-
-          {/* Cart Items by Shop */}
-          {Object.entries(groupedByShop).map(([shop, items]) => (
-            <div key={shop} className="mb-6 border border-gray-800 rounded-xl overflow-hidden">
-              {/* Shop Header */}
-              <div className="bg-gray-800 px-4 py-3 flex items-center">
-                <input
-                  type="checkbox"
-                  className="mr-4 h-4 w-4 accent-gray-600"
-                  checked={items.every(item => item.selected)}
-                  onChange={(e) => {
-                    const selected = e.target.checked;
-                    setCartItems(cartItems =>
-                      cartItems.map(item =>
-                        item.shop === shop ? { ...item, selected } : item
-                      )
-                    );
-                  }}
-                />
-                <span className="text-white font-medium">{shop}</span>
+          ) : (
+            <>
+              {/* Header row */}
+              <div
+                className="border border-gray-800 rounded-lg p-3 mb-4 grid grid-cols-[auto_2fr_1fr_1fr_1fr_auto] gap-4 items-center bg-gray-800">
+                <div className="px-1">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-gray-600"
+                    checked={allSelected}
+                    onChange={(e) => toggleAllSelection(e.target.checked)}
+                  />
+                </div>
+                <div className="text-sm font-medium">Tên sản phẩm</div>
+                <div className="text-sm font-medium">Đơn giá</div>
+                <div className="text-sm font-medium">Số lượng</div>
+                <div className="text-sm font-medium">Số tiền</div>
+                <div></div>
               </div>
 
-              {/* Items from this shop */}
-              {items.map(item => (
-                <div key={item.id} className="border-t border-gray-800 py-4 px-4">
-                  <div className="flex items-center flex-wrap md:grid grid-cols-[auto_2fr_1fr_1fr_1fr_auto] gap-4">
-                    {/* Checkbox */}
-                    <div className="flex items-center">
+              {/* Cart Items by Shop */}
+              {Object.entries(groupedByShop).map(([shop, items]) => (
+                <div key={shop} className="mb-6 border border-gray-800 rounded-xl overflow-hidden">
+                  {/* Shop Header */}
+                  <div className="bg-gray-800 px-4 py-3 flex items-center">
+                    <input
+                      type="checkbox"
+                      className="mr-4 h-4 w-4 accent-gray-600"
+                      checked={items.every(item => item.selected)}
+                      onChange={(e) => {
+                        const selected = e.target.checked;
+                        setCartItems(cartItems =>
+                          cartItems.map(item =>
+                            item.shop === shop ? { ...item, selected } : item
+                          )
+                        );
+                      }}
+                    />
+                    <span className="text-white font-medium">{shop}</span>
+                  </div>
+
+                  {/* Items from this shop */}
+                  {items.map(item => (
+                    <div key={item.id} className="border-t border-gray-800 py-4 px-4">
+                      <div className="flex items-center flex-wrap md:grid grid-cols-[auto_2fr_1fr_1fr_1fr_auto] gap-4">
+                        {/* Checkbox */}
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            className="mr-4 h-4 w-4 accent-gray-600"
+                            checked={item.selected}
+                            onChange={() => toggleItemSelection(item.id)}
+                          />
+                        </div>
+
+                        {/* Product info */}
+                        <div className="flex items-center">
+                          <div className="h-16 w-16 bg-gray-800 rounded-lg flex-shrink-0 overflow-hidden">
+                            <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover"/>
+                          </div>
+                          <div className="ml-3">
+                            <p className="text-white">{item.name}</p>
+                            <p className="text-xs text-gray-400 mt-1">{item.stockStatus}</p>
+                          </div>
+                        </div>
+
+                        {/* Price */}
+                        <div className="flex flex-col">
+                          {item.salePrice ? (
+                            <>
+                              <span className="text-white">₫{item.salePrice.toFixed(2)}</span>
+                              <span className="text-gray-400 line-through">₫{item.price.toFixed(2)}</span>
+                            </>
+                          ) : (
+                            <span className="text-white">₫{item.price.toFixed(2)}</span>
+                          )}
+                        </div>
+
+                        {/* Quantity */}
+                        <div className="flex items-center">
+                          <div className="flex items-center border border-gray-700 rounded-lg">
+                            <button
+                              onClick={() => updateQuantity(item.id, -1)}
+                              className="px-3 py-1 text-gray-400 hover:text-white"
+                              disabled={item.quantity <= 1 || addCartMutation.isPending}
+                            >
+                              <FiMinus size={14}/>
+                            </button>
+                            <span className="w-8 text-center">{item.quantity}</span>
+                            <button
+                              onClick={() => updateQuantity(item.id, 1)}
+                              className="px-3 py-1 text-gray-400 hover:text-white"
+                              disabled={addCartMutation.isPending}
+                            >
+                              <FiPlus size={14}/>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Total */}
+                        <div className="text-white font-medium">
+                          ₫{((item.salePrice || item.price) * item.quantity).toFixed(2)}
+                        </div>
+
+                        {/* Remove */}
+                        <button
+                          onClick={() => removeItem(item.id)}
+                          className="text-gray-400 hover:text-white p-1"
+                          disabled={deleteCartMutation.isPending}
+                        >
+                          <FaTrashAlt size={20}/>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+
+              {/* Shipping Information */}
+              <div className="border border-gray-800 rounded-xl p-5 mb-6">
+                <h2 className="text-lg font-medium mb-4">Địa chỉ giao hàng</h2>
+                <form className="grid grid-cols-1 gap-4">
+                  <div className="form-group">
+                    <label htmlFor="shipping-name" className="block text-sm text-gray-400 mb-1">Họ tên</label>
+                    <input
+                      id="shipping-name"
+                      type="text"
+                      value={shippingName}
+                      onChange={(e) => setShippingName(e.target.value)}
+                      placeholder="Nhập họ và tên"
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white outline-none focus:ring-1 focus:ring-gray-600"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="shipping-phone" className="block text-sm text-gray-400 mb-1">Số điện thoại</label>
+                    <input
+                      id="shipping-phone"
+                      type="tel"
+                      value={shippingPhone}
+                      onChange={(e) => setShippingPhone(e.target.value)}
+                      placeholder="Nhập số điện thoại"
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white outline-none focus:ring-1 focus:ring-gray-600"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="shipping-address" className="block text-sm text-gray-400 mb-1">Địa chỉ</label>
+                    <input
+                      id="shipping-address"
+                      type="text"
+                      value={shippingAddress}
+                      onChange={(e) => setShippingAddress(e.target.value)}
+                      placeholder="Nhập địa chỉ giao hàng"
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white outline-none focus:ring-1 focus:ring-gray-600"
+                    />
+                  </div>
+                </form>
+              </div>
+
+              {/* Shipping Methods from API */}
+              {shippingMethods.length > 0 && (
+                <div className="border border-gray-800 rounded-xl mb-6">
+                  <h2 className="text-lg font-medium p-5 border-b border-gray-800">Phương thức vận chuyển</h2>
+
+                  {shippingMethods.filter(method => method.status === 'ACTIVE').map((method) => (
+                    <div key={method.id}
+                         className="px-5 py-4 flex items-center border-b border-gray-800 last:border-b-0">
                       <input
                         type="checkbox"
                         className="mr-4 h-4 w-4 accent-gray-600"
-                        checked={item.selected}
-                        onChange={() => toggleItemSelection(item.id)}
+                        checked={method.selected}
+                        onChange={() => selectShippingMethod(method.id)}
                       />
-                    </div>
-
-                    {/* Product info */}
-                    <div className="flex items-center">
-                      <div className="h-16 w-16 bg-gray-800 rounded-lg flex-shrink-0 overflow-hidden">
-                        <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover"/>
+                      <div
+                        className="h-14 w-14 bg-gray-800 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
+                        <img
+                          src={method.avatarUrl}
+                          alt={method.name}
+                          className="h-10 w-10 object-contain"
+                        />
                       </div>
-                      <div className="ml-3">
-                        <p className="text-white">{item.name}</p>
-                        <p className="text-xs text-gray-400 mt-1">{item.stockStatus}</p>
+                      <div className="ml-3 flex-grow">
+                        <p className="text-white">{method.name}</p>
+                        <p className="text-xs text-gray-400">{method.duration}</p>
                       </div>
-                    </div>
-
-                    {/* Price */}
-                    <div className="flex flex-col">
-                      {item.originalPrice ? (
-                        <>
-                          <span className="text-gray-400 line-through">${item.originalPrice.toFixed(2)}</span>
-                          <span className="text-white">${item.price.toFixed(2)}</span>
-                        </>
-                      ) : (
-                        <span className="text-white">${item.price.toFixed(2)}</span>
-                      )}
-                    </div>
-
-                    {/* Quantity */}
-                    <div className="flex items-center">
-                      <div className="flex items-center border border-gray-700 rounded-lg">
-                        <button
-                          onClick={() => updateQuantity(item.id, -1)}
-                          className="px-3 py-1 text-gray-400 hover:text-white"
-                        >
-                          <FiMinus size={14}/>
-                        </button>
-                        <span className="w-8 text-center">{item.quantity}</span>
-                        <button
-                          onClick={() => updateQuantity(item.id, 1)}
-                          className="px-3 py-1 text-gray-400 hover:text-white"
-                        >
-                          <FiPlus size={14}/>
-                        </button>
+                      <div className="text-white font-medium">
+                        ₫{method.price.toFixed(2)}
                       </div>
                     </div>
+                  ))}
+                </div>
+              )}
 
-                    {/* Total */}
-                    <div className="text-white font-medium">
-                      ${(item.price * item.quantity).toFixed(2)}
-                    </div>
+              {/* Discount Code */}
+              {/*<div className="mb-6">*/}
+              {/*  <h2 className="text-lg font-medium mb-4">Nhập mã giảm giá</h2>*/}
+              {/*  <div className="flex">*/}
+              {/*    <input*/}
+              {/*      type="text"*/}
+              {/*      value={couponCode}*/}
+              {/*      onChange={(e) => setCouponCode(e.target.value)}*/}
+              {/*      placeholder="Coupon Code"*/}
+              {/*      className="flex-grow bg-gray-800 border border-gray-700 rounded-l-lg px-4 py-2 text-white outline-none focus:ring-1 focus:ring-gray-600"*/}
+              {/*    />*/}
+              {/*    <button className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-r-lg">*/}
+              {/*      Apply*/}
+              {/*    </button>*/}
+              {/*  </div>*/}
+              {/*</div>*/}
 
-                    {/* Remove */}
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      className="text-gray-400 hover:text-white p-1"
-                    >
-                      <FaTrashAlt size={20}/>
-                    </button>
+              {/* Order Summary */}
+              <div className="border-t border-gray-800 pt-6 mb-6">
+                <div className="flex justify-between mb-3">
+                  <span className="text-gray-400">Tổng tiền hàng</span>
+                  <span className="text-white">₫{subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between mb-3">
+                  <span className="text-gray-400">Tổng tiền vận chuyển</span>
+                  <span className="text-white">₫{shipping.toFixed(2)}</span>
+                </div>
+                {/*<div className="flex justify-between mb-3">*/}
+                {/*  <span className="text-gray-400">Giảm giá</span>*/}
+                {/*  <span className="text-white">-₫{discount.toFixed(2)}</span>*/}
+                {/*</div>*/}
+                <div className="border-t border-gray-800 pt-3 mt-3">
+                  <div className="flex justify-between">
+                    <span className="text-lg font-bold">Tổng số tiền thanh toán</span>
+                    <span className="text-xl font-bold">₫{total.toFixed(2)}</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          ))}
-
-          {/* Shipping Information */}
-          <div className="border border-gray-800 rounded-xl p-5 mb-6">
-            <h2 className="text-lg font-medium mb-4">Địa chỉ giao hàng</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-white">John Doe (+00) 000000000</p>
               </div>
-              <div>
-                <p className="text-white">Nguyễn Văn Trỗi, An Lạc, Hà Đông, Hà Nội</p>
-              </div>
-            </div>
-          </div>
 
-          {/* Shipping Methods - Now global, not tied to shops */}
-          <div className="border border-gray-800 rounded-xl mb-6">
-            <h2 className="text-lg font-medium p-5 border-b border-gray-800">Phương thức vận chuyển</h2>
-
-            {shippingMethods.map((method) => (
-              <div key={method.id} className="px-5 py-4 flex items-center border-b border-gray-800 last:border-b-0">
-                <input
-                  type="checkbox"
-                  className="mr-4 h-4 w-4 accent-gray-600"
-                  checked={method.selected}
-                  onChange={() => selectShippingMethod(method.id)}
-                />
-                <div
-                  className="h-14 w-14 bg-gray-800 rounded-lg flex-shrink-0 overflow-hidden flex items-center justify-center">
-                  <img
-                    src={method.id === "express" ? "/images/shipping/express.png" : "/images/shipping/standard.png"}
-                    alt={method.name}
-                    className="h-10 w-10 object-contain"
-                  />
-                </div>
-                <div className="ml-3 flex-grow">
-                  <p className="text-white">{method.name}</p>
-                  <p className="text-xs text-gray-400">{method.duration}</p>
-                </div>
-                <div className="text-white font-medium">
-                  ${method.price.toFixed(2)}
+              {/* Payment Methods */}
+              <div className="mb-8">
+                <h2 className="text-lg font-medium mb-4">Phương thức thanh toán</h2>
+                <div className="flex flex-wrap gap-4">
+                  <button
+                    onClick={() => setSelectedPaymentMethod("vnpay")}
+                    className={`px-6 py-3 rounded-lg border ${
+                      selectedPaymentMethod === "vnpay"
+                        ? "border-white"
+                        : "border-gray-700 text-gray-300"
+                    }`}
+                  >
+                    VNPay
+                  </button>
+                  <button
+                    onClick={() => setSelectedPaymentMethod("cod")}
+                    className={`px-6 py-3 rounded-lg border ${
+                      selectedPaymentMethod === "cod"
+                        ? "border-white"
+                        : "border-gray-700 text-gray-300"
+                    }`}
+                  >
+                    Thanh toán khi nhận hàng
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Discount Code */}
-          <div className="mb-6">
-            <h2 className="text-lg font-medium mb-4">Nhập mã giảm giá</h2>
-            <div className="flex">
-              <input
-                type="text"
-                value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value)}
-                placeholder="Coupon Code"
-                className="flex-grow bg-gray-800 border border-gray-700 rounded-l-lg px-4 py-2 text-white outline-none focus:ring-1 focus:ring-gray-600"
-              />
-              <button className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-r-lg">
-                Apply
-              </button>
-            </div>
-          </div>
-
-          {/* Order Summary */}
-          <div className="border-t border-gray-800 pt-6 mb-6">
-            <div className="flex justify-between mb-3">
-              <span className="text-gray-400">Tổng tiền hàng</span>
-              <span className="text-white">${subtotal.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between mb-3">
-              <span className="text-gray-400">Tổng tiền vận chuyển</span>
-              <span className="text-white">${shipping.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between mb-3">
-              <span className="text-gray-400">Giảm giá</span>
-              <span className="text-white">-${discount.toFixed(2)}</span>
-            </div>
-            <div className="border-t border-gray-800 pt-3 mt-3">
-              <div className="flex justify-between">
-                <span className="text-lg font-bold">Tổng số tiền thanh toán</span>
-                <span className="text-xl font-bold">${total.toFixed(2)}</span>
+              {/* Checkout Button */}
+              <div className="flex justify-end">
+                <button
+                  className="bg-white text-gray-900 font-bold py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors">
+                  Đặt hàng
+                </button>
               </div>
-            </div>
-          </div>
-
-          {/* Payment Methods */}
-          <div className="mb-8">
-            <h2 className="text-lg font-medium mb-4">Phương thức thanh toán</h2>
-            <div className="flex flex-wrap gap-4">
-              <button
-                onClick={() => setSelectedPaymentMethod("vnpay")}
-                className={`px-6 py-3 rounded-lg border ${
-                  selectedPaymentMethod === "vnpay"
-                    ? "border-white"
-                    : "border-gray-700 text-gray-300"
-                }`}
-              >
-                VNPay
-              </button>
-              <button
-                onClick={() => setSelectedPaymentMethod("cod")}
-                className={`px-6 py-3 rounded-lg border ${
-                  selectedPaymentMethod === "cod"
-                    ? "border-white"
-                    : "border-gray-700 text-gray-300"
-                }`}
-              >
-                Thanh toán khi nhận hàng
-              </button>
-            </div>
-          </div>
-
-          {/* Checkout Button */}
-          <div className="flex justify-end">
-            <button
-              className="bg-white text-gray-900 font-bold py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors">
-              Đặt hàng
-            </button>
-          </div>
+            </>
+          )}
         </div>
 
         <Footer/>

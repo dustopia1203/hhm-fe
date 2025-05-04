@@ -236,13 +236,7 @@ function ProductDetail(
               disabled={status === 'INACTIVE'}
             >
               <FiShoppingCart className="mr-2"/>
-              Add to cart
-            </button>
-            <button
-              className="flex-1 flex items-center justify-center py-3 px-6 rounded-lg border border-gray-600 bg-gray-700 text-white hover:bg-gray-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-gray-700"
-              disabled={status === 'INACTIVE'}
-            >
-              Buy now
+              Thêm vào giỏ hàng
             </button>
           </div>
         </div>
