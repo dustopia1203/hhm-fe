@@ -237,7 +237,7 @@ function RouteComponent() {
     )
 
     toast.success("Đã xác nhận nhận hàng", {
-      description: "Cảm ơn bạn đã xác nhậny"
+      description: "Cảm ơn bạn đã xác nhận"
     })
   }
 
