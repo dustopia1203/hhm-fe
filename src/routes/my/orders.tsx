@@ -22,7 +22,7 @@ enum OrderItemStatus {
   REFUND = 'REFUND',
 }
 
-// Updated Order interface structure
+// Updated Order interface structure - removed statusText
 interface Order {
   id: string; // UUID
   productId: string; // UUID
@@ -33,8 +33,7 @@ interface Order {
   orderItemStatus: OrderItemStatus;
   productName: string;
   productImage: string;
-  shop: string; // Added for UI purposes
-  statusText: string; // Added for UI display
+  shopName: string; // Added for UI purposes
 }
 
 export const Route = createFileRoute('/my/orders')({
@@ -57,7 +56,7 @@ function RouteComponent() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Orders state - updated to match new structure
+  // Orders state - removed statusText from objects
   const [ordersState, setOrdersState] = useState<Order[]>([
     {
       id: 'order1',
@@ -69,8 +68,7 @@ function RouteComponent() {
       orderItemStatus: OrderItemStatus.PENDING,
       productName: 'PlayStation 5',
       productImage: '/images/products/ps5-1.jpg',
-      shop: 'TTGShop',
-      statusText: 'Đang xác nhận'
+      shopName: 'TTGShop'
     },
     {
       id: 'order2',
@@ -82,8 +80,7 @@ function RouteComponent() {
       orderItemStatus: OrderItemStatus.COMPLETED,
       productName: 'PlayStation 5',
       productImage: '/images/products/ps5-1.jpg',
-      shop: 'TTGShop',
-      statusText: 'Đã hoàn thành'
+      shopName: 'TTGShop'
     },
     {
       id: 'order3',
@@ -95,8 +92,7 @@ function RouteComponent() {
       orderItemStatus: OrderItemStatus.SHIPPING,
       productName: 'PlayStation 5',
       productImage: '/images/products/ps5-1.jpg',
-      shop: 'TTGShop',
-      statusText: 'Đang vận chuyển'
+      shopName: 'TTGShop'
     },
     {
       id: 'order4',
@@ -108,8 +104,7 @@ function RouteComponent() {
       orderItemStatus: OrderItemStatus.DELIVERED,
       productName: 'Xbox Series X',
       productImage: '/images/products/xbox.jpg',
-      shop: 'GameZone',
-      statusText: 'Đã giao hàng'
+      shopName: 'GameZone'
     },
     {
       id: 'order5',
@@ -121,8 +116,7 @@ function RouteComponent() {
       orderItemStatus: OrderItemStatus.COMPLETED,
       productName: 'iPhone 16 Pro Max',
       productImage: '/images/products/iphone.jpg',
-      shop: 'ElectronicHub',
-      statusText: 'Đã hoàn thành'
+      shopName: 'ElectronicHub'
     },
     {
       id: 'order6',
@@ -134,8 +128,7 @@ function RouteComponent() {
       orderItemStatus: OrderItemStatus.DELIVERED,
       productName: 'DualSense Controller',
       productImage: '/images/products/controller.jpg',
-      shop: 'TTGShop',
-      statusText: 'Đã giao hàng'
+      shopName: 'TTGShop'
     },
     {
       id: 'order7',
@@ -147,8 +140,7 @@ function RouteComponent() {
       orderItemStatus: OrderItemStatus.REVIEWED,
       productName: 'Nintendo Switch OLED',
       productImage: '/images/products/switch.jpg',
-      shop: 'GameZone',
-      statusText: 'Đã đánh giá'
+      shopName: 'GameZone'
     },
     {
       id: 'order8',
@@ -160,8 +152,7 @@ function RouteComponent() {
       orderItemStatus: OrderItemStatus.REVIEWED,
       productName: 'Samsung Galaxy S24 Ultra',
       productImage: '/images/products/galaxy.jpg',
-      shop: 'TechGadgets',
-      statusText: 'Đã đánh giá'
+      shopName: 'TechGadgets'
     },
     {
       id: 'order9',
@@ -173,10 +164,33 @@ function RouteComponent() {
       orderItemStatus: OrderItemStatus.REFUND_PROGRESSING,
       productName: 'Sony WH-1000XM5',
       productImage: '/images/products/headphones.jpg',
-      shop: 'TTGShop',
-      statusText: 'Đang xử lý hoàn tiền'
+      shopName: 'TTGShop'
     }
   ])
+
+  // Get status text based on OrderItemStatus
+  const getStatusText = (status: OrderItemStatus): string => {
+    switch (status) {
+      case OrderItemStatus.PENDING:
+        return 'Đang xác nhận'
+      case OrderItemStatus.SHIPPING:
+        return 'Đang vận chuyển'
+      case OrderItemStatus.DELIVERED:
+        return 'Đã giao hàng'
+      case OrderItemStatus.REFUND_PROGRESSING:
+        return 'Đang xử lý hoàn tiền'
+      case OrderItemStatus.COMPLETED:
+        return 'Đã hoàn thành'
+      case OrderItemStatus.REVIEWED:
+        return 'Đã đánh giá'
+      case OrderItemStatus.CANCELLED:
+        return 'Đã hủy'
+      case OrderItemStatus.REFUND:
+        return 'Đã hoàn tiền'
+      default:
+        return 'Không xác định'
+    }
+  }
 
   // Filter orders based on orderType
   const filteredOrders = ordersState.filter(order => {
@@ -228,8 +242,7 @@ function RouteComponent() {
         if (order.id === orderId && order.orderItemStatus === OrderItemStatus.DELIVERED) {
           return {
             ...order,
-            orderItemStatus: OrderItemStatus.COMPLETED,
-            statusText: 'Đã hoàn thành'
+            orderItemStatus: OrderItemStatus.COMPLETED
           }
         }
         return order
@@ -258,8 +271,7 @@ function RouteComponent() {
           if (order.id === data.orderItemId && order.orderItemStatus === OrderItemStatus.DELIVERED) {
             return {
               ...order,
-              orderItemStatus: OrderItemStatus.REFUND_PROGRESSING,
-              statusText: 'Đang xử lý hoàn tiền'
+              orderItemStatus: OrderItemStatus.REFUND_PROGRESSING
             }
           }
           return order
@@ -293,8 +305,7 @@ function RouteComponent() {
           if (order.id === data.orderItemId && order.orderItemStatus === OrderItemStatus.COMPLETED) {
             return {
               ...order,
-              orderItemStatus: OrderItemStatus.REVIEWED,
-              statusText: 'Đã đánh giá'
+              orderItemStatus: OrderItemStatus.REVIEWED
             }
           }
           return order
@@ -424,8 +435,10 @@ function RouteComponent() {
             <div key={order.id} className="border border-gray-800 rounded-lg overflow-hidden">
               {/* Shop Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-800">
-                <div className="font-medium text-white">{order.shop}</div>
-                <div className={`${getStatusStyle(order.orderItemStatus)}`}>{order.statusText}</div>
+                <div className="font-medium text-white">{order.shopName}</div>
+                <div className={`${getStatusStyle(order.orderItemStatus)}`}>
+                  {getStatusText(order.orderItemStatus)}
+                </div>
               </div>
 
               {/* Product Item */}
