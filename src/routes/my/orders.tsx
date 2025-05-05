@@ -10,21 +10,31 @@ import { toast } from "sonner"
 import ReviewForm from "@components/features/ReviewForm.tsx";
 import auth from "@utils/auth.ts";
 
-interface OrderProduct {
-  id: string
-  name: string
-  image: string
-  price: number
-  originalPrice?: number  // Added originalPrice field as optional
-  quantity: number
+// Updated enum to match required structure
+enum OrderItemStatus {
+  PENDING = 'PENDING',
+  SHIPPING = 'SHIPPING',
+  DELIVERED = 'DELIVERED',
+  REFUND_PROGRESSING = 'REFUND_PROGRESSING',
+  COMPLETED = 'COMPLETED',
+  REVIEWED = 'REVIEWED',
+  CANCELLED = 'CANCELLED',
+  REFUND = 'REFUND',
 }
 
+// Updated Order interface structure
 interface Order {
-  id: string
-  shop: string
-  products: OrderProduct[]
-  status: 'pending' | 'shipping' | 'delivered' | 'completed' | 'cancelled' | 'refund' | 'reviewed' | 'refund_progressing'
-  statusText: string
+  id: string; // UUID
+  productId: string; // UUID
+  shippingId: string; // UUID
+  price: number; // BigDecimal
+  amount: number; // Integer
+  address: string;
+  orderItemStatus: OrderItemStatus;
+  productName: string;
+  productImage: string;
+  shop: string; // Added for UI purposes
+  statusText: string; // Added for UI display
 }
 
 export const Route = createFileRoute('/my/orders')({
@@ -44,149 +54,126 @@ function RouteComponent() {
   // Dialog states
   const [refundDialogOpen, setRefundDialogOpen] = useState(false)
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState<OrderProduct | null>(null)
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Orders state - allows us to update the status
+  // Orders state - updated to match new structure
   const [ordersState, setOrdersState] = useState<Order[]>([
     {
       id: 'order1',
+      productId: 'product1',
+      shippingId: 'shipping1',
+      price: 89.99,
+      amount: 1,
+      address: '123 Main St, City',
+      orderItemStatus: OrderItemStatus.PENDING,
+      productName: 'PlayStation 5',
+      productImage: '/images/products/ps5-1.jpg',
       shop: 'TTGShop',
-      products: [
-        {
-          id: 'product1',
-          name: 'PlayStation 5',
-          image: '/images/products/ps5-1.jpg',
-          originalPrice: 99.99,
-          price: 89.99,
-          quantity: 1
-        }
-      ],
-      status: 'pending',
       statusText: 'Đang xác nhận'
     },
     {
       id: 'order2',
+      productId: 'product2',
+      shippingId: 'shipping2',
+      price: 89.99,
+      amount: 1,
+      address: '456 Elm St, City',
+      orderItemStatus: OrderItemStatus.COMPLETED,
+      productName: 'PlayStation 5',
+      productImage: '/images/products/ps5-1.jpg',
       shop: 'TTGShop',
-      products: [
-        {
-          id: 'product2',
-          name: 'PlayStation 5',
-          image: '/images/products/ps5-1.jpg',
-          originalPrice: 99.99,
-          price: 89.99,
-          quantity: 1
-        }
-      ],
-      status: 'completed',
       statusText: 'Đã hoàn thành'
     },
     {
       id: 'order3',
+      productId: 'product3',
+      shippingId: 'shipping3',
+      price: 89.99,
+      amount: 1,
+      address: '789 Oak St, City',
+      orderItemStatus: OrderItemStatus.SHIPPING,
+      productName: 'PlayStation 5',
+      productImage: '/images/products/ps5-1.jpg',
       shop: 'TTGShop',
-      products: [
-        {
-          id: 'product3',
-          name: 'PlayStation 5',
-          image: '/images/products/ps5-1.jpg',
-          price: 89.99,
-          quantity: 1
-        }
-      ],
-      status: 'shipping',
       statusText: 'Đang vận chuyển'
     },
     {
       id: 'order4',
+      productId: 'product4',
+      shippingId: 'shipping4',
+      price: 499.99,
+      amount: 1,
+      address: '101 Pine St, City',
+      orderItemStatus: OrderItemStatus.DELIVERED,
+      productName: 'Xbox Series X',
+      productImage: '/images/products/xbox.jpg',
       shop: 'GameZone',
-      products: [
-        {
-          id: 'product4',
-          name: 'Xbox Series X',
-          image: '/images/products/xbox.jpg',
-          originalPrice: 549.99,
-          price: 499.99,
-          quantity: 1
-        }
-      ],
-      status: 'delivered',
       statusText: 'Đã giao hàng'
     },
     {
       id: 'order5',
+      productId: 'product7',
+      shippingId: 'shipping5',
+      price: 1299.99,
+      amount: 1,
+      address: '202 Maple St, City',
+      orderItemStatus: OrderItemStatus.COMPLETED,
+      productName: 'iPhone 16 Pro Max',
+      productImage: '/images/products/iphone.jpg',
       shop: 'ElectronicHub',
-      products: [
-        {
-          id: 'product7',
-          name: 'iPhone 16 Pro Max',
-          image: '/images/products/iphone.jpg',
-          price: 1299.99,
-          quantity: 1
-        }
-      ],
-      status: 'completed',
       statusText: 'Đã hoàn thành'
     },
     {
       id: 'order6',
+      productId: 'product8',
+      shippingId: 'shipping6',
+      price: 69.99,
+      amount: 2,
+      address: '303 Cedar St, City',
+      orderItemStatus: OrderItemStatus.DELIVERED,
+      productName: 'DualSense Controller',
+      productImage: '/images/products/controller.jpg',
       shop: 'TTGShop',
-      products: [
-        {
-          id: 'product8',
-          name: 'DualSense Controller',
-          image: '/images/products/controller.jpg',
-          price: 69.99,
-          quantity: 2
-        }
-      ],
-      status: 'delivered',
       statusText: 'Đã giao hàng'
     },
     {
       id: 'order7',
+      productId: 'product9',
+      shippingId: 'shipping7',
+      price: 349.99,
+      amount: 1,
+      address: '404 Birch St, City',
+      orderItemStatus: OrderItemStatus.REVIEWED,
+      productName: 'Nintendo Switch OLED',
+      productImage: '/images/products/switch.jpg',
       shop: 'GameZone',
-      products: [
-        {
-          id: 'product9',
-          name: 'Nintendo Switch OLED',
-          image: '/images/products/switch.jpg',
-          price: 349.99,
-          quantity: 1
-        }
-      ],
-      status: 'reviewed',
       statusText: 'Đã đánh giá'
     },
     {
       id: 'order8',
+      productId: 'product10',
+      shippingId: 'shipping8',
+      price: 1199.99,
+      amount: 1,
+      address: '505 Walnut St, City',
+      orderItemStatus: OrderItemStatus.REVIEWED,
+      productName: 'Samsung Galaxy S24 Ultra',
+      productImage: '/images/products/galaxy.jpg',
       shop: 'TechGadgets',
-      products: [
-        {
-          id: 'product10',
-          name: 'Samsung Galaxy S24 Ultra',
-          image: '/images/products/galaxy.jpg',
-          price: 1199.99,
-          quantity: 1
-        }
-      ],
-      status: 'reviewed',
       statusText: 'Đã đánh giá'
     },
-    // New order with refund_progressing status
     {
       id: 'order9',
+      productId: 'product11',
+      shippingId: 'shipping9',
+      price: 349.99,
+      amount: 1,
+      address: '606 Spruce St, City',
+      orderItemStatus: OrderItemStatus.REFUND_PROGRESSING,
+      productName: 'Sony WH-1000XM5',
+      productImage: '/images/products/headphones.jpg',
       shop: 'TTGShop',
-      products: [
-        {
-          id: 'product11',
-          name: 'Sony WH-1000XM5',
-          image: '/images/products/headphones.jpg',
-          originalPrice: 399.99,
-          price: 349.99,
-          quantity: 1
-        }
-      ],
-      status: 'refund_progressing',
       statusText: 'Đang xử lý hoàn tiền'
     }
   ])
@@ -195,15 +182,18 @@ function RouteComponent() {
   const filteredOrders = ordersState.filter(order => {
     switch (orderType) {
       case '1':
-        return order.status === 'pending'
+        return order.orderItemStatus === OrderItemStatus.PENDING
       case '2':
-        return order.status === 'shipping' || order.status === 'delivered' || order.status === 'refund_progressing'
+        return order.orderItemStatus === OrderItemStatus.SHIPPING ||
+          order.orderItemStatus === OrderItemStatus.DELIVERED ||
+          order.orderItemStatus === OrderItemStatus.REFUND_PROGRESSING
       case '3':
-        return order.status === 'completed' || order.status === 'reviewed'
+        return order.orderItemStatus === OrderItemStatus.COMPLETED ||
+          order.orderItemStatus === OrderItemStatus.REVIEWED
       case '4':
-        return order.status === 'cancelled'
+        return order.orderItemStatus === OrderItemStatus.CANCELLED
       case '5':
-        return order.status === 'refund'
+        return order.orderItemStatus === OrderItemStatus.REFUND
       default:
         return true
     }
@@ -219,15 +209,36 @@ function RouteComponent() {
   ]
 
   // Open refund dialog
-  const handleRefundClick = (product: OrderProduct) => {
-    setSelectedProduct(product)
+  const handleRefundClick = (order: Order) => {
+    setSelectedOrder(order)
     setRefundDialogOpen(true)
   }
 
   // Open review dialog
-  const handleReviewClick = (product: OrderProduct) => {
-    setSelectedProduct(product)
+  const handleReviewClick = (order: Order) => {
+    setSelectedOrder(order)
     setReviewDialogOpen(true)
+  }
+
+  // Handle received order button
+  const handleOrderReceived = (orderId: string) => {
+    // Update the order status to completed
+    setOrdersState(prevOrders =>
+      prevOrders.map(order => {
+        if (order.id === orderId && order.orderItemStatus === OrderItemStatus.DELIVERED) {
+          return {
+            ...order,
+            orderItemStatus: OrderItemStatus.COMPLETED,
+            statusText: 'Đã hoàn thành'
+          }
+        }
+        return order
+      })
+    )
+
+    toast.success("Đã xác nhận nhận hàng", {
+      description: "Cảm ơn bạn đã xác nhậny"
+    })
   }
 
   // Handle refund form submission
@@ -244,13 +255,10 @@ function RouteComponent() {
       // Update the order status to refund_progressing
       setOrdersState(prevOrders =>
         prevOrders.map(order => {
-          // Check if this order contains the product being refunded
-          const containsProduct = order.products.some(p => p.id === data.orderItemId)
-          if (containsProduct && order.status === 'delivered') {
-            // Update the order status
+          if (order.id === data.orderItemId && order.orderItemStatus === OrderItemStatus.DELIVERED) {
             return {
               ...order,
-              status: 'refund_progressing',
+              orderItemStatus: OrderItemStatus.REFUND_PROGRESSING,
               statusText: 'Đang xử lý hoàn tiền'
             }
           }
@@ -282,13 +290,10 @@ function RouteComponent() {
       // Update the order status to reviewed
       setOrdersState(prevOrders =>
         prevOrders.map(order => {
-          // Check if this order contains the product being reviewed
-          const containsProduct = order.products.some(p => p.id === data.orderItemId)
-          if (containsProduct && order.status === 'completed') {
-            // Update the order status
+          if (order.id === data.orderItemId && order.orderItemStatus === OrderItemStatus.COMPLETED) {
             return {
               ...order,
-              status: 'reviewed',
+              orderItemStatus: OrderItemStatus.REVIEWED,
               statusText: 'Đã đánh giá'
             }
           }
@@ -321,18 +326,26 @@ function RouteComponent() {
   }
 
   // Render actions buttons based on order status
-  const renderActions = (order: Order, product: OrderProduct) => {
-    switch (order.status) {
-      case 'delivered': // Only delivered orders have refund button in tab 2
+  const renderActions = (order: Order) => {
+    switch (order.orderItemStatus) {
+      case OrderItemStatus.DELIVERED:
         return (
-          <button
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 border border-gray-600"
-            onClick={() => handleRefundClick(product)}
-          >
-            Trả hàng/Hoàn tiền
-          </button>
+          <div className="flex space-x-2">
+            <button
+              className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-600 border border-green-600"
+              onClick={() => handleOrderReceived(order.id)}
+            >
+              Đã nhận được hàng
+            </button>
+            <button
+              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 border border-gray-600"
+              onClick={() => handleRefundClick(order)}
+            >
+              Trả hàng/Hoàn tiền
+            </button>
+          </div>
         )
-      case 'refund_progressing': // Disabled refund button for refund_progressing status
+      case OrderItemStatus.REFUND_PROGRESSING:
         return (
           <button
             className="px-4 py-2 bg-gray-600 text-gray-400 rounded-lg border border-gray-700 cursor-not-allowed"
@@ -341,40 +354,39 @@ function RouteComponent() {
             Đang xử lý hoàn tiền
           </button>
         )
-      case 'completed': // Show review button only for completed orders, not for reviewed ones
+      case OrderItemStatus.COMPLETED:
         return (
           <button
             className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 border border-gray-700 flex items-center"
-            onClick={() => handleReviewClick(product)}
+            onClick={() => handleReviewClick(order)}
           >
             <FaStar className="mr-2 text-yellow-400"/>
             Đánh giá sản phẩm
           </button>
         )
-      // For reviewed status, don't return any action buttons
       default:
         return null
     }
   }
 
   // Generate status label styling
-  const getStatusStyle = (status: Order['status']) => {
+  const getStatusStyle = (status: OrderItemStatus) => {
     switch (status) {
-      case 'pending':
+      case OrderItemStatus.PENDING:
         return 'text-yellow-300'
-      case 'shipping':
+      case OrderItemStatus.SHIPPING:
         return 'text-blue-300'
-      case 'delivered':
+      case OrderItemStatus.DELIVERED:
         return 'text-blue-300'
-      case 'completed':
+      case OrderItemStatus.COMPLETED:
         return 'text-green-300'
-      case 'reviewed':
+      case OrderItemStatus.REVIEWED:
         return 'text-green-300'
-      case 'cancelled':
+      case OrderItemStatus.CANCELLED:
         return 'text-red-300'
-      case 'refund':
+      case OrderItemStatus.REFUND:
         return 'text-purple-300'
-      case 'refund_progressing':
+      case OrderItemStatus.REFUND_PROGRESSING:
         return 'text-orange-300'
       default:
         return 'text-gray-300'
@@ -382,7 +394,7 @@ function RouteComponent() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-900">
+    <div className="flex flex-col min-h-screen w-full">
       <Header/>
 
       <main className="flex-grow py-6 max-w-6xl mx-auto w-full px-4">
@@ -413,46 +425,32 @@ function RouteComponent() {
               {/* Shop Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-800">
                 <div className="font-medium text-white">{order.shop}</div>
-                <div className={`${getStatusStyle(order.status)}`}>{order.statusText}</div>
+                <div className={`${getStatusStyle(order.orderItemStatus)}`}>{order.statusText}</div>
               </div>
 
-              {/* Products */}
-              {order.products.map(product => (
-                <div key={product.id}
-                     className="flex items-center p-4 gap-4 border-b border-gray-700/30 last:border-b-0">
-                  <div className="h-20 w-20 bg-gray-800 rounded-lg overflow-hidden">
-                    <div className="h-full w-full flex items-center justify-center bg-blue-100/10">
-                      <img src={product.image} alt={product.name} className="max-h-16 max-w-16"/>
-                    </div>
-                  </div>
-
-                  <div className="flex-grow">
-                    <h3 className="text-white font-medium">{product.name}</h3>
-                    <div className="mt-2">
-                      {product.originalPrice ? (
-                        <div className="flex items-center">
-                          <span className="line-through text-gray-500 mr-2">${product.originalPrice.toFixed(2)}</span>
-                          <span className="text-white">${product.price.toFixed(2)}</span>
-                        </div>
-                      ) : (
-                        <span className="text-white">${product.price.toFixed(2)}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="text-gray-400">
-                    × {product.quantity}
+              {/* Product Item */}
+              <div className="flex items-center p-4 gap-4 border-b border-gray-700/30">
+                <div className="h-20 w-20 bg-gray-800 rounded-lg overflow-hidden">
+                  <div className="h-full w-full flex items-center justify-center bg-blue-100/10">
+                    <img src={order.productImage} alt={order.productName} className="max-h-16 max-w-16"/>
                   </div>
                 </div>
-              ))}
+
+                <div className="flex-grow">
+                  <h3 className="text-white font-medium">{order.productName}</h3>
+                  <div className="mt-2">
+                    <span className="text-white">${order.price.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <div className="text-gray-400">
+                  × {order.amount}
+                </div>
+              </div>
 
               {/* Actions */}
               <div className="flex justify-end p-4 border-t border-gray-800">
-                {order.products.map(product => (
-                  <div key={`action-${product.id}`}>
-                    {renderActions(order, product)}
-                  </div>
-                ))}
+                {renderActions(order)}
               </div>
             </div>
           ))}
@@ -492,14 +490,14 @@ function RouteComponent() {
 
           {/* Use a scrollable container for the content */}
           <div className="overflow-y-auto scrollbar-hide max-h-[calc(90vh-80px)]">
-            {selectedProduct && (
+            {selectedOrder && (
               <div className="px-6 py-6">
                 <RefundForm
-                  orderItemId={selectedProduct.id}
-                  productName={selectedProduct.name}
-                  price={selectedProduct.price}
-                  quantity={selectedProduct.quantity}
-                  productImage={selectedProduct.image}
+                  orderItemId={selectedOrder.id}
+                  productName={selectedOrder.productName}
+                  price={selectedOrder.price}
+                  quantity={selectedOrder.amount}
+                  productImage={selectedOrder.productImage}
                   onSubmit={handleRefundSubmit}
                   onClose={handleRefundDialogClose}
                 />
@@ -534,14 +532,14 @@ function RouteComponent() {
 
           {/* Use a scrollable container for the content */}
           <div className="overflow-y-auto scrollbar-hide max-h-[calc(90vh-80px)]">
-            {selectedProduct && (
+            {selectedOrder && (
               <div className="px-6 py-6">
                 <ReviewForm
-                  orderItemId={selectedProduct.id}
-                  productName={selectedProduct.name}
-                  price={selectedProduct.price}
-                  quantity={selectedProduct.quantity}
-                  productImage={selectedProduct.image}
+                  orderItemId={selectedOrder.id}
+                  productName={selectedOrder.productName}
+                  price={selectedOrder.price}
+                  quantity={selectedOrder.amount}
+                  productImage={selectedOrder.productImage}
                   onSubmit={handleReviewSubmit}
                   onClose={handleReviewDialogClose}
                 />
