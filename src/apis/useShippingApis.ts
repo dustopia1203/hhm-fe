@@ -1,5 +1,5 @@
 import { prepareParams, serializeParams } from "@utils/searchUtils.ts";
-import { publicClient } from "@apis/axiosClient.ts";
+import { authClient } from "@apis/axiosClient.ts";
 import resourceUrls from "@constants/resourceUrls.ts";
 import { useQuery } from "@tanstack/react-query";
 
@@ -17,7 +17,7 @@ interface ShippingSearchRequest {
 async function searchShipping(request: ShippingSearchRequest) {
   const params = prepareParams(request);
 
-  const response = await publicClient.get(resourceUrls.SHIPPING_RESOURCE.SEARCH_SHIPPING, {
+  const response = await authClient.get(resourceUrls.SHIPPING_RESOURCE.SEARCH_SHIPPING, {
     params,
     paramsSerializer: {
       serialize: serializeParams

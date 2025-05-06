@@ -25,9 +25,6 @@ function auth(requiredPrivileges: string[]) {
 
   const isAccepted = validatePrivileges(requiredPrivileges, userPrivileges);
 
-  console.log(profile)
-  console.log(isAccepted)
-
   if (!profile || !isAccepted) {
     throw redirect({ to: "/login" });
   }

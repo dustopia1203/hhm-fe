@@ -23,6 +23,13 @@ const resourceUrls: ResourceUrls = {
     SEARCH_CATEGORIES: "/api/categories/q",
     GET_TREE_BY_ID: "/api/categories/{id}"
   },
+  ORDER_RESOURCE: {
+    SEARCH_MY_ORDERS: "/api/orders/my/q",
+    SEARCH_MY_SHOP_ORDERS: "/api/orders/my/shop/q",
+    CREATE_MY_ORDER: "/api/orders/my",
+    REFUND_MY_ORDER: "/api/orders/my/{id}/refund",
+    COMPLETED_MY_ORDER: "/api/orders/my/{id}/completed",
+  },
   PRODUCT_RESOURCE: {
     SEARCH_PRODUCTS: "/api/products/q",
     GET_PRODUCT_BY_ID: "/api/products/{id}",
@@ -30,7 +37,13 @@ const resourceUrls: ResourceUrls = {
     UPDATE_MY_SHOP_PRODUCT: "/api/products/my/shop/{id}",
     ACTIVE_MY_SHOP_PRODUCT: "/api/products/my/shop/active",
     INACTIVE_MY_SHOP_PRODUCT: "/api/products/my/shop/inactive",
-    DELETE_MY_SHOP_PRODUCT: "/api/products/my/shop"
+    DELETE_MY_SHOP_PRODUCT: "/api/products/my/shop",
+    CONFIRM_ORDER: "/api/shops/my/{orderId}/confirm",
+    CONFIRM_ORDER_REFUND: "/api/shops/my/{orderId}/refund",
+  },
+  REVIEW_RESOURCE: {
+    SEARCH_REVIEWS: "/api/reviews/q",
+    CREATE_MY_REVIEW: "/api/reviews/my",
   },
   SHIPPING_RESOURCE: {
     SEARCH_SHIPPING: "/api/shipping/q"

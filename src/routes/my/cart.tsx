@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from "react";
 import { FiMinus, FiPlus } from "react-icons/fi";
 import { FaTrashAlt } from "react-icons/fa";
@@ -11,6 +11,7 @@ import Loader from "@components/common/Loader.tsx";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import useProfileStore from "@stores/useProfileStore.ts";
+import { useCreateMyOrderApi } from "@apis/useOrderApis.ts";
 
 interface CartItem {
   id: string;
@@ -42,6 +43,7 @@ export const Route = createFileRoute('/my/cart')({
 })
 
 function RouteComponent() {
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [shippingName, setShippingName] = useState("");
   const [shippingPhone, setShippingPhone] = useState("");
@@ -49,6 +51,7 @@ function RouteComponent() {
   const { data, isLoading, error } = useGetMyCartApi();
   const deleteCartMutation = useDeleteMyCartApi();
   const addCartMutation = useAddMyCartApi();
+  const createOrderMutation = useCreateMyOrderApi();
   const queryClient = useQueryClient();
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const { profile } = useProfileStore();
@@ -121,6 +124,7 @@ function RouteComponent() {
 
   const [couponCode, setCouponCode] = useState("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("cod");
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const updateQuantity = async (id: string, change: number) => {
     const cartItem = cartItems.find(item => item.id === id);
@@ -148,7 +152,7 @@ function RouteComponent() {
           onClick: () => toast.dismiss(),
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       setCartItems(items =>
         items.map(item =>
           item.id === id
@@ -178,7 +182,7 @@ function RouteComponent() {
         },
       });
       queryClient.invalidateQueries({ queryKey: ["cart/my"] });
-    } catch (error) {
+    } catch (error: any) {
       toast.error("Không thể xóa sản phẩm. Vui lòng thử lại sau.", {
         cancel: {
           label: "X",
@@ -222,7 +226,7 @@ function RouteComponent() {
 
   // const discount = 0;
   const total = subtotal + shipping;
-    // - discount;
+  // - discount;
 
   const groupedByShop = cartItems.reduce((groups, item) => {
     (groups[item.shop] = groups[item.shop] || []).push(item);
@@ -230,6 +234,81 @@ function RouteComponent() {
   }, {} as Record<string, CartItem[]>);
 
   const allSelected = cartItems.length > 0 && cartItems.every(item => item.selected);
+
+  // Handle checkout process
+  const handleCheckout = async () => {
+    // Validate selected items
+    const selectedItems = cartItems.filter(item => item.selected);
+    if (selectedItems.length === 0) {
+      toast.error("Vui lòng chọn ít nhất một sản phẩm để thanh toán", {
+        description: "Bạn chưa chọn sản phẩm nào",
+      });
+      return;
+    }
+
+    // Validate shipping information
+    if (!shippingName || !shippingPhone || !shippingAddress) {
+      toast.error("Vui lòng điền đầy đủ thông tin giao hàng", {
+        description: "Tên, số điện thoại và địa chỉ là bắt buộc",
+      });
+      return;
+    }
+
+    // Validate shipping method
+    if (!selectedShippingMethod) {
+      toast.error("Vui lòng chọn phương thức vận chuyển", {
+        description: "Bạn chưa chọn phương thức vận chuyển",
+      });
+      return;
+    }
+
+    setIsCheckingOut(true);
+
+    try {
+      if (selectedPaymentMethod === "cod") {
+        // Create order request
+        const orderRequest = {
+          shippingId: selectedShippingMethod.id,
+          address: shippingAddress,
+          orderItemCreateRequests: selectedItems.map(item => ({
+            productId: item.productId,
+            price: item.salePrice || item.price,
+            amount: item.quantity
+          }))
+        };
+
+        // Call create order API
+        await createOrderMutation.mutateAsync(orderRequest);
+
+        // Show success message
+        toast.success("Đặt hàng thành công", {
+          description: "Đơn hàng của bạn đã được tạo thành công"
+        });
+
+        // Delete selected items from cart
+        const selectedIds = selectedItems.map(item => item.id);
+        await deleteCartMutation.mutateAsync({ ids: selectedIds });
+
+        // Invalidate cart query to refresh data
+        queryClient.invalidateQueries({ queryKey: ["cart/my"] });
+
+        // Navigate to orders page
+        navigate({ to: "/my/orders" });
+      } else {
+        // For other payment methods (placeholder for future implementation)
+        toast.info("Phương thức thanh toán đang được phát triển", {
+          description: "Chức năng thanh toán qua VNPay sẽ sớm được triển khai"
+        });
+      }
+    } catch (error: any) {
+      console.error("Checkout error:", error);
+      toast.error("Không thể tạo đơn hàng", {
+        description: error?.message || "Đã xảy ra lỗi, vui lòng thử lại sau"
+      });
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
 
   if (isLoading || isLoadingShipping) {
     return (
@@ -519,8 +598,10 @@ function RouteComponent() {
               {/* Checkout Button */}
               <div className="flex justify-end">
                 <button
-                  className="bg-white text-gray-900 font-bold py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors">
-                  Đặt hàng
+                  onClick={handleCheckout}
+                  disabled={isCheckingOut}
+                  className="bg-white text-gray-900 font-bold py-3 px-8 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
+                  {isCheckingOut ? "Đang xử lý..." : "Đặt hàng"}
                 </button>
               </div>
             </>
