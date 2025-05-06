@@ -4,6 +4,17 @@ import { authClient } from "@apis/axiosClient.ts";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 // Search my orders API
+export enum OrderItemStatus {
+  PENDING = 'PENDING',
+  SHIPPING = 'SHIPPING',
+  DELIVERED = 'DELIVERED',
+  REFUND_PROGRESSING = 'REFUND_PROGRESSING',
+  COMPLETED = 'COMPLETED',
+  REVIEWED = 'REVIEWED',
+  CANCELLED = 'CANCELLED',
+  REFUND = 'REFUND',
+}
+
 interface OrderSearchRequest {
   keyword?: string;
   pageIndex?: number;
@@ -14,7 +25,7 @@ interface OrderSearchRequest {
   userIds?: string[];
   shopIds?: string[];
   shippingIds?: string[];
-  orderItemStatus?: 'PENDING' | 'SHIPPING' | 'DELIVERED' | 'REFUND_PROGRESSING' | 'COMPLETED' | 'REVIEWED' | 'CANCELLED' | 'REFUND';
+  orderItemStatuses?: OrderItemStatus[];
 }
 
 async function searchMyOrders(request: OrderSearchRequest) {
@@ -96,9 +107,29 @@ function useCompleteMyOrderApi() {
   });
 }
 
+// Refund my order API
+interface RefundOrderRequest {
+  reason: string;
+  images: string;
+  note: string;
+}
+
+async function refundMyOrder(id: string, request: RefundOrderRequest) {
+  const response = await authClient.post(resourceUrls.ORDER_RESOURCE.REFUND_MY_ORDER.replace("{id}", id), request);
+
+  return response.data;
+}
+
+function useRefundMyOrderApi() {
+  return useMutation({
+    mutationFn: ({ id, request }: { id: string; request: RefundOrderRequest }) => refundMyOrder(id, request)
+  });
+}
+
 export {
   useSearchMyOrderApi,
   useSearchMyShopOrderApi,
   useCreateMyOrderApi,
-  useCompleteMyOrderApi
+  useCompleteMyOrderApi,
+  useRefundMyOrderApi
 }
