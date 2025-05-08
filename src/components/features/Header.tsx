@@ -3,15 +3,33 @@ import { FiSearch, FiShoppingCart } from "react-icons/fi";
 import { FaBell } from "react-icons/fa6";
 import { BsReceiptCutoff } from "react-icons/bs";
 import { RxAvatar } from "react-icons/rx";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import useProfileStore from "@stores/useProfileStore.ts";
 import Logout from "./Logout.tsx";
 import { useGetAccountProfileApi } from "@apis/useAccountApis.ts";
+import { useSuggestProducts } from "@apis/useProductElasticsearchApis.ts";
+import { useDebounce } from "@hooks/useDebounce.ts";
+
+interface ProductSuggestion {
+  id: string;
+  name: string;
+  description: string;
+  shopId: string;
+  categoryId: string;
+  price: number;
+  amount: number;
+  status: string;
+}
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const { profile, setProfile } = useProfileStore();
   const { refetch } = useGetAccountProfileApi({ enabled: false });
+  const { data: suggestions } = useSuggestProducts(debouncedSearchQuery);
+  const navigate = useNavigate();
 
   let timeoutId: NodeJS.Timeout;
 
@@ -50,6 +68,19 @@ function Header() {
     timeoutId = setTimeout(() => {
       setIsMenuOpen(false);
     }, 200);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate({ to: "/products", search: { keyword: searchQuery } });
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSuggestionClick = (productId: string) => {
+    navigate({ to: "/products/$productId", params: { productId } });
+    setShowSuggestions(false);
   };
 
   return (
@@ -129,10 +160,14 @@ function Header() {
         </div>
 
         {/* Search bar */}
-        <form className="flex-1 mx-6 relative">
+        <form className="flex-1 mx-6 relative" onSubmit={handleSearch}>
           <input
             type="text"
             name="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             placeholder="Tìm kiếm sản phẩm"
             className="w-full px-3 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
           />
@@ -142,11 +177,28 @@ function Header() {
           >
             <FiSearch size={20}/>
           </button>
+          
+          {/* Suggestions dropdown */}
+          {showSuggestions && suggestions && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
+              <ul className="py-2">
+                {suggestions.slice(0, 5).map((product: ProductSuggestion) => (
+                  <li
+                    key={product.id}
+                    className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-gray-300"
+                    onClick={() => handleSuggestionClick(product.id)}
+                  >
+                    {product.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </form>
 
         {/* Orders + Cart */}
         <div className="flex items-center space-x-4">
-          <Link to="/my/orders">
+          <Link to="/my/orders" search={{ tab: null }}>
             <BsReceiptCutoff className="text-gray-300 cursor-pointer" size={24}/>
           </Link>
           <Link to="/my/cart">

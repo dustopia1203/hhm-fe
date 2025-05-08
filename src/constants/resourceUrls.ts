@@ -40,6 +40,7 @@ const resourceUrls: ResourceUrls = {
     DELETE_MY_SHOP_PRODUCT: "/api/products/my/shop",
     CONFIRM_ORDER: "/api/shops/my/{orderId}/confirm",
     CONFIRM_ORDER_REFUND: "/api/shops/my/{orderId}/refund",
+    SUGGEST_PRODUCTS_ELASTIC: "api/v1/products/suggest"
   },
   REVIEW_RESOURCE: {
     SEARCH_REVIEWS: "/api/reviews/q",
