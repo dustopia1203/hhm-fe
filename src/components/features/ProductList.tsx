@@ -459,10 +459,10 @@ function ProductList(
                         className="h-4 w-4 accent-blue-600 cursor-pointer"
                       />
                     </td>
-                    <td className="px-6 py-3">{pageIndex * pageSize + index + 1}</td>
+                    <td className="px-6 py-3">{(pageIndex - 1) * pageSize + index + 1}</td>
                     <td className="px-6 py-3">
                       <img
-                        src={product.imageUrl || "https://via.placeholder.com/50"}
+                        src={product.contentUrls ? product.contentUrls.split(';')[0] : undefined}
                         alt={product.name}
                         className="h-8 w-8 rounded-full object-cover"
                       />
@@ -527,7 +527,7 @@ function ProductList(
           {(data?.total || 0) > 0 && (
             <div className="flex justify-between items-center mt-6">
               <div className="text-gray-400">
-                Hiển thị {pageIndex * pageSize + 1} - {Math.min((pageIndex + 1) * pageSize, data?.total || 0)} trên {data?.total || 0} sản phẩm
+                Hiển thị {(pageIndex - 1) * pageSize + 1} - {Math.min((pageIndex + 1) * pageSize, data?.total || 0)} trên {data?.total || 0} sản phẩm
               </div>
               <div className="flex items-center space-x-2">
                 <button
