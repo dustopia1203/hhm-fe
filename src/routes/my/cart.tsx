@@ -222,7 +222,7 @@ function RouteComponent() {
     .reduce((sum, item) => sum + (item.salePrice || item.price) * item.quantity, 0);
 
   const selectedShippingMethod = shippingMethods.find(m => m.selected);
-  const shipping = selectedShippingMethod ? selectedShippingMethod.price : 0;
+  const shipping = selectedShippingMethod ? selectedShippingMethod.price * cartItems.filter(item => item.selected).length : 0;
 
   // const discount = 0;
   const total = subtotal + shipping;
@@ -499,6 +499,7 @@ function RouteComponent() {
               {shippingMethods.length > 0 && (
                 <div className="border border-gray-800 rounded-xl mb-6">
                   <h2 className="text-lg font-medium p-5 border-b border-gray-800">Phương thức vận chuyển</h2>
+                  <h4 className="text-sm text-yellow-400 font-medium px-5 border-b border-gray-800">Lưu ý: tiền dịch vụ vận chuyển sẽ được tính riêng theo mỗi đơn hàng </h4>
 
                   {shippingMethods.filter(method => method.status === 'ACTIVE').map((method) => (
                     <div key={method.id}
