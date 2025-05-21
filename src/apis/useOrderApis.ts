@@ -82,15 +82,15 @@ interface CreateOrderRequest {
   orderItemCreateRequests: OrderItemCreateRequest[];
 }
 
-async function createMyOrder(request: CreateOrderRequest) {
-  const response = await authClient.post(resourceUrls.ORDER_RESOURCE.CREATE_MY_ORDER, request);
+async function codPaymentMyOrder(request: CreateOrderRequest) {
+  const response = await authClient.post(resourceUrls.ORDER_RESOURCE.COD_PAYMENT_MY_ORDER, request);
 
   return response.data;
 }
 
-function useCreateMyOrderApi() {
+function useCodPaymentMyOrder() {
   return useMutation({
-    mutationFn: createMyOrder
+    mutationFn: codPaymentMyOrder
   });
 }
 
@@ -129,7 +129,7 @@ function useRefundMyOrderApi() {
 export {
   useSearchMyOrderApi,
   useSearchMyShopOrderApi,
-  useCreateMyOrderApi,
+  useCodPaymentMyOrder,
   useCompleteMyOrderApi,
   useRefundMyOrderApi
 }

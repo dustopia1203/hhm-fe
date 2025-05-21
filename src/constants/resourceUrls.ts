@@ -26,7 +26,7 @@ const resourceUrls: ResourceUrls = {
   ORDER_RESOURCE: {
     SEARCH_MY_ORDERS: "/api/orders/my/q",
     SEARCH_MY_SHOP_ORDERS: "/api/orders/my/shop/q",
-    CREATE_MY_ORDER: "/api/orders/my",
+    COD_PAYMENT_MY_ORDER: "/api/orders/my/payment/cod",
     REFUND_MY_ORDER: "/api/orders/my/{id}/refund",
     COMPLETED_MY_ORDER: "/api/orders/my/{id}/completed",
   },

@@ -11,7 +11,7 @@ import Loader from "@components/common/Loader.tsx";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import useProfileStore from "@stores/useProfileStore.ts";
-import { useCreateMyOrderApi } from "@apis/useOrderApis.ts";
+import { useCodPaymentMyOrder } from "@apis/useOrderApis.ts";
 
 interface CartItem {
   id: string;
@@ -51,7 +51,7 @@ function RouteComponent() {
   const { data, isLoading, error } = useGetMyCartApi();
   const deleteCartMutation = useDeleteMyCartApi();
   const addCartMutation = useAddMyCartApi();
-  const createOrderMutation = useCreateMyOrderApi();
+  const createOrderMutation = useCodPaymentMyOrder();
   const queryClient = useQueryClient();
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const { profile } = useProfileStore();

@@ -21,6 +21,7 @@ interface Order {
   productId: string;
   shippingId: string;
   price: number;
+  shippingPrice: number;
   amount: number;
   address: string;
   orderItemStatus: OrderItemStatus;
@@ -106,6 +107,7 @@ function RouteComponent() {
     productId: item.productId,
     shippingId: item.shippingId,
     price: Number(item.price),
+    shippingPrice: Number(item.shippingPrice),
     amount: item.amount,
     address: item.address || '',
     orderItemStatus: item.orderItemStatus,
@@ -417,7 +419,7 @@ function RouteComponent() {
                 <div className="flex-grow">
                   <h3 className="text-white font-medium">{order.productName}</h3>
                   <div className="mt-2">
-                    <span className="text-white">${order.price.toFixed(2)}</span>
+                    <span className="text-white">₫{(order.price + order.shippingPrice).toFixed(2)}</span>
                   </div>
                 </div>
 
