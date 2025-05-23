@@ -8,6 +8,7 @@ interface ReviewFormProps {
   price: number
   quantity: number
   productImage?: string
+  isSubmitting?: boolean
   onSubmit?: (data: {
     orderItemId: string
     rating: number
@@ -24,6 +25,7 @@ function ReviewForm
    price,
    quantity,
    productImage = '/placeholder-image.jpg',
+   isSubmitting = false,
    onSubmit,
    onClose
  }: ReviewFormProps
@@ -32,7 +34,6 @@ function ReviewForm
   const [hoveredRating, setHoveredRating] = useState(0)
   const [comment, setComment] = useState("")
   const [images, setImages] = useState<File[]>([])
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -46,7 +47,6 @@ function ReviewForm
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitting(true)
 
     const formData = {
       orderItemId,
@@ -61,11 +61,6 @@ function ReviewForm
     } else {
       // Fallback to default behavior (for backward compatibility)
       console.log('Submitted review:', formData)
-
-      // Reset submission state after a delay
-      setTimeout(() => {
-        setIsSubmitting(false)
-      }, 1000)
     }
   }
 
@@ -119,6 +114,7 @@ function ReviewForm
                 onMouseEnter={() => setHoveredRating(star)}
                 onMouseLeave={() => setHoveredRating(0)}
                 className="text-2xl focus:outline-none"
+                disabled={isSubmitting}
               >
                 <FaStar
                   className={`${
@@ -143,6 +139,7 @@ function ReviewForm
             onChange={(e) => setComment(e.target.value)}
             className="w-full h-28 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-gray-600"
             placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
+            disabled={isSubmitting}
           />
         </div>
 
@@ -163,6 +160,7 @@ function ReviewForm
                   type="button"
                   onClick={() => removeImage(index)}
                   className="absolute top-1 right-1 h-5 w-5 bg-gray-900/80 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100"
+                  disabled={isSubmitting}
                 >
                   <FiX size={12}/>
                 </button>
@@ -170,7 +168,7 @@ function ReviewForm
             ))}
 
             <label
-              className="h-20 w-20 border border-gray-700 rounded-lg flex flex-col items-center justify-center cursor-pointer bg-gray-800 hover:bg-gray-750">
+              className={`h-20 w-20 border border-gray-700 rounded-lg flex flex-col items-center justify-center ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer bg-gray-800 hover:bg-gray-750'}`}>
               <FiPlus className="text-gray-400 mb-1" size={18}/>
               <span className="text-xs text-gray-400 text-center">Thêm hình ảnh</span>
               <input
@@ -179,6 +177,7 @@ function ReviewForm
                 className="hidden"
                 onChange={handleImageUpload}
                 multiple
+                disabled={isSubmitting}
               />
             </label>
           </div>
@@ -190,6 +189,7 @@ function ReviewForm
             type="button"
             onClick={handleCancel}
             className="px-6 py-2.5 mr-3 border border-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors"
+            disabled={isSubmitting}
           >
             Hủy
           </button>
