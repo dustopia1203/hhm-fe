@@ -23,6 +23,7 @@ import { Route as authLoginImport } from './routes/(auth)/login'
 import { Route as MyShopIndexImport } from './routes/my/shop/index'
 import { Route as MyShopSettingsImport } from './routes/my/shop/settings'
 import { Route as MyShopProductsImport } from './routes/my/shop/products'
+import { Route as MyShopOrdersImport } from './routes/my/shop/orders'
 
 // Create/Update Routes
 
@@ -98,6 +99,12 @@ const MyShopProductsRoute = MyShopProductsImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const MyShopOrdersRoute = MyShopOrdersImport.update({
+  id: '/my/shop/orders',
+  path: '/my/shop/orders',
+  getParentRoute: () => rootRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -165,6 +172,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductsIndexImport
       parentRoute: typeof rootRoute
     }
+    '/my/shop/orders': {
+      id: '/my/shop/orders'
+      path: '/my/shop/orders'
+      fullPath: '/my/shop/orders'
+      preLoaderRoute: typeof MyShopOrdersImport
+      parentRoute: typeof rootRoute
+    }
     '/my/shop/products': {
       id: '/my/shop/products'
       path: '/my/shop/products'
@@ -201,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products': typeof ProductsIndexRoute
+  '/my/shop/orders': typeof MyShopOrdersRoute
   '/my/shop/products': typeof MyShopProductsRoute
   '/my/shop/settings': typeof MyShopSettingsRoute
   '/my/shop': typeof MyShopIndexRoute
@@ -216,6 +231,7 @@ export interface FileRoutesByTo {
   '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products': typeof ProductsIndexRoute
+  '/my/shop/orders': typeof MyShopOrdersRoute
   '/my/shop/products': typeof MyShopProductsRoute
   '/my/shop/settings': typeof MyShopSettingsRoute
   '/my/shop': typeof MyShopIndexRoute
@@ -232,6 +248,7 @@ export interface FileRoutesById {
   '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products/': typeof ProductsIndexRoute
+  '/my/shop/orders': typeof MyShopOrdersRoute
   '/my/shop/products': typeof MyShopProductsRoute
   '/my/shop/settings': typeof MyShopSettingsRoute
   '/my/shop/': typeof MyShopIndexRoute
@@ -249,6 +266,7 @@ export interface FileRouteTypes {
     | '/payment/vnpay-callback'
     | '/products/$productId'
     | '/products'
+    | '/my/shop/orders'
     | '/my/shop/products'
     | '/my/shop/settings'
     | '/my/shop'
@@ -263,6 +281,7 @@ export interface FileRouteTypes {
     | '/payment/vnpay-callback'
     | '/products/$productId'
     | '/products'
+    | '/my/shop/orders'
     | '/my/shop/products'
     | '/my/shop/settings'
     | '/my/shop'
@@ -277,6 +296,7 @@ export interface FileRouteTypes {
     | '/payment/vnpay-callback'
     | '/products/$productId'
     | '/products/'
+    | '/my/shop/orders'
     | '/my/shop/products'
     | '/my/shop/settings'
     | '/my/shop/'
@@ -293,6 +313,7 @@ export interface RootRouteChildren {
   PaymentVnpayCallbackRoute: typeof PaymentVnpayCallbackRoute
   ProductsProductIdRoute: typeof ProductsProductIdRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
+  MyShopOrdersRoute: typeof MyShopOrdersRoute
   MyShopProductsRoute: typeof MyShopProductsRoute
   MyShopSettingsRoute: typeof MyShopSettingsRoute
   MyShopIndexRoute: typeof MyShopIndexRoute
@@ -308,6 +329,7 @@ const rootRouteChildren: RootRouteChildren = {
   PaymentVnpayCallbackRoute: PaymentVnpayCallbackRoute,
   ProductsProductIdRoute: ProductsProductIdRoute,
   ProductsIndexRoute: ProductsIndexRoute,
+  MyShopOrdersRoute: MyShopOrdersRoute,
   MyShopProductsRoute: MyShopProductsRoute,
   MyShopSettingsRoute: MyShopSettingsRoute,
   MyShopIndexRoute: MyShopIndexRoute,
@@ -332,6 +354,7 @@ export const routeTree = rootRoute
         "/payment/vnpay-callback",
         "/products/$productId",
         "/products/",
+        "/my/shop/orders",
         "/my/shop/products",
         "/my/shop/settings",
         "/my/shop/"
@@ -363,6 +386,9 @@ export const routeTree = rootRoute
     },
     "/products/": {
       "filePath": "products/index.tsx"
+    },
+    "/my/shop/orders": {
+      "filePath": "my/shop/orders.tsx"
     },
     "/my/shop/products": {
       "filePath": "my/shop/products.tsx"

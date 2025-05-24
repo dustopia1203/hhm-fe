@@ -93,8 +93,7 @@ function RouteComponent() {
   const {
     data: ordersData,
     isLoading,
-    error,
-    refetch
+    error
   } = useSearchMyOrderApi(getSearchParams());
 
   const completeOrderMutation = useCompleteMyOrderApi();

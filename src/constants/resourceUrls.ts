@@ -56,7 +56,10 @@ const resourceUrls: ResourceUrls = {
     GET_SHOP_BY_ID: "/api/shops/{id}",
     GET_MY_SHOP: "/api/shops/my",
     CREATE_MY_SHOP: "/api/shops/my",
-    UPDATE_MY_SHOP: "/api/shops/my"
+    UPDATE_MY_SHOP: "/api/shops/my",
+    CONFIRM_MY_SHOP_ORDER: "/api/shops/my/{orderId}/confirm",
+    GET_MY_SHOP_REFUND: "/api/shops/my/{orderId}/refund",
+    CONFIRM_MY_SHOP_REFUND: "/api/shops/my/{orderId}/refund"
   }
 }
 
