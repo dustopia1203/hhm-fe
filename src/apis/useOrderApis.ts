@@ -69,7 +69,7 @@ function useSearchMyShopOrderApi(request: OrderSearchRequest) {
   })
 }
 
-// Create my order API
+// Create my cod order API
 interface OrderItemCreateRequest {
   productId: string;
   price: number;
@@ -88,9 +88,26 @@ async function codPaymentMyOrder(request: CreateOrderRequest) {
   return response.data;
 }
 
-function useCodPaymentMyOrder() {
+function useCodPaymentMyOrderApi() {
   return useMutation({
     mutationFn: codPaymentMyOrder
+  });
+}
+
+// Create my VNPay order API
+interface VNPayCreateOrderRequest extends CreateOrderRequest{
+  transactionNumber: string;
+}
+
+async function vnPayPaymentMyOrder(request: VNPayCreateOrderRequest) {
+  const response = await authClient.post(resourceUrls.ORDER_RESOURCE.VNPAY_PAYMENT_MY_ORDER, request);
+
+  return response.data;
+}
+
+function useVNPayPaymentMyOrderApi() {
+  return useMutation({
+    mutationFn: vnPayPaymentMyOrder
   });
 }
 
@@ -129,7 +146,8 @@ function useRefundMyOrderApi() {
 export {
   useSearchMyOrderApi,
   useSearchMyShopOrderApi,
-  useCodPaymentMyOrder,
+  useCodPaymentMyOrderApi,
+  useVNPayPaymentMyOrderApi,
   useCompleteMyOrderApi,
   useRefundMyOrderApi
 }

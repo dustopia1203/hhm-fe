@@ -14,6 +14,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
 import { Route as ProductsIndexImport } from './routes/products/index'
 import { Route as ProductsProductIdImport } from './routes/products/$productId'
+import { Route as PaymentVnpayCallbackImport } from './routes/payment/vnpay-callback'
 import { Route as MyOrdersImport } from './routes/my/orders'
 import { Route as MyCartImport } from './routes/my/cart'
 import { Route as authVerifyAccountImport } from './routes/(auth)/verify-account'
@@ -40,6 +41,12 @@ const ProductsIndexRoute = ProductsIndexImport.update({
 const ProductsProductIdRoute = ProductsProductIdImport.update({
   id: '/products/$productId',
   path: '/products/$productId',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PaymentVnpayCallbackRoute = PaymentVnpayCallbackImport.update({
+  id: '/payment/vnpay-callback',
+  path: '/payment/vnpay-callback',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -137,6 +144,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MyOrdersImport
       parentRoute: typeof rootRoute
     }
+    '/payment/vnpay-callback': {
+      id: '/payment/vnpay-callback'
+      path: '/payment/vnpay-callback'
+      fullPath: '/payment/vnpay-callback'
+      preLoaderRoute: typeof PaymentVnpayCallbackImport
+      parentRoute: typeof rootRoute
+    }
     '/products/$productId': {
       id: '/products/$productId'
       path: '/products/$productId'
@@ -184,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/verify-account': typeof authVerifyAccountRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
+  '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products': typeof ProductsIndexRoute
   '/my/shop/products': typeof MyShopProductsRoute
@@ -198,6 +213,7 @@ export interface FileRoutesByTo {
   '/verify-account': typeof authVerifyAccountRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
+  '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products': typeof ProductsIndexRoute
   '/my/shop/products': typeof MyShopProductsRoute
@@ -213,6 +229,7 @@ export interface FileRoutesById {
   '/(auth)/verify-account': typeof authVerifyAccountRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
+  '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products/': typeof ProductsIndexRoute
   '/my/shop/products': typeof MyShopProductsRoute
@@ -229,6 +246,7 @@ export interface FileRouteTypes {
     | '/verify-account'
     | '/my/cart'
     | '/my/orders'
+    | '/payment/vnpay-callback'
     | '/products/$productId'
     | '/products'
     | '/my/shop/products'
@@ -242,6 +260,7 @@ export interface FileRouteTypes {
     | '/verify-account'
     | '/my/cart'
     | '/my/orders'
+    | '/payment/vnpay-callback'
     | '/products/$productId'
     | '/products'
     | '/my/shop/products'
@@ -255,6 +274,7 @@ export interface FileRouteTypes {
     | '/(auth)/verify-account'
     | '/my/cart'
     | '/my/orders'
+    | '/payment/vnpay-callback'
     | '/products/$productId'
     | '/products/'
     | '/my/shop/products'
@@ -270,6 +290,7 @@ export interface RootRouteChildren {
   authVerifyAccountRoute: typeof authVerifyAccountRoute
   MyCartRoute: typeof MyCartRoute
   MyOrdersRoute: typeof MyOrdersRoute
+  PaymentVnpayCallbackRoute: typeof PaymentVnpayCallbackRoute
   ProductsProductIdRoute: typeof ProductsProductIdRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
   MyShopProductsRoute: typeof MyShopProductsRoute
@@ -284,6 +305,7 @@ const rootRouteChildren: RootRouteChildren = {
   authVerifyAccountRoute: authVerifyAccountRoute,
   MyCartRoute: MyCartRoute,
   MyOrdersRoute: MyOrdersRoute,
+  PaymentVnpayCallbackRoute: PaymentVnpayCallbackRoute,
   ProductsProductIdRoute: ProductsProductIdRoute,
   ProductsIndexRoute: ProductsIndexRoute,
   MyShopProductsRoute: MyShopProductsRoute,
@@ -307,6 +329,7 @@ export const routeTree = rootRoute
         "/(auth)/verify-account",
         "/my/cart",
         "/my/orders",
+        "/payment/vnpay-callback",
         "/products/$productId",
         "/products/",
         "/my/shop/products",
@@ -331,6 +354,9 @@ export const routeTree = rootRoute
     },
     "/my/orders": {
       "filePath": "my/orders.tsx"
+    },
+    "/payment/vnpay-callback": {
+      "filePath": "payment/vnpay-callback.tsx"
     },
     "/products/$productId": {
       "filePath": "products/$productId.tsx"

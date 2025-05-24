@@ -24,7 +24,7 @@ function ReviewForm
    productName,
    price,
    quantity,
-   productImage = '/placeholder-image.jpg',
+   productImage,
    isSubmitting = false,
    onSubmit,
    onClose

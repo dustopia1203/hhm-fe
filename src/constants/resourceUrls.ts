@@ -27,8 +27,12 @@ const resourceUrls: ResourceUrls = {
     SEARCH_MY_ORDERS: "/api/orders/my/q",
     SEARCH_MY_SHOP_ORDERS: "/api/orders/my/shop/q",
     COD_PAYMENT_MY_ORDER: "/api/orders/my/payment/cod",
+    VNPAY_PAYMENT_MY_ORDER: "/api/orders/my/payment/vnpay",
     REFUND_MY_ORDER: "/api/orders/my/{id}/refund",
     COMPLETED_MY_ORDER: "/api/orders/my/{id}/completed",
+  },
+  PAYMENT_RESOURCE: {
+    CREATE_VNPAY_PAYMENT_URL: "/api/payment/vnpay",
   },
   PRODUCT_RESOURCE: {
     SEARCH_PRODUCTS: "/api/products/q",

@@ -1,37 +1,48 @@
 import { useState } from "react";
 import { FiUser, FiStar } from "react-icons/fi";
-import { cn } from "../../lib/utils";
+import { cn } from "@/lib/utils.ts";
 
 interface ReviewCardProps {
+  userAvatar?: string;
   username: string;
   rating: number;
-  date: string;
-  time: string;
+  timestamp: string; // Changed to accept a single timestamp
   description: string;
   images?: string[];
 }
 
 function ReviewCard(
   {
+    userAvatar,
     username,
     rating,
-    date,
-    time,
+    timestamp,
     description,
     images = []
   }: ReviewCardProps
 ) {
   const [imageView, setImageView] = useState<string | null>(null);
 
+  // Format the timestamp for display
+  const formattedTimestamp = new Date(timestamp).toLocaleString('vi-VN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
   return (
     <div className="rounded-2xl border border-gray-700 bg-gray-800 p-6 shadow-md">
       <div className="flex items-center space-x-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-700">
-          <FiUser className="text-gray-300"/>
+          {userAvatar ?
+            <img src={userAvatar} alt="Avatar" className="h-6 w-6 rounded-full cursor-pointer object-cover"/>
+            : <FiUser className="text-gray-300"/>}
         </div>
         <div className="flex flex-col">
           <span className="font-medium text-gray-100">{username}</span>
-          <span className="text-xs text-gray-400">{date} {time}</span>
+          <span className="text-xs text-gray-400">{formattedTimestamp}</span>
         </div>
       </div>
 
