@@ -46,7 +46,7 @@ function RouteComponent() {
   }
 
   // Calculate total pages based on API response
-  const totalPages = reviewsData?.totalPages || 1;
+  const totalPages = Math.ceil(reviewsData?.total / reviewsData?.pageSize) || 1;
   const reviews = reviewsData?.data || [];
 
   return (
