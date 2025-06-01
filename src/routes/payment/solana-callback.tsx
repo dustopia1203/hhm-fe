@@ -33,7 +33,7 @@ function RouteComponent() {
         setSolanaToken(roundedSolTokens);
 
         const createPayment = await axios.post("http://localhost:8081/api/payment-qr", {
-          solanaToken: roundedSolTokens
+          amount: roundedSolTokens
         });
 
         console.log(createPayment.data);
@@ -116,7 +116,7 @@ function RouteComponent() {
         solanaToken
       }, "*");
 
-      setTimeout(() => window.close(), 2000);
+      setTimeout(() => window.close());
     }
   }
 
