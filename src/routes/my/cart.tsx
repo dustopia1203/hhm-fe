@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FiMinus, FiPlus } from "react-icons/fi";
 import { FaTrashAlt } from "react-icons/fa";
 import Header from "@components/features/Header.tsx";
@@ -11,7 +11,8 @@ import Loader from "@components/common/Loader.tsx";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import useProfileStore from "@stores/useProfileStore.ts";
-import { useCreateMyOrderApi } from "@apis/useOrderApis.ts";
+import { useCodPaymentMyOrderApi, useSolanaPaymentMyOrderApi, useVNPayPaymentMyOrderApi } from "@apis/useOrderApis.ts";
+import { useCreateVNPayPaymentURLApi } from "@apis/usePaymentApis.ts";
 
 interface CartItem {
   id: string;
@@ -51,10 +52,25 @@ function RouteComponent() {
   const { data, isLoading, error } = useGetMyCartApi();
   const deleteCartMutation = useDeleteMyCartApi();
   const addCartMutation = useAddMyCartApi();
-  const createOrderMutation = useCreateMyOrderApi();
+  const createCodOrderMutation = useCodPaymentMyOrderApi();
+  const createVNPayPaymentURL = useCreateVNPayPaymentURLApi();
+  const createVNPayOrderMutation = useVNPayPaymentMyOrderApi();
+  const createSolanaOrderMutation = useSolanaPaymentMyOrderApi();
   const queryClient = useQueryClient();
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const { profile } = useProfileStore();
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("cod");
+  const [couponCode, setCouponCode] = useState("");
+
+  // Ref to track if component is mounted (for cleanup)
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (profile) {
@@ -121,10 +137,6 @@ function RouteComponent() {
       );
     }
   }, [error]);
-
-  const [couponCode, setCouponCode] = useState("");
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("cod");
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const updateQuantity = async (id: string, change: number) => {
     const cartItem = cartItems.find(item => item.id === id);
@@ -222,7 +234,7 @@ function RouteComponent() {
     .reduce((sum, item) => sum + (item.salePrice || item.price) * item.quantity, 0);
 
   const selectedShippingMethod = shippingMethods.find(m => m.selected);
-  const shipping = selectedShippingMethod ? selectedShippingMethod.price : 0;
+  const shipping = selectedShippingMethod ? selectedShippingMethod.price * cartItems.filter(item => item.selected).length : 0;
 
   // const discount = 0;
   const total = subtotal + shipping;
@@ -278,7 +290,7 @@ function RouteComponent() {
         };
 
         // Call create order API
-        await createOrderMutation.mutateAsync(orderRequest);
+        await createCodOrderMutation.mutateAsync(orderRequest);
 
         // Show success message
         toast.success("Đặt hàng thành công", {
@@ -290,14 +302,197 @@ function RouteComponent() {
         await deleteCartMutation.mutateAsync({ ids: selectedIds });
 
         // Invalidate cart query to refresh data
-        queryClient.invalidateQueries({ queryKey: ["cart/my"] });
+        await queryClient.invalidateQueries({ queryKey: ["cart/my"] });
 
         // Navigate to orders page
-        navigate({ to: "/my/orders" });
+        await navigate({ to: "/my/orders" });
+      } else if (selectedPaymentMethod === "vnpay") {
+        // Create a named function for the event listener
+        const handleVNPayCallback = async (event) => {
+          if (event.data && event.data.success === true && event.data.vnp_TransactionNo) {
+            console.log("VNPay callback received:", event.data);
+
+            try {
+              // Remove listener
+              window.removeEventListener("message", handleVNPayCallback);
+
+              const { vnp_TransactionNo } = event.data;
+
+              // Create order request
+              const orderRequest = {
+                shippingId: selectedShippingMethod.id,
+                address: shippingAddress,
+                orderItemCreateRequests: selectedItems.map(item => ({
+                  productId: item.productId,
+                  price: item.salePrice || item.price,
+                  amount: item.quantity
+                })),
+                transactionNumber: vnp_TransactionNo
+              };
+
+              // Call create order API
+              await createVNPayOrderMutation.mutateAsync(orderRequest);
+
+              // Show success message
+              toast.success("Đặt hàng thành công", {
+                description: "Thanh toán VNPay đã được xác nhận"
+              });
+
+              // Delete selected items from cart
+              const selectedIds = selectedItems.map(item => item.id);
+              await deleteCartMutation.mutateAsync({ ids: selectedIds });
+
+              // Invalidate cart query to refresh data
+              await queryClient.invalidateQueries({ queryKey: ["cart/my"] });
+
+              // Navigate to orders page
+              navigate({ to: "/my/orders" });
+            } catch (error) {
+              console.error("VNPay order error:", error);
+              toast.error("Không thể tạo đơn hàng", {
+                description: error?.message || "Đã xảy ra lỗi, vui lòng thử lại sau"
+              });
+              setIsCheckingOut(false);
+            }
+          } else if (event.data && event.data.success === false) {
+            // Payment failed
+            window.removeEventListener("message", handleVNPayCallback);
+            toast.error("Thanh toán VNPay thất bại", {
+              description: event.data.errorMessage || "Vui lòng thử lại hoặc chọn phương thức thanh toán khác"
+            });
+            setIsCheckingOut(false);
+          }
+        };
+
+        // Add event listener before opening popup
+        window.addEventListener("message", handleVNPayCallback);
+
+        try {
+          const paymentURLResponse = await createVNPayPaymentURL.mutateAsync({
+            orderInfo: `Thanh toán đơn hàng HHMShop ${Date.now()}`,
+            amount: total,
+            language: "vn"
+          });
+
+          const paymentURL = paymentURLResponse.data;
+
+          // Open payment window
+          const popupWindow = window.open(paymentURL, "Thanh toán VNPay", "width=1000,height=600");
+
+          // If popup fails to open
+          if (!popupWindow) {
+            window.removeEventListener("message", handleVNPayCallback);
+            setIsCheckingOut(false);
+            throw new Error("Không thể mở cửa sổ thanh toán. Vui lòng kiểm tra trình duyệt của bạn.");
+          }
+
+          // Simple check if popup is closed
+          const popupCheckInterval = setInterval(() => {
+            if (popupWindow.closed) {
+              clearInterval(popupCheckInterval);
+              window.removeEventListener("message", handleVNPayCallback);
+              setIsCheckingOut(false);
+            }
+          }, 1000);
+
+          return;
+        } catch (error) {
+          window.removeEventListener("message", handleVNPayCallback);
+          setIsCheckingOut(false);
+          throw error;
+        }
+      } else if (selectedPaymentMethod === "solana") {
+        // Create a named function for the event listener
+        const handleSolanaCallback = async (event) => {
+          if (event.data && event.data.success === true && event.data.reference) {
+            console.log("Solana callback received:", event.data);
+
+            try {
+              // Remove listener
+              window.removeEventListener("message", handleSolanaCallback);
+
+              const { reference, solanaToken } = event.data;
+
+              // Create order request
+              const orderRequest = {
+                shippingId: selectedShippingMethod.id,
+                address: shippingAddress,
+                orderItemCreateRequests: selectedItems.map(item => ({
+                  productId: item.productId,
+                  price: item.salePrice || item.price,
+                  amount: item.quantity
+                })),
+                reference: reference
+              };
+
+              // Call create order API
+              await createSolanaOrderMutation.mutateAsync(orderRequest);
+
+              // Show success message
+              toast.success("Đặt hàng thành công", {
+                description: "Thanh toán Solana đã được xác nhận"
+              });
+
+              // Delete selected items from cart
+              const selectedIds = selectedItems.map(item => item.id);
+              await deleteCartMutation.mutateAsync({ ids: selectedIds });
+
+              // Invalidate cart query to refresh data
+              await queryClient.invalidateQueries({ queryKey: ["cart/my"] });
+
+              // Navigate to orders page
+              navigate({ to: "/my/orders" });
+            } catch (error) {
+              console.error("Solana order error:", error);
+              toast.error("Không thể tạo đơn hàng", {
+                description: error?.message || "Đã xảy ra lỗi, vui lòng thử lại sau"
+              });
+              setIsCheckingOut(false);
+            }
+          } else if (event.data && event.data.success === false) {
+            // Payment failed
+            window.removeEventListener("message", handleSolanaCallback);
+            toast.error("Thanh toán Solana thất bại", {
+              description: event.data.errorMessage || "Vui lòng thử lại hoặc chọn phương thức thanh toán khác"
+            });
+            setIsCheckingOut(false);
+          }
+        };
+
+        // Add event listener before opening popup
+        window.addEventListener("message", handleSolanaCallback);
+
+        try {
+          // Open Solana payment window with amount
+          const popupUrl = `/payment/solana-callback?amount=${total}`;
+          const popupWindow = window.open(popupUrl, "Thanh toán Solana", "width=500,height=700");
+
+          // If popup fails to open
+          if (!popupWindow) {
+            window.removeEventListener("message", handleSolanaCallback);
+            setIsCheckingOut(false);
+            throw new Error("Không thể mở cửa sổ thanh toán. Vui lòng kiểm tra trình duyệt của bạn.");
+          }
+
+          // Simple check if popup is closed
+          const popupCheckInterval = setInterval(() => {
+            if (popupWindow.closed) {
+              clearInterval(popupCheckInterval);
+              window.removeEventListener("message", handleSolanaCallback);
+              setIsCheckingOut(false);
+            }
+          }, 1000);
+
+          return;
+        } catch (error) {
+          window.removeEventListener("message", handleSolanaCallback);
+          setIsCheckingOut(false);
+          throw error;
+        }
       } else {
         // For other payment methods (placeholder for future implementation)
         toast.info("Phương thức thanh toán đang được phát triển", {
-          description: "Chức năng thanh toán qua VNPay sẽ sớm được triển khai"
+          description: "Chức năng thanh toán sẽ sớm được triển khai"
         });
       }
     } catch (error: any) {
@@ -306,9 +501,16 @@ function RouteComponent() {
         description: error?.message || "Đã xảy ra lỗi, vui lòng thử lại sau"
       });
     } finally {
-      setIsCheckingOut(false);
+      if (isMounted.current) {
+        setIsCheckingOut(false);
+      }
     }
   };
+
+  const handleClickPaymentMethod = (paymentMethod: string) => {
+    setIsCheckingOut(false);
+    setSelectedPaymentMethod(paymentMethod);
+  }
 
   if (isLoading || isLoadingShipping) {
     return (
@@ -499,6 +701,7 @@ function RouteComponent() {
               {shippingMethods.length > 0 && (
                 <div className="border border-gray-800 rounded-xl mb-6">
                   <h2 className="text-lg font-medium p-5 border-b border-gray-800">Phương thức vận chuyển</h2>
+                  <h4 className="text-sm text-yellow-400 font-medium px-5 border-b border-gray-800">Lưu ý: tiền dịch vụ vận chuyển sẽ được tính riêng theo mỗi đơn hàng </h4>
 
                   {shippingMethods.filter(method => method.status === 'ACTIVE').map((method) => (
                     <div key={method.id}
@@ -529,23 +732,6 @@ function RouteComponent() {
                 </div>
               )}
 
-              {/* Discount Code */}
-              {/*<div className="mb-6">*/}
-              {/*  <h2 className="text-lg font-medium mb-4">Nhập mã giảm giá</h2>*/}
-              {/*  <div className="flex">*/}
-              {/*    <input*/}
-              {/*      type="text"*/}
-              {/*      value={couponCode}*/}
-              {/*      onChange={(e) => setCouponCode(e.target.value)}*/}
-              {/*      placeholder="Coupon Code"*/}
-              {/*      className="flex-grow bg-gray-800 border border-gray-700 rounded-l-lg px-4 py-2 text-white outline-none focus:ring-1 focus:ring-gray-600"*/}
-              {/*    />*/}
-              {/*    <button className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-r-lg">*/}
-              {/*      Apply*/}
-              {/*    </button>*/}
-              {/*  </div>*/}
-              {/*</div>*/}
-
               {/* Order Summary */}
               <div className="border-t border-gray-800 pt-6 mb-6">
                 <div className="flex justify-between mb-3">
@@ -556,10 +742,6 @@ function RouteComponent() {
                   <span className="text-gray-400">Tổng tiền vận chuyển</span>
                   <span className="text-white">₫{shipping.toFixed(2)}</span>
                 </div>
-                {/*<div className="flex justify-between mb-3">*/}
-                {/*  <span className="text-gray-400">Giảm giá</span>*/}
-                {/*  <span className="text-white">-₫{discount.toFixed(2)}</span>*/}
-                {/*</div>*/}
                 <div className="border-t border-gray-800 pt-3 mt-3">
                   <div className="flex justify-between">
                     <span className="text-lg font-bold">Tổng số tiền thanh toán</span>
@@ -573,18 +755,42 @@ function RouteComponent() {
                 <h2 className="text-lg font-medium mb-4">Phương thức thanh toán</h2>
                 <div className="flex flex-wrap gap-4">
                   <button
-                    onClick={() => setSelectedPaymentMethod("vnpay")}
-                    className={`px-6 py-3 rounded-lg border ${
+                    onClick={() => handleClickPaymentMethod("vnpay")}
+                    className={`w-48 h-14 flex items-center justify-center rounded-lg border ${
                       selectedPaymentMethod === "vnpay"
                         ? "border-white"
                         : "border-gray-700 text-gray-300"
                     }`}
                   >
-                    VNPay
+                    <div className="flex">
+                      <img
+                        src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png"
+                        alt="VNPay logo"
+                        className="h-6 mr-2"
+                      />
+                      <span>VNPay</span>
+                    </div>
                   </button>
                   <button
-                    onClick={() => setSelectedPaymentMethod("cod")}
-                    className={`px-6 py-3 rounded-lg border ${
+                    onClick={() => handleClickPaymentMethod("solana")}
+                    className={`w-48 h-14 flex items-center justify-center rounded-lg border ${
+                      selectedPaymentMethod === "solana"
+                        ? "border-white"
+                        : "border-gray-700 text-gray-300"
+                    }`}
+                  >
+                    <div className="flex">
+                      <img
+                        src="https://static.vecteezy.com/system/resources/thumbnails/044/626/788/small_2x/solana-logo-on-transparent-background-free-vector.jpg"
+                        alt="Solana logo"
+                        className="h-6 mr-2"
+                      />
+                      <span>Solana</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleClickPaymentMethod("cod")}
+                    className={`w-48 h-14 flex items-center justify-center rounded-lg border ${
                       selectedPaymentMethod === "cod"
                         ? "border-white"
                         : "border-gray-700 text-gray-300"

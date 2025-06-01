@@ -69,7 +69,7 @@ function useSearchMyShopOrderApi(request: OrderSearchRequest) {
   })
 }
 
-// Create my order API
+// Create my cod order API
 interface OrderItemCreateRequest {
   productId: string;
   price: number;
@@ -82,15 +82,49 @@ interface CreateOrderRequest {
   orderItemCreateRequests: OrderItemCreateRequest[];
 }
 
-async function createMyOrder(request: CreateOrderRequest) {
-  const response = await authClient.post(resourceUrls.ORDER_RESOURCE.CREATE_MY_ORDER, request);
+async function codPaymentMyOrder(request: CreateOrderRequest) {
+  const response = await authClient.post(resourceUrls.ORDER_RESOURCE.COD_PAYMENT_MY_ORDER, request);
 
   return response.data;
 }
 
-function useCreateMyOrderApi() {
+function useCodPaymentMyOrderApi() {
   return useMutation({
-    mutationFn: createMyOrder
+    mutationFn: codPaymentMyOrder
+  });
+}
+
+// Create my VNPay order API
+interface VNPayCreateOrderRequest extends CreateOrderRequest{
+  transactionNumber: string;
+}
+
+async function vnPayPaymentMyOrder(request: VNPayCreateOrderRequest) {
+  const response = await authClient.post(resourceUrls.ORDER_RESOURCE.VNPAY_PAYMENT_MY_ORDER, request);
+
+  return response.data;
+}
+
+function useVNPayPaymentMyOrderApi() {
+  return useMutation({
+    mutationFn: vnPayPaymentMyOrder
+  });
+}
+
+// Create my Solana order API
+interface SolanaCreateOrderRequest extends CreateOrderRequest{
+  reference: string;
+}
+
+async function solanaPaymentMyOrder(request: SolanaCreateOrderRequest) {
+  const response = await authClient.post(resourceUrls.ORDER_RESOURCE.SOLANA_PAYMENT_MY_ORDER, request);
+
+  return response.data;
+}
+
+function useSolanaPaymentMyOrderApi() {
+  return useMutation({
+    mutationFn: solanaPaymentMyOrder
   });
 }
 
@@ -129,7 +163,9 @@ function useRefundMyOrderApi() {
 export {
   useSearchMyOrderApi,
   useSearchMyShopOrderApi,
-  useCreateMyOrderApi,
+  useCodPaymentMyOrderApi,
+  useVNPayPaymentMyOrderApi,
+  useSolanaPaymentMyOrderApi,
   useCompleteMyOrderApi,
   useRefundMyOrderApi
 }

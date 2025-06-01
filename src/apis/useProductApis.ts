@@ -13,6 +13,8 @@ interface ProductSearchRequest {
   ids?: string[];
   shopIds?: string[];
   categoryIds?: string[];
+  minPrice?: number;
+  maxPrice?: number;
   status?: "ACTIVE" | "INACTIVE";
 }
 

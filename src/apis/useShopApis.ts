@@ -62,9 +62,53 @@ function useUpdateMyShopApi() {
   })
 }
 
+// Confirm my shop order API
+async function confirmMyShopOrder(orderId: string) {
+  const response = await authClient.post(resourceUrls.SHOP_RESOURCE.CONFIRM_MY_SHOP_ORDER.replace("{orderId}", orderId));
+
+  return response.data;
+}
+
+function useConfirmMyShopOrderApi(orderId: string) {
+  return useMutation({
+    mutationFn: () => confirmMyShopOrder(orderId)
+  })
+}
+
+// Get my shop refund request API
+async function getMyShopRefund(orderId: string) {
+  const response = await authClient.get(resourceUrls.SHOP_RESOURCE.GET_MY_SHOP_REFUND.replace("{orderId}", orderId))
+
+  return response.data;
+}
+
+function useGetMyShopRefundApi(orderId: string) {
+  return useQuery({
+    queryKey: ["refund", orderId],
+    queryFn: () => getMyShopRefund(orderId),
+    enabled: false
+  })
+}
+
+// Confirm my shop refund request API
+async function confirmMyShopRefund(orderId: string) {
+  const response = await authClient.post(resourceUrls.SHOP_RESOURCE.CONFIRM_MY_SHOP_REFUND.replace("{orderId}", orderId));
+
+  return response.data;
+}
+
+function useConfirmMyShopRefundApi(id: string) {
+  return useMutation({
+    mutationFn: () => confirmMyShopRefund(id)
+  })
+}
+
 export {
   useGetShopByIdApi,
   useGetMyShopApi,
   useCreateMyShopApi,
-  useUpdateMyShopApi
+  useUpdateMyShopApi,
+  useConfirmMyShopOrderApi,
+  useGetMyShopRefundApi,
+  useConfirmMyShopRefundApi
 }

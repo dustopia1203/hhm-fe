@@ -26,9 +26,14 @@ const resourceUrls: ResourceUrls = {
   ORDER_RESOURCE: {
     SEARCH_MY_ORDERS: "/api/orders/my/q",
     SEARCH_MY_SHOP_ORDERS: "/api/orders/my/shop/q",
-    CREATE_MY_ORDER: "/api/orders/my",
+    COD_PAYMENT_MY_ORDER: "/api/orders/my/payment/cod",
+    VNPAY_PAYMENT_MY_ORDER: "/api/orders/my/payment/vnpay",
+    SOLANA_PAYMENT_MY_ORDER: "/api/orders/my/payment/solana",
     REFUND_MY_ORDER: "/api/orders/my/{id}/refund",
     COMPLETED_MY_ORDER: "/api/orders/my/{id}/completed",
+  },
+  PAYMENT_RESOURCE: {
+    CREATE_VNPAY_PAYMENT_URL: "/api/payment/vnpay",
   },
   PRODUCT_RESOURCE: {
     SEARCH_PRODUCTS: "/api/products/q",
@@ -53,7 +58,10 @@ const resourceUrls: ResourceUrls = {
     GET_SHOP_BY_ID: "/api/shops/{id}",
     GET_MY_SHOP: "/api/shops/my",
     CREATE_MY_SHOP: "/api/shops/my",
-    UPDATE_MY_SHOP: "/api/shops/my"
+    UPDATE_MY_SHOP: "/api/shops/my",
+    CONFIRM_MY_SHOP_ORDER: "/api/shops/my/{orderId}/confirm",
+    GET_MY_SHOP_REFUND: "/api/shops/my/{orderId}/refund",
+    CONFIRM_MY_SHOP_REFUND: "/api/shops/my/{orderId}/refund"
   }
 }
 

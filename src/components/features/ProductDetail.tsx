@@ -31,7 +31,16 @@ const CategoryBreadcrumb = ({ category, productName }: { category: CategoryRespo
   return (
     <>
       <Link
-        to={`/category/${category.id}`}
+        to="/products"
+        search={{
+          keyword: undefined,
+          categoryId: category.id,
+          minPrice: undefined,
+          maxPrice: undefined,
+          pageIndex: 1,
+          sortBy: 'createdAt',
+          sortOrder: 'DESC',
+        }}
         className="text-gray-400 hover:text-white"
       >
         {category.name}
