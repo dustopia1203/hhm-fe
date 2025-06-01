@@ -11,7 +11,7 @@ import Loader from "@components/common/Loader.tsx";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import useProfileStore from "@stores/useProfileStore.ts";
-import { useCodPaymentMyOrderApi, useVNPayPaymentMyOrderApi } from "@apis/useOrderApis.ts";
+import { useCodPaymentMyOrderApi, useSolanaPaymentMyOrderApi, useVNPayPaymentMyOrderApi } from "@apis/useOrderApis.ts";
 import { useCreateVNPayPaymentURLApi } from "@apis/usePaymentApis.ts";
 
 interface CartItem {
@@ -55,6 +55,7 @@ function RouteComponent() {
   const createCodOrderMutation = useCodPaymentMyOrderApi();
   const createVNPayPaymentURL = useCreateVNPayPaymentURLApi();
   const createVNPayOrderMutation = useVNPayPaymentMyOrderApi();
+  const createSolanaOrderMutation = useSolanaPaymentMyOrderApi();
   const queryClient = useQueryClient();
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const { profile } = useProfileStore();
@@ -400,6 +401,94 @@ function RouteComponent() {
           setIsCheckingOut(false);
           throw error;
         }
+      } else if (selectedPaymentMethod === "solana") {
+        // Create a named function for the event listener
+        const handleSolanaCallback = async (event) => {
+          if (event.data && event.data.success === true && event.data.reference) {
+            console.log("Solana callback received:", event.data);
+
+            try {
+              // Remove listener
+              window.removeEventListener("message", handleSolanaCallback);
+
+              const { reference, solanaToken } = event.data;
+
+              // Create order request
+              const orderRequest = {
+                shippingId: selectedShippingMethod.id,
+                address: shippingAddress,
+                orderItemCreateRequests: selectedItems.map(item => ({
+                  productId: item.productId,
+                  price: item.salePrice || item.price,
+                  amount: item.quantity
+                })),
+                reference: reference
+              };
+
+              // Call create order API
+              await createSolanaOrderMutation.mutateAsync(orderRequest);
+
+              // Show success message
+              toast.success("Đặt hàng thành công", {
+                description: "Thanh toán Solana đã được xác nhận"
+              });
+
+              // Delete selected items from cart
+              const selectedIds = selectedItems.map(item => item.id);
+              await deleteCartMutation.mutateAsync({ ids: selectedIds });
+
+              // Invalidate cart query to refresh data
+              await queryClient.invalidateQueries({ queryKey: ["cart/my"] });
+
+              // Navigate to orders page
+              navigate({ to: "/my/orders" });
+            } catch (error) {
+              console.error("Solana order error:", error);
+              toast.error("Không thể tạo đơn hàng", {
+                description: error?.message || "Đã xảy ra lỗi, vui lòng thử lại sau"
+              });
+              setIsCheckingOut(false);
+            }
+          } else if (event.data && event.data.success === false) {
+            // Payment failed
+            window.removeEventListener("message", handleSolanaCallback);
+            toast.error("Thanh toán Solana thất bại", {
+              description: event.data.errorMessage || "Vui lòng thử lại hoặc chọn phương thức thanh toán khác"
+            });
+            setIsCheckingOut(false);
+          }
+        };
+
+        // Add event listener before opening popup
+        window.addEventListener("message", handleSolanaCallback);
+
+        try {
+          // Open Solana payment window with amount
+          const popupUrl = `/payment/solana-callback?amount=${total}`;
+          const popupWindow = window.open(popupUrl, "Thanh toán Solana", "width=500,height=700");
+
+          // If popup fails to open
+          if (!popupWindow) {
+            window.removeEventListener("message", handleSolanaCallback);
+            setIsCheckingOut(false);
+            throw new Error("Không thể mở cửa sổ thanh toán. Vui lòng kiểm tra trình duyệt của bạn.");
+          }
+
+          // Simple check if popup is closed
+          const popupCheckInterval = setInterval(() => {
+            if (popupWindow.closed) {
+              clearInterval(popupCheckInterval);
+              window.removeEventListener("message", handleSolanaCallback);
+              setIsCheckingOut(false);
+            }
+          }, 1000);
+
+          return;
+        } catch (error) {
+          window.removeEventListener("message", handleSolanaCallback);
+          setIsCheckingOut(false);
+          throw error;
+        }
       } else {
         // For other payment methods (placeholder for future implementation)
         toast.info("Phương thức thanh toán đang được phát triển", {
@@ -680,6 +769,23 @@ function RouteComponent() {
                         className="h-6 mr-2"
                       />
                       <span>VNPay</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => handleClickPaymentMethod("solana")}
+                    className={`w-48 h-14 flex items-center justify-center rounded-lg border ${
+                      selectedPaymentMethod === "solana"
+                        ? "border-white"
+                        : "border-gray-700 text-gray-300"
+                    }`}
+                  >
+                    <div className="flex">
+                      <img
+                        src="https://static.vecteezy.com/system/resources/thumbnails/044/626/788/small_2x/solana-logo-on-transparent-background-free-vector.jpg"
+                        alt="Solana logo"
+                        className="h-6 mr-2"
+                      />
+                      <span>Solana</span>
                     </div>
                   </button>
                   <button

@@ -111,6 +111,23 @@ function useVNPayPaymentMyOrderApi() {
   });
 }
 
+// Create my Solana order API
+interface SolanaCreateOrderRequest extends CreateOrderRequest{
+  reference: string;
+}
+
+async function solanaPaymentMyOrder(request: SolanaCreateOrderRequest) {
+  const response = await authClient.post(resourceUrls.ORDER_RESOURCE.SOLANA_PAYMENT_MY_ORDER, request);
+
+  return response.data;
+}
+
+function useSolanaPaymentMyOrderApi() {
+  return useMutation({
+    mutationFn: solanaPaymentMyOrder
+  });
+}
+
 // Complete my order API
 async function completeMyOrder(id: string) {
   const response = await authClient.post(resourceUrls.ORDER_RESOURCE.COMPLETED_MY_ORDER.replace("{id}", id));
@@ -148,6 +165,7 @@ export {
   useSearchMyShopOrderApi,
   useCodPaymentMyOrderApi,
   useVNPayPaymentMyOrderApi,
+  useSolanaPaymentMyOrderApi,
   useCompleteMyOrderApi,
   useRefundMyOrderApi
 }

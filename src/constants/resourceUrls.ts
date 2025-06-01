@@ -28,6 +28,7 @@ const resourceUrls: ResourceUrls = {
     SEARCH_MY_SHOP_ORDERS: "/api/orders/my/shop/q",
     COD_PAYMENT_MY_ORDER: "/api/orders/my/payment/cod",
     VNPAY_PAYMENT_MY_ORDER: "/api/orders/my/payment/vnpay",
+    SOLANA_PAYMENT_MY_ORDER: "/api/orders/my/payment/solana",
     REFUND_MY_ORDER: "/api/orders/my/{id}/refund",
     COMPLETED_MY_ORDER: "/api/orders/my/{id}/completed",
   },

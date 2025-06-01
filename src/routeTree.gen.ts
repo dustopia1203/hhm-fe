@@ -15,6 +15,7 @@ import { Route as IndexImport } from './routes/index'
 import { Route as ProductsIndexImport } from './routes/products/index'
 import { Route as ProductsProductIdImport } from './routes/products/$productId'
 import { Route as PaymentVnpayCallbackImport } from './routes/payment/vnpay-callback'
+import { Route as PaymentSolanaCallbackImport } from './routes/payment/solana-callback'
 import { Route as MyOrdersImport } from './routes/my/orders'
 import { Route as MyCartImport } from './routes/my/cart'
 import { Route as authVerifyAccountImport } from './routes/(auth)/verify-account'
@@ -48,6 +49,12 @@ const ProductsProductIdRoute = ProductsProductIdImport.update({
 const PaymentVnpayCallbackRoute = PaymentVnpayCallbackImport.update({
   id: '/payment/vnpay-callback',
   path: '/payment/vnpay-callback',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PaymentSolanaCallbackRoute = PaymentSolanaCallbackImport.update({
+  id: '/payment/solana-callback',
+  path: '/payment/solana-callback',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -151,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MyOrdersImport
       parentRoute: typeof rootRoute
     }
+    '/payment/solana-callback': {
+      id: '/payment/solana-callback'
+      path: '/payment/solana-callback'
+      fullPath: '/payment/solana-callback'
+      preLoaderRoute: typeof PaymentSolanaCallbackImport
+      parentRoute: typeof rootRoute
+    }
     '/payment/vnpay-callback': {
       id: '/payment/vnpay-callback'
       path: '/payment/vnpay-callback'
@@ -212,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/verify-account': typeof authVerifyAccountRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
+  '/payment/solana-callback': typeof PaymentSolanaCallbackRoute
   '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products': typeof ProductsIndexRoute
@@ -228,6 +243,7 @@ export interface FileRoutesByTo {
   '/verify-account': typeof authVerifyAccountRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
+  '/payment/solana-callback': typeof PaymentSolanaCallbackRoute
   '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products': typeof ProductsIndexRoute
@@ -245,6 +261,7 @@ export interface FileRoutesById {
   '/(auth)/verify-account': typeof authVerifyAccountRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
+  '/payment/solana-callback': typeof PaymentSolanaCallbackRoute
   '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
   '/products/$productId': typeof ProductsProductIdRoute
   '/products/': typeof ProductsIndexRoute
@@ -263,6 +280,7 @@ export interface FileRouteTypes {
     | '/verify-account'
     | '/my/cart'
     | '/my/orders'
+    | '/payment/solana-callback'
     | '/payment/vnpay-callback'
     | '/products/$productId'
     | '/products'
@@ -278,6 +296,7 @@ export interface FileRouteTypes {
     | '/verify-account'
     | '/my/cart'
     | '/my/orders'
+    | '/payment/solana-callback'
     | '/payment/vnpay-callback'
     | '/products/$productId'
     | '/products'
@@ -293,6 +312,7 @@ export interface FileRouteTypes {
     | '/(auth)/verify-account'
     | '/my/cart'
     | '/my/orders'
+    | '/payment/solana-callback'
     | '/payment/vnpay-callback'
     | '/products/$productId'
     | '/products/'
@@ -310,6 +330,7 @@ export interface RootRouteChildren {
   authVerifyAccountRoute: typeof authVerifyAccountRoute
   MyCartRoute: typeof MyCartRoute
   MyOrdersRoute: typeof MyOrdersRoute
+  PaymentSolanaCallbackRoute: typeof PaymentSolanaCallbackRoute
   PaymentVnpayCallbackRoute: typeof PaymentVnpayCallbackRoute
   ProductsProductIdRoute: typeof ProductsProductIdRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
@@ -326,6 +347,7 @@ const rootRouteChildren: RootRouteChildren = {
   authVerifyAccountRoute: authVerifyAccountRoute,
   MyCartRoute: MyCartRoute,
   MyOrdersRoute: MyOrdersRoute,
+  PaymentSolanaCallbackRoute: PaymentSolanaCallbackRoute,
   PaymentVnpayCallbackRoute: PaymentVnpayCallbackRoute,
   ProductsProductIdRoute: ProductsProductIdRoute,
   ProductsIndexRoute: ProductsIndexRoute,
@@ -351,6 +373,7 @@ export const routeTree = rootRoute
         "/(auth)/verify-account",
         "/my/cart",
         "/my/orders",
+        "/payment/solana-callback",
         "/payment/vnpay-callback",
         "/products/$productId",
         "/products/",
@@ -377,6 +400,9 @@ export const routeTree = rootRoute
     },
     "/my/orders": {
       "filePath": "my/orders.tsx"
+    },
+    "/payment/solana-callback": {
+      "filePath": "payment/solana-callback.tsx"
     },
     "/payment/vnpay-callback": {
       "filePath": "payment/vnpay-callback.tsx"
