@@ -11,10 +11,70 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as IndexImport } from './routes/index'
+import { Route as ProductsIndexImport } from './routes/products/index'
+import { Route as ProductsProductIdImport } from './routes/products/$productId'
+import { Route as PaymentVnpayCallbackImport } from './routes/payment/vnpay-callback'
+import { Route as PaymentSolanaCallbackImport } from './routes/payment/solana-callback'
+import { Route as MyOrdersImport } from './routes/my/orders'
+import { Route as MyCartImport } from './routes/my/cart'
+import { Route as authVerifyAccountImport } from './routes/(auth)/verify-account'
 import { Route as authRegisterImport } from './routes/(auth)/register'
 import { Route as authLoginImport } from './routes/(auth)/login'
+import { Route as MyShopIndexImport } from './routes/my/shop/index'
+import { Route as MyShopSettingsImport } from './routes/my/shop/settings'
+import { Route as MyShopProductsImport } from './routes/my/shop/products'
+import { Route as MyShopOrdersImport } from './routes/my/shop/orders'
 
 // Create/Update Routes
+
+const IndexRoute = IndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProductsIndexRoute = ProductsIndexImport.update({
+  id: '/products/',
+  path: '/products/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProductsProductIdRoute = ProductsProductIdImport.update({
+  id: '/products/$productId',
+  path: '/products/$productId',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PaymentVnpayCallbackRoute = PaymentVnpayCallbackImport.update({
+  id: '/payment/vnpay-callback',
+  path: '/payment/vnpay-callback',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PaymentSolanaCallbackRoute = PaymentSolanaCallbackImport.update({
+  id: '/payment/solana-callback',
+  path: '/payment/solana-callback',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MyOrdersRoute = MyOrdersImport.update({
+  id: '/my/orders',
+  path: '/my/orders',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MyCartRoute = MyCartImport.update({
+  id: '/my/cart',
+  path: '/my/cart',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const authVerifyAccountRoute = authVerifyAccountImport.update({
+  id: '/(auth)/verify-account',
+  path: '/verify-account',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const authRegisterRoute = authRegisterImport.update({
   id: '/(auth)/register',
@@ -28,10 +88,41 @@ const authLoginRoute = authLoginImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const MyShopIndexRoute = MyShopIndexImport.update({
+  id: '/my/shop/',
+  path: '/my/shop/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MyShopSettingsRoute = MyShopSettingsImport.update({
+  id: '/my/shop/settings',
+  path: '/my/shop/settings',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MyShopProductsRoute = MyShopProductsImport.update({
+  id: '/my/shop/products',
+  path: '/my/shop/products',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MyShopOrdersRoute = MyShopOrdersImport.update({
+  id: '/my/shop/orders',
+  path: '/my/shop/orders',
+  getParentRoute: () => rootRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
     '/(auth)/login': {
       id: '/(auth)/login'
       path: '/login'
@@ -46,44 +137,224 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authRegisterImport
       parentRoute: typeof rootRoute
     }
+    '/(auth)/verify-account': {
+      id: '/(auth)/verify-account'
+      path: '/verify-account'
+      fullPath: '/verify-account'
+      preLoaderRoute: typeof authVerifyAccountImport
+      parentRoute: typeof rootRoute
+    }
+    '/my/cart': {
+      id: '/my/cart'
+      path: '/my/cart'
+      fullPath: '/my/cart'
+      preLoaderRoute: typeof MyCartImport
+      parentRoute: typeof rootRoute
+    }
+    '/my/orders': {
+      id: '/my/orders'
+      path: '/my/orders'
+      fullPath: '/my/orders'
+      preLoaderRoute: typeof MyOrdersImport
+      parentRoute: typeof rootRoute
+    }
+    '/payment/solana-callback': {
+      id: '/payment/solana-callback'
+      path: '/payment/solana-callback'
+      fullPath: '/payment/solana-callback'
+      preLoaderRoute: typeof PaymentSolanaCallbackImport
+      parentRoute: typeof rootRoute
+    }
+    '/payment/vnpay-callback': {
+      id: '/payment/vnpay-callback'
+      path: '/payment/vnpay-callback'
+      fullPath: '/payment/vnpay-callback'
+      preLoaderRoute: typeof PaymentVnpayCallbackImport
+      parentRoute: typeof rootRoute
+    }
+    '/products/$productId': {
+      id: '/products/$productId'
+      path: '/products/$productId'
+      fullPath: '/products/$productId'
+      preLoaderRoute: typeof ProductsProductIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/products/': {
+      id: '/products/'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof ProductsIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/my/shop/orders': {
+      id: '/my/shop/orders'
+      path: '/my/shop/orders'
+      fullPath: '/my/shop/orders'
+      preLoaderRoute: typeof MyShopOrdersImport
+      parentRoute: typeof rootRoute
+    }
+    '/my/shop/products': {
+      id: '/my/shop/products'
+      path: '/my/shop/products'
+      fullPath: '/my/shop/products'
+      preLoaderRoute: typeof MyShopProductsImport
+      parentRoute: typeof rootRoute
+    }
+    '/my/shop/settings': {
+      id: '/my/shop/settings'
+      path: '/my/shop/settings'
+      fullPath: '/my/shop/settings'
+      preLoaderRoute: typeof MyShopSettingsImport
+      parentRoute: typeof rootRoute
+    }
+    '/my/shop/': {
+      id: '/my/shop/'
+      path: '/my/shop'
+      fullPath: '/my/shop'
+      preLoaderRoute: typeof MyShopIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
+  '/verify-account': typeof authVerifyAccountRoute
+  '/my/cart': typeof MyCartRoute
+  '/my/orders': typeof MyOrdersRoute
+  '/payment/solana-callback': typeof PaymentSolanaCallbackRoute
+  '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
+  '/products/$productId': typeof ProductsProductIdRoute
+  '/products': typeof ProductsIndexRoute
+  '/my/shop/orders': typeof MyShopOrdersRoute
+  '/my/shop/products': typeof MyShopProductsRoute
+  '/my/shop/settings': typeof MyShopSettingsRoute
+  '/my/shop': typeof MyShopIndexRoute
 }
 
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
+  '/verify-account': typeof authVerifyAccountRoute
+  '/my/cart': typeof MyCartRoute
+  '/my/orders': typeof MyOrdersRoute
+  '/payment/solana-callback': typeof PaymentSolanaCallbackRoute
+  '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
+  '/products/$productId': typeof ProductsProductIdRoute
+  '/products': typeof ProductsIndexRoute
+  '/my/shop/orders': typeof MyShopOrdersRoute
+  '/my/shop/products': typeof MyShopProductsRoute
+  '/my/shop/settings': typeof MyShopSettingsRoute
+  '/my/shop': typeof MyShopIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
+  '/': typeof IndexRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
+  '/(auth)/verify-account': typeof authVerifyAccountRoute
+  '/my/cart': typeof MyCartRoute
+  '/my/orders': typeof MyOrdersRoute
+  '/payment/solana-callback': typeof PaymentSolanaCallbackRoute
+  '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
+  '/products/$productId': typeof ProductsProductIdRoute
+  '/products/': typeof ProductsIndexRoute
+  '/my/shop/orders': typeof MyShopOrdersRoute
+  '/my/shop/products': typeof MyShopProductsRoute
+  '/my/shop/settings': typeof MyShopSettingsRoute
+  '/my/shop/': typeof MyShopIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/register'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/verify-account'
+    | '/my/cart'
+    | '/my/orders'
+    | '/payment/solana-callback'
+    | '/payment/vnpay-callback'
+    | '/products/$productId'
+    | '/products'
+    | '/my/shop/orders'
+    | '/my/shop/products'
+    | '/my/shop/settings'
+    | '/my/shop'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register'
-  id: '__root__' | '/(auth)/login' | '/(auth)/register'
+  to:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/verify-account'
+    | '/my/cart'
+    | '/my/orders'
+    | '/payment/solana-callback'
+    | '/payment/vnpay-callback'
+    | '/products/$productId'
+    | '/products'
+    | '/my/shop/orders'
+    | '/my/shop/products'
+    | '/my/shop/settings'
+    | '/my/shop'
+  id:
+    | '__root__'
+    | '/'
+    | '/(auth)/login'
+    | '/(auth)/register'
+    | '/(auth)/verify-account'
+    | '/my/cart'
+    | '/my/orders'
+    | '/payment/solana-callback'
+    | '/payment/vnpay-callback'
+    | '/products/$productId'
+    | '/products/'
+    | '/my/shop/orders'
+    | '/my/shop/products'
+    | '/my/shop/settings'
+    | '/my/shop/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
+  authVerifyAccountRoute: typeof authVerifyAccountRoute
+  MyCartRoute: typeof MyCartRoute
+  MyOrdersRoute: typeof MyOrdersRoute
+  PaymentSolanaCallbackRoute: typeof PaymentSolanaCallbackRoute
+  PaymentVnpayCallbackRoute: typeof PaymentVnpayCallbackRoute
+  ProductsProductIdRoute: typeof ProductsProductIdRoute
+  ProductsIndexRoute: typeof ProductsIndexRoute
+  MyShopOrdersRoute: typeof MyShopOrdersRoute
+  MyShopProductsRoute: typeof MyShopProductsRoute
+  MyShopSettingsRoute: typeof MyShopSettingsRoute
+  MyShopIndexRoute: typeof MyShopIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
+  authVerifyAccountRoute: authVerifyAccountRoute,
+  MyCartRoute: MyCartRoute,
+  MyOrdersRoute: MyOrdersRoute,
+  PaymentSolanaCallbackRoute: PaymentSolanaCallbackRoute,
+  PaymentVnpayCallbackRoute: PaymentVnpayCallbackRoute,
+  ProductsProductIdRoute: ProductsProductIdRoute,
+  ProductsIndexRoute: ProductsIndexRoute,
+  MyShopOrdersRoute: MyShopOrdersRoute,
+  MyShopProductsRoute: MyShopProductsRoute,
+  MyShopSettingsRoute: MyShopSettingsRoute,
+  MyShopIndexRoute: MyShopIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -96,15 +367,63 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
+        "/",
         "/(auth)/login",
-        "/(auth)/register"
+        "/(auth)/register",
+        "/(auth)/verify-account",
+        "/my/cart",
+        "/my/orders",
+        "/payment/solana-callback",
+        "/payment/vnpay-callback",
+        "/products/$productId",
+        "/products/",
+        "/my/shop/orders",
+        "/my/shop/products",
+        "/my/shop/settings",
+        "/my/shop/"
       ]
+    },
+    "/": {
+      "filePath": "index.tsx"
     },
     "/(auth)/login": {
       "filePath": "(auth)/login.tsx"
     },
     "/(auth)/register": {
       "filePath": "(auth)/register.tsx"
+    },
+    "/(auth)/verify-account": {
+      "filePath": "(auth)/verify-account.tsx"
+    },
+    "/my/cart": {
+      "filePath": "my/cart.tsx"
+    },
+    "/my/orders": {
+      "filePath": "my/orders.tsx"
+    },
+    "/payment/solana-callback": {
+      "filePath": "payment/solana-callback.tsx"
+    },
+    "/payment/vnpay-callback": {
+      "filePath": "payment/vnpay-callback.tsx"
+    },
+    "/products/$productId": {
+      "filePath": "products/$productId.tsx"
+    },
+    "/products/": {
+      "filePath": "products/index.tsx"
+    },
+    "/my/shop/orders": {
+      "filePath": "my/shop/orders.tsx"
+    },
+    "/my/shop/products": {
+      "filePath": "my/shop/products.tsx"
+    },
+    "/my/shop/settings": {
+      "filePath": "my/shop/settings.tsx"
+    },
+    "/my/shop/": {
+      "filePath": "my/shop/index.tsx"
     }
   }
 }
