@@ -6,6 +6,18 @@ import ProductCard from "@components/features/ProductCard.tsx";
 import { FiChevronLeft, FiChevronRight, FiChevronRight as FiChevronRightIcon } from "react-icons/fi";
 import { BiSolidMessageRoundedDetail } from "react-icons/bi";
 import Categories from "@components/features/Categories.tsx";
+import { useGetSimilarProductsFromSearchesApi } from "@apis/useProductApis";
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  contentUrls: string;
+  rating: number;
+  reviewCount: number;
+  salePercent?: number;
+  salePrice?: number;
+}
 
 export const Route = createFileRoute('/')({
   component: RouteComponent
@@ -14,7 +26,8 @@ export const Route = createFileRoute('/')({
 function RouteComponent() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-
+  const { data: recommendedProducts, isLoading } = useGetSimilarProductsFromSearchesApi(10);
+  console.log(recommendedProducts);
   // Banner images - replace with your actual images
   const banners = [
     "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80", // Electronics
@@ -67,44 +80,44 @@ function RouteComponent() {
   ];
 
   // Mock products data for Featured Products with ratings (some with discounts, some without)
-  const featuredProducts = [
-    {
-      id: "p001",
-      name: "Apple MacBook Air M2",
-      price: 26990000,
-      imageUrl: "/images/products/laptop-1.jpg",
-      rating: 4.9,
-      reviewCount: 528,
-      salePercent: 5,
-      salePrice: 25640500
-    },
-    {
-      id: "p002",
-      name: "Sony PlayStation 5 Digital Edition",
-      price: 11990000,
-      imageUrl: "/images/products/ps5-1.jpg",
-      rating: 4.8,
-      reviewCount: 1876
-    },
-    {
-      id: "p003",
-      name: "Canon EOS R6 Mirrorless Camera",
-      price: 52990000,
-      imageUrl: "/images/products/camera-1.jpg",
-      rating: 4.7,
-      reviewCount: 342,
-      salePercent: 8,
-      salePrice: 48750800
-    },
-    {
-      id: "p004",
-      name: "Samsung 55\" QLED 4K Smart TV",
-      price: 16490000,
-      imageUrl: "/images/products/tv-1.jpg",
-      rating: 4.5,
-      reviewCount: 697
-    }
-  ];
+  // const featuredProducts = [
+  //   {
+  //     id: "p001",
+  //     name: "Apple MacBook Air M2",
+  //     price: 26990000,
+  //     imageUrl: "/images/products/laptop-1.jpg",
+  //     rating: 4.9,
+  //     reviewCount: 528,
+  //     salePercent: 5,
+  //     salePrice: 25640500
+  //   },
+  //   {
+  //     id: "p002",
+  //     name: "Sony PlayStation 5 Digital Edition",
+  //     price: 11990000,
+  //     imageUrl: "/images/products/ps5-1.jpg",
+  //     rating: 4.8,
+  //     reviewCount: 1876
+  //   },
+  //   {
+  //     id: "p003",
+  //     name: "Canon EOS R6 Mirrorless Camera",
+  //     price: 52990000,
+  //     imageUrl: "/images/products/camera-1.jpg",
+  //     rating: 4.7,
+  //     reviewCount: 342,
+  //     salePercent: 8,
+  //     salePrice: 48750800
+  //   },
+  //   {
+  //     id: "p004",
+  //     name: "Samsung 55\" QLED 4K Smart TV",
+  //     price: 16490000,
+  //     imageUrl: "/images/products/tv-1.jpg",
+  //     rating: 4.5,
+  //     reviewCount: 697
+  //   }
+  // ];
 
   let categoryTimeoutId: NodeJS.Timeout;
 
@@ -233,19 +246,47 @@ function RouteComponent() {
           <div className="container mx-auto px-6 lg:px-48 py-6">
             <h2 className="text-xl font-bold text-white mb-6">Gợi ý hàng đầu</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              {featuredProducts.map(product => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  imageUrl={product.imageUrl}
-                  rating={product.rating}
-                  reviewCount={product.reviewCount}
-                  salePercent={product.salePercent}
-                  salePrice={product.salePrice}
-                />
-              ))}
+              {isLoading ? (
+                // Loading skeleton
+                Array(4).fill(0).map((_, index) => (
+                  <div key={index} className="bg-gray-800 rounded-lg p-4 animate-pulse">
+                    <div className="w-full h-48 bg-gray-700 rounded-lg mb-4"></div>
+                    <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+                  </div>
+                ))
+              ) : recommendedProducts?.length > 0 ? (
+                recommendedProducts.map((product: Product) => (
+                  <ProductCard
+                    key={product.id}
+                    id={product.id}
+                    name={product.name}
+                    price={product.price}
+                    imageUrl={product.contentUrls}
+                    rating={product.rating}
+                    reviewCount={product.reviewCount}
+                    salePercent={product.salePercent}
+                    salePrice={product.salePrice}
+                  />
+                ))
+              ) : null
+              // : (
+              //   // Fallback to featured products if no recommendations
+              //   featuredProducts.map((product: Product) => (
+              //     <ProductCard
+              //       key={product.id}
+              //       id={product.id}
+              //       name={product.name}
+              //       price={product.price}
+              //       imageUrl={product.imageUrl}
+              //       rating={product.rating}
+              //       reviewCount={product.reviewCount}
+              //       salePercent={product.salePercent}
+              //       salePrice={product.salePrice}
+              //     />
+              //   ))
+              // )
+              }
             </div>
             <div className="flex justify-center">
               <button

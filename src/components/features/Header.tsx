@@ -7,8 +7,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import useProfileStore from "@stores/useProfileStore.ts";
 import Logout from "./Logout.tsx";
 import { useGetAccountProfileApi } from "@apis/useAccountApis.ts";
-import { useSuggestProducts } from "@apis/useProductElasticsearchApis.ts";
 import { useDebounce } from "@hooks/useDebounce.ts";
+import { useSuggestProductsApi } from "@apis/useProductRecommendationApis.ts";
 
 interface ProductSuggestion {
   id: string;
@@ -25,10 +25,10 @@ function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const debouncedSearchQuery = useDebounce(searchQuery, 1000);
   const { profile, setProfile } = useProfileStore();
   const { refetch } = useGetAccountProfileApi({ enabled: false });
-  const { data: suggestions } = useSuggestProducts(debouncedSearchQuery);
+  const { data: suggestions } = useSuggestProductsApi(debouncedSearchQuery);
   const navigate = useNavigate();
 
   let timeoutId: NodeJS.Timeout;
@@ -78,10 +78,11 @@ function Header() {
     }
   };
 
-  const handleSuggestionClick = (productId: string) => {
-    navigate({ to: "/products/$productId", params: { productId } });
-    setShowSuggestions(false);
-  };
+  const handleSuggestionClick = (productName: string) => {
+      setSearchQuery(productName);
+      setShowSuggestions(false);
+      navigate({ to: "/products", search: { keyword: productName } });
+    };
 
   return (
     <header className="shadow-md bg-gray-800 top-0 left-0 w-full z-50">
@@ -186,7 +187,7 @@ function Header() {
                   <li
                     key={product.id}
                     className="px-4 py-2 hover:bg-gray-700 cursor-pointer text-gray-300"
-                    onClick={() => handleSuggestionClick(product.id)}
+                    onClick={() => handleSuggestionClick(product.name)}
                   >
                     {product.name}
                   </li>

@@ -21,7 +21,7 @@ interface ProductSearchRequest {
 async function searchProducts(request: ProductSearchRequest) {
   const params = prepareParams(request)
 
-  const response = await publicClient.get(resourceUrls.PRODUCT_RESOURCE.SEARCH_PRODUCTS, {
+  const response = await authClient.get(resourceUrls.PRODUCT_RESOURCE.SEARCH_PRODUCTS, {
     params,
     paramsSerializer: {
       serialize: serializeParams
@@ -131,6 +131,22 @@ function useDeleteMyShopProductApi() {
   })
 }
 
+// Get similar products from searches API
+async function getSimilarProductsFromSearches(size: number = 4) {
+  const response = await authClient.get(resourceUrls.PRODUCT_RESOURCE.GET_SIMILAR_PRODUCTS_FROM_SEARCHES, {
+    params: { size }
+  });
+
+  return response.data;
+}
+
+function useGetSimilarProductsFromSearchesApi(size: number = 4) {
+  return useQuery({
+    queryKey: ["product/similar-from-searches", size],
+    queryFn: () => getSimilarProductsFromSearches(size)
+  })
+}
+
 export {
   useSearchProductsApi,
   useGetProductByIdApi,
@@ -138,5 +154,6 @@ export {
   useUpdateMyShopProductApi,
   useActiveMyShopProductApi,
   useInactiveMyShopProductApi,
-  useDeleteMyShopProductApi
+  useDeleteMyShopProductApi,
+  useGetSimilarProductsFromSearchesApi
 }
