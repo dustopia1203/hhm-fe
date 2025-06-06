@@ -2,8 +2,9 @@ import { FaFacebook, FaGoogle } from "react-icons/fa";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useLoginApi } from "@apis/useAccountApis.ts";
+import { useLoginApi, useGoogleLoginApi } from "@apis/useAccountApis.ts";
 import { useEffect, useState } from "react";
+import { useGoogleLogin } from "@react-oauth/google";
 
 interface LoginForm {
   credential: string;
@@ -15,6 +16,7 @@ function LoginForm() {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
   const navigate = useNavigate();
   const mutationLogin = useLoginApi();
+  const mutationGoogleLogin = useGoogleLoginApi();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -28,7 +30,6 @@ function LoginForm() {
     setIsLoading(true);
     try {
       const responseData = await mutationLogin.mutateAsync(data);
-
       if (responseData) {
         toast.success(
           "Đăng nhập thành công",
@@ -39,7 +40,6 @@ function LoginForm() {
             }
           }
         );
-
         localStorage.setItem("access_token", responseData.data.accessToken);
         localStorage.setItem("refresh_token", responseData.data.refreshToken);
         localStorage.setItem("remember_me", String(data.rememberMe));
@@ -60,6 +60,41 @@ function LoginForm() {
       setIsLoading(false);
     }
   }
+
+  const handleGoogleLogin = useGoogleLogin({
+    flow: 'auth-code',
+    onSuccess: async (codeResponse) => {
+      try {
+        const result = await mutationGoogleLogin.mutateAsync(codeResponse.code);
+        
+        if (result?.data) {
+          const { accessToken, refreshToken } = result.data;
+          
+          if (accessToken) {
+            toast.success("Đăng nhập thành công");
+            localStorage.setItem("access_token", accessToken);
+            if (refreshToken) {
+              localStorage.setItem("refresh_token", refreshToken);
+            }
+            localStorage.setItem("remember_me", "true");
+            navigate({ to: "/" });
+          } else {
+            toast.error("Token không hợp lệ");
+          }
+        } else {
+          toast.error("Đăng nhập thất bại");
+        }
+      } catch (error: any) {
+        console.error('Google login error:', error);
+        toast.error(error.response?.data?.message || "Đăng nhập thất bại");
+      }
+    },
+    onError: error => {
+      console.error('Google login error:', error);
+      toast.error("Đăng nhập bằng Google thất bại");
+    },
+    scope: 'email profile'
+  });
 
   return (
     <>
@@ -124,20 +159,21 @@ function LoginForm() {
           <div className="text-center mb-4 text-gray-400">Hoặc đăng nhập với</div>
           <div className="flex justify-center space-x-4 mb-4">
             <button
+              type="button"
               className="bg-gray-700 p-2 rounded-full w-10 h-10 flex items-center justify-center text-blue-500 hover:bg-gray-600 hover:text-blue-400 focus:ring-2 focus:ring-gray-500"
               disabled={isLoading}
             >
               <Link to="#">
-                <FaFacebook/>
+                <FaFacebook />
               </Link>
             </button>
             <button
+              type="button"
+              onClick={handleGoogleLogin}
               className="bg-gray-700 p-2 rounded-full w-10 h-10 flex items-center justify-center text-red-500 hover:bg-gray-600 hover:text-gray-300 focus:ring-2 focus:ring-gray-500"
               disabled={isLoading}
             >
-              <Link to="#">
-                <FaGoogle/>
-              </Link>
+              <FaGoogle />
             </button>
           </div>
           <div className="text-center">

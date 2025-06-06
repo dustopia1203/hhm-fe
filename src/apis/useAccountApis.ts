@@ -73,9 +73,25 @@ function useGetAccountProfileApi(options?: { enabled?: boolean }) {
   });
 }
 
+// Google Login API
+async function loginGoogle(code: string) {
+  const response = await publicClient.get(`${resourceUrls.ACCOUNT_RESOURCE.LOGIN_GOOGLE}?code=${code}`);
+  return response.data;
+}
+
+function useGoogleLoginApi() {
+  return useMutation({
+    mutationFn: loginGoogle,
+    onError: (error) => {
+      console.error("Google login API error:", error);
+    }
+  });
+}
+
 export {
   useLoginApi,
   useRegisterApi,
   useActiveAccountApi,
-  useGetAccountProfileApi
+  useGetAccountProfileApi,
+  useGoogleLoginApi
 };
