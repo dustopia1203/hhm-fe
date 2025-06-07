@@ -142,7 +142,7 @@ function LoginForm() {
               />
               <span className="ml-2">Lưu tài khoản</span>
             </label>
-            <Link to="#" className="text-gray-500 hover:underline">
+            <Link to="/forgot-password" className="text-gray-500 hover:underline">
               Quên mật khẩu
             </Link>
           </div>

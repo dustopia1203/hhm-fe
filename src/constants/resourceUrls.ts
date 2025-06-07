@@ -14,6 +14,9 @@ const resourceUrls: ResourceUrls = {
     REFRESH_TOKEN: "/api/account/refresh-token",
     GET_PROFILE: "/api/account/profile",
     LOGIN_GOOGLE: "/api/account/authenticate/callback",
+    FORGOT_PASSWORD: "/api/account/forgot-password",
+    VERIFY_OTP: "/api/account/verify-otp",
+    RESET_PASSWORD: "/api/account/reset-password"
   },
   CART_RESOURCE: {
     GET_MY_CART: "/api/carts/my",

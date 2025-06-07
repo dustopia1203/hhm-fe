@@ -88,10 +88,53 @@ function useGoogleLoginApi() {
   });
 }
 
+// Forgot Password API
+async function forgotPassword(data: Pick<LoginRequest, 'credential'>) {
+  const response = await publicClient.post(resourceUrls.ACCOUNT_RESOURCE.FORGOT_PASSWORD, data);
+  return response.data;
+}
+
+function useForgotPasswordApi() {
+  return useMutation({
+    mutationFn: forgotPassword,
+  });
+}
+
+async function verifyOtp(data: ActiveAccountRequest) {
+  const response = await publicClient.post(resourceUrls.ACCOUNT_RESOURCE.VERIFY_OTP, data);
+  return response.data;
+}
+
+function useVerifyOtpApi() {
+  return useMutation({
+    mutationFn: verifyOtp,
+  });
+}
+
+interface ResetPasswordRequest {
+  credential: string;
+  newPassword: string;
+}
+
+async function resetPassword(data: ResetPasswordRequest) {
+  console.log("data", data);
+  const response = await publicClient.post(resourceUrls.ACCOUNT_RESOURCE.RESET_PASSWORD, data);
+  return response.data;
+}
+
+function useResetPasswordApi() {
+  return useMutation({
+    mutationFn: resetPassword,
+  });
+}
+
 export {
   useLoginApi,
   useRegisterApi,
   useActiveAccountApi,
   useGetAccountProfileApi,
-  useGoogleLoginApi
+  useGoogleLoginApi,
+  useForgotPasswordApi,
+  useVerifyOtpApi,
+  useResetPasswordApi
 };
