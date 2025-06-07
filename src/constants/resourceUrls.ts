@@ -46,7 +46,8 @@ const resourceUrls: ResourceUrls = {
     CONFIRM_ORDER: "/api/shops/my/{orderId}/confirm",
     CONFIRM_ORDER_REFUND: "/api/shops/my/{orderId}/refund",
     SUGGEST_PRODUCTS_ELASTIC: "api/v1/products/suggest",
-    GET_SIMILAR_PRODUCTS_FROM_SEARCHES: "api/v1/products/similar-from-searches"
+    GET_SIMILAR_PRODUCTS_FROM_SEARCHES: "api/v1/products/similar-from-searches",
+    GET_SIMILAR_PRODUCTS: "api/v1/products/{productId}/similar"
   },
   REVIEW_RESOURCE: {
     SEARCH_REVIEWS: "/api/reviews/q",

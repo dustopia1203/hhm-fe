@@ -147,6 +147,55 @@ function useGetSimilarProductsFromSearchesApi(size: number = 4) {
   })
 }
 
+// Get similar products API
+async function getSimilarProducts(productId: string, size: number = 10) {
+  const response = await publicClient.get(resourceUrls.PRODUCT_RESOURCE.GET_SIMILAR_PRODUCTS.replace("{productId}", productId), {
+    params: { size }
+  });
+
+  return response.data;
+}
+
+function useGetSimilarProductsApi(productId: string, size: number = 10) {
+  return useQuery({
+    queryKey: ["product/similar", productId, size],
+    queryFn: () => getSimilarProducts(productId, size)
+  })
+}
+
+interface TrackBehaviorRequest {
+  productId?: string;
+  behaviorType: "VIEW" | "SEARCH" | "PURCHASE" | "CART_ADD";
+  searchQuery?: string;
+  categoryId?: string;
+  shopId?: string;
+}
+
+async function trackBehavior(request: TrackBehaviorRequest) {
+  const response = await authClient.post(resourceUrls.PRODUCT_RESOURCE.TRACK_BEHAVIOR, request);
+  return response.data;
+}
+
+function useTrackBehaviorApi() {
+  return useMutation({
+    mutationFn: trackBehavior
+  });
+} 
+
+async function suggestProducts(query: string) {
+  const response = await publicClient.get(resourceUrls.PRODUCT_RESOURCE.SUGGEST_PRODUCTS_ELASTIC, {
+    params: { query }
+  });
+  return response.data;
+}
+
+function useSuggestProductsApi(query: string) {
+  return useQuery({
+    queryKey: ["product/suggest/elastic", query],
+    queryFn: () => suggestProducts(query),
+    enabled: !!query
+  });
+} 
 export {
   useSearchProductsApi,
   useGetProductByIdApi,
@@ -155,5 +204,8 @@ export {
   useActiveMyShopProductApi,
   useInactiveMyShopProductApi,
   useDeleteMyShopProductApi,
-  useGetSimilarProductsFromSearchesApi
+  useGetSimilarProductsFromSearchesApi,
+  useGetSimilarProductsApi,
+  useTrackBehaviorApi,
+  useSuggestProductsApi
 }

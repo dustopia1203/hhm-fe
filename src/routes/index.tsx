@@ -26,7 +26,11 @@ export const Route = createFileRoute('/')({
 function RouteComponent() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  const { data: recommendedProducts, isLoading } = useGetSimilarProductsFromSearchesApi(10);
+  const [productCount, setProductCount] = useState(4);
+  const [lastProductLength, setLastProductLength] = useState<number | null>(null);
+  const [hideSeeMore, setHideSeeMore] = useState(false);
+  const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]);
+  const { data: recommendedProducts, isLoading } = useGetSimilarProductsFromSearchesApi(productCount);
   console.log(recommendedProducts);
   // Banner images - replace with your actual images
   const banners = [
@@ -79,46 +83,6 @@ function RouteComponent() {
     }
   ];
 
-  // Mock products data for Featured Products with ratings (some with discounts, some without)
-  // const featuredProducts = [
-  //   {
-  //     id: "p001",
-  //     name: "Apple MacBook Air M2",
-  //     price: 26990000,
-  //     imageUrl: "/images/products/laptop-1.jpg",
-  //     rating: 4.9,
-  //     reviewCount: 528,
-  //     salePercent: 5,
-  //     salePrice: 25640500
-  //   },
-  //   {
-  //     id: "p002",
-  //     name: "Sony PlayStation 5 Digital Edition",
-  //     price: 11990000,
-  //     imageUrl: "/images/products/ps5-1.jpg",
-  //     rating: 4.8,
-  //     reviewCount: 1876
-  //   },
-  //   {
-  //     id: "p003",
-  //     name: "Canon EOS R6 Mirrorless Camera",
-  //     price: 52990000,
-  //     imageUrl: "/images/products/camera-1.jpg",
-  //     rating: 4.7,
-  //     reviewCount: 342,
-  //     salePercent: 8,
-  //     salePrice: 48750800
-  //   },
-  //   {
-  //     id: "p004",
-  //     name: "Samsung 55\" QLED 4K Smart TV",
-  //     price: 16490000,
-  //     imageUrl: "/images/products/tv-1.jpg",
-  //     rating: 4.5,
-  //     reviewCount: 697
-  //   }
-  // ];
-
   let categoryTimeoutId: NodeJS.Timeout;
 
   const handleCategoryMouseEnter = () => {
@@ -151,6 +115,33 @@ function RouteComponent() {
 
   const goToSlide = useCallback((index: number) => {
     setCurrentSlide(index);
+  }, []);
+
+  useEffect(() => {
+    if (recommendedProducts) {
+      if (lastProductLength !== null && recommendedProducts.length === lastProductLength) {
+        setHideSeeMore(true);
+      } else {
+        setHideSeeMore(false);
+      }
+      setLastProductLength(recommendedProducts.length);
+      setDisplayedProducts((prev) => {
+        const prevIds = new Set(prev.map((p) => p.id));
+        if (prev.length === 0) {
+          return recommendedProducts.slice(0, 4);
+        }
+        const newProducts = recommendedProducts.filter((p: Product) => !prevIds.has(p.id));
+        return [...prev, ...newProducts];
+      });
+    }
+  }, [recommendedProducts]);
+
+  // Reset displayedProducts khi reload trang
+  useEffect(() => {
+    setDisplayedProducts([]);
+    setProductCount(4);
+    setLastProductLength(null);
+    setHideSeeMore(false);
   }, []);
 
   return (
@@ -246,53 +237,36 @@ function RouteComponent() {
           <div className="container mx-auto px-6 lg:px-48 py-6">
             <h2 className="text-xl font-bold text-white mb-6">Gợi ý hàng đầu</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              {isLoading ? (
-                // Loading skeleton
-                Array(4).fill(0).map((_, index) => (
-                  <div key={index} className="bg-gray-800 rounded-lg p-4 animate-pulse">
-                    <div className="w-full h-48 bg-gray-700 rounded-lg mb-4"></div>
-                    <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-700 rounded w-1/2"></div>
-                  </div>
-                ))
-              ) : recommendedProducts?.length > 0 ? (
-                recommendedProducts.map((product: Product) => (
-                  <ProductCard
-                    key={product.id}
-                    id={product.id}
-                    name={product.name}
-                    price={product.price}
-                    imageUrl={product.contentUrls}
-                    rating={product.rating}
-                    reviewCount={product.reviewCount}
-                    salePercent={product.salePercent}
-                    salePrice={product.salePrice}
-                  />
-                ))
-              ) : null
-              // : (
-              //   // Fallback to featured products if no recommendations
-              //   featuredProducts.map((product: Product) => (
-              //     <ProductCard
-              //       key={product.id}
-              //       id={product.id}
-              //       name={product.name}
-              //       price={product.price}
-              //       imageUrl={product.imageUrl}
-              //       rating={product.rating}
-              //       reviewCount={product.reviewCount}
-              //       salePercent={product.salePercent}
-              //       salePrice={product.salePrice}
-              //     />
-              //   ))
-              // )
-              }
+              {isLoading && Array(4).fill(0).map((_, index) => (
+                <div key={index} className="bg-gray-800 rounded-lg p-4 animate-pulse">
+                  <div className="w-full h-48 bg-gray-700 rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+                </div>
+              ))}
+              {displayedProducts.map((product: Product) => (
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  name={product.name}
+                  price={product.price}
+                  imageUrl={product.contentUrls}
+                  rating={product.rating}
+                  reviewCount={product.reviewCount}
+                  salePercent={product.salePercent}
+                  salePrice={product.salePrice}
+                />
+              ))}
             </div>
             <div className="flex justify-center">
-              <button
-                className="px-8 py-2 border border-gray-700 rounded-full text-gray-300 hover:bg-gray-800 transition-colors">
-                Xem thêm
-              </button>
+              {!hideSeeMore && (
+                <button
+                  className="px-8 py-2 border border-gray-700 rounded-full text-gray-300 hover:bg-gray-800 transition-colors"
+                  onClick={() => setProductCount((prev) => prev + 8)}
+                >
+                  Xem thêm
+                </button>
+              )}
             </div>
           </div>
 

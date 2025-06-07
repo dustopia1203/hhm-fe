@@ -8,7 +8,7 @@ import useProfileStore from "@stores/useProfileStore.ts";
 import Logout from "./Logout.tsx";
 import { useGetAccountProfileApi } from "@apis/useAccountApis.ts";
 import { useDebounce } from "@hooks/useDebounce.ts";
-import { useSuggestProductsApi } from "@apis/useProductRecommendationApis.ts";
+import { useSuggestProductsApi } from "@apis/useProductApis.ts";
 
 interface ProductSuggestion {
   id: string;
