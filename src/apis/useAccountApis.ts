@@ -114,6 +114,7 @@ function useVerifyOtpApi() {
 interface ResetPasswordRequest {
   credential: string;
   newPassword: string;
+  currentPassword?: string;
 }
 
 async function resetPassword(data: ResetPasswordRequest) {

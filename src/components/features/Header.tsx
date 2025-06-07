@@ -96,8 +96,10 @@ function Header() {
                     className="absolute right-0 mt-2 w-40 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-50">
                     <ul className="py-2">
                       <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Đơn mua</li>
-                      <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">Tài khoản</li>
-                      <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer"><Logout/></li>
+                      <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer">
+                        <Link to="/my/profile">Tài khoản</Link>
+                      </li>
+                      <li className="px-4 py-2 hover:bg-gray-700 cursor-pointer"><Logout /></li>
                     </ul>
                   </div>
                 )}
