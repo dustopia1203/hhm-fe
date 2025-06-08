@@ -6,10 +6,10 @@ function validatePrivileges(requiredPrivileges: string[], userPrivileges: string
 
   return requiredPrivileges.some(requiredPrivilege =>
     userPrivileges.some((userPrivilege: string) => {
-      if (!requiredPrivilege.includes("_") || !userPrivilege.includes("_")) return false;
+      if (!requiredPrivilege.includes(":") || !userPrivilege.includes(":")) return false;
 
-      const [requiredResource, requiredAction] = requiredPrivilege.split("_");
-      const [userResource, userAction] = userPrivilege.split("_");
+      const [requiredResource, requiredAction] = requiredPrivilege.split(":");
+      const [userResource, userAction] = userPrivilege.split(":");
 
       return (userPrivilege === requiredPrivilege)
         || (userResource === "ALL" && userAction === requiredAction)
