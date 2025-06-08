@@ -4,8 +4,10 @@ import ShopSidebar from "@components/features/ShopSidebar.tsx";
 import Footer from "@components/features/Footer.tsx";
 import useShopStore from "@stores/useShopStore.ts";
 import UpdateShopForm from "@components/features/UpdateShopForm.tsx";
+import auth from "@utils/auth.ts";
 
 export const Route = createFileRoute('/my/shop/settings')({
+  beforeLoad: () => auth([]),
   component: RouteComponent,
 })
 

@@ -50,6 +50,9 @@ const resourceUrls: ResourceUrls = {
     SEARCH_REVIEWS: "/api/reviews/q",
     CREATE_MY_REVIEW: "/api/reviews/my",
   },
+  ROLE_RESOURCE: {
+    GET_AVAILABLE_ROLES: "/api/roles/available"
+  },
   SHIPPING_RESOURCE: {
     SEARCH_SHIPPING: "/api/shipping/q"
   },
@@ -61,6 +64,18 @@ const resourceUrls: ResourceUrls = {
     CONFIRM_MY_SHOP_ORDER: "/api/shops/my/{orderId}/confirm",
     GET_MY_SHOP_REFUND: "/api/shops/my/{orderId}/refund",
     CONFIRM_MY_SHOP_REFUND: "/api/shops/my/{orderId}/refund"
+  },
+  TRANSACTION_RESOURCE: {
+    SEARCH: "/api/transactions/q"
+  },
+  USER_RESOURCE: {
+    SEARCH: "/api/users/q",
+    GET_BY_ID: "/api/users/{id}",
+    ACTIVE: "/api/users/active",
+    INACTIVE: "/api/users/inactive",
+    DELETE: "/api/users",
+    GET_ROLES: "/api/users/{id}/roles",
+    SET_ROLE: "/api/users/{id}/roles"
   }
 }
 
