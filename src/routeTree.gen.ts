@@ -16,6 +16,7 @@ import { Route as ProductsIndexImport } from './routes/products/index'
 import { Route as ProductsProductIdImport } from './routes/products/$productId'
 import { Route as PaymentVnpayCallbackImport } from './routes/payment/vnpay-callback'
 import { Route as PaymentSolanaCallbackImport } from './routes/payment/solana-callback'
+import { Route as MyProfileImport } from './routes/my/profile'
 import { Route as MyOrdersImport } from './routes/my/orders'
 import { Route as MyCartImport } from './routes/my/cart'
 import { Route as AdminUserManagementImport } from './routes/admin/user-management'
@@ -23,6 +24,7 @@ import { Route as AdminTransactionImport } from './routes/admin/transaction'
 import { Route as authVerifyAccountImport } from './routes/(auth)/verify-account'
 import { Route as authRegisterImport } from './routes/(auth)/register'
 import { Route as authLoginImport } from './routes/(auth)/login'
+import { Route as authForgotPasswordImport } from './routes/(auth)/forgot-password'
 import { Route as MyShopIndexImport } from './routes/my/shop/index'
 import { Route as MyShopSettingsImport } from './routes/my/shop/settings'
 import { Route as MyShopProductsImport } from './routes/my/shop/products'
@@ -57,6 +59,12 @@ const PaymentVnpayCallbackRoute = PaymentVnpayCallbackImport.update({
 const PaymentSolanaCallbackRoute = PaymentSolanaCallbackImport.update({
   id: '/payment/solana-callback',
   path: '/payment/solana-callback',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MyProfileRoute = MyProfileImport.update({
+  id: '/my/profile',
+  path: '/my/profile',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -102,6 +110,12 @@ const authLoginRoute = authLoginImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const authForgotPasswordRoute = authForgotPasswordImport.update({
+  id: '/(auth)/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const MyShopIndexRoute = MyShopIndexImport.update({
   id: '/my/shop/',
   path: '/my/shop/',
@@ -135,6 +149,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/(auth)/forgot-password': {
+      id: '/(auth)/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof authForgotPasswordImport
       parentRoute: typeof rootRoute
     }
     '/(auth)/login': {
@@ -184,6 +205,13 @@ declare module '@tanstack/react-router' {
       path: '/my/orders'
       fullPath: '/my/orders'
       preLoaderRoute: typeof MyOrdersImport
+      parentRoute: typeof rootRoute
+    }
+    '/my/profile': {
+      id: '/my/profile'
+      path: '/my/profile'
+      fullPath: '/my/profile'
+      preLoaderRoute: typeof MyProfileImport
       parentRoute: typeof rootRoute
     }
     '/payment/solana-callback': {
@@ -249,6 +277,7 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
@@ -256,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/admin/user-management': typeof AdminUserManagementRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
+  '/my/profile': typeof MyProfileRoute
   '/payment/solana-callback': typeof PaymentSolanaCallbackRoute
   '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
   '/products/$productId': typeof ProductsProductIdRoute
@@ -268,6 +298,7 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/forgot-password': typeof authForgotPasswordRoute
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
@@ -275,6 +306,7 @@ export interface FileRoutesByTo {
   '/admin/user-management': typeof AdminUserManagementRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
+  '/my/profile': typeof MyProfileRoute
   '/payment/solana-callback': typeof PaymentSolanaCallbackRoute
   '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
   '/products/$productId': typeof ProductsProductIdRoute
@@ -288,6 +320,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
   '/(auth)/verify-account': typeof authVerifyAccountRoute
@@ -295,6 +328,7 @@ export interface FileRoutesById {
   '/admin/user-management': typeof AdminUserManagementRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
+  '/my/profile': typeof MyProfileRoute
   '/payment/solana-callback': typeof PaymentSolanaCallbackRoute
   '/payment/vnpay-callback': typeof PaymentVnpayCallbackRoute
   '/products/$productId': typeof ProductsProductIdRoute
@@ -309,6 +343,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/forgot-password'
     | '/login'
     | '/register'
     | '/verify-account'
@@ -316,6 +351,7 @@ export interface FileRouteTypes {
     | '/admin/user-management'
     | '/my/cart'
     | '/my/orders'
+    | '/my/profile'
     | '/payment/solana-callback'
     | '/payment/vnpay-callback'
     | '/products/$productId'
@@ -327,6 +363,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/forgot-password'
     | '/login'
     | '/register'
     | '/verify-account'
@@ -334,6 +371,7 @@ export interface FileRouteTypes {
     | '/admin/user-management'
     | '/my/cart'
     | '/my/orders'
+    | '/my/profile'
     | '/payment/solana-callback'
     | '/payment/vnpay-callback'
     | '/products/$productId'
@@ -345,6 +383,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/(auth)/forgot-password'
     | '/(auth)/login'
     | '/(auth)/register'
     | '/(auth)/verify-account'
@@ -352,6 +391,7 @@ export interface FileRouteTypes {
     | '/admin/user-management'
     | '/my/cart'
     | '/my/orders'
+    | '/my/profile'
     | '/payment/solana-callback'
     | '/payment/vnpay-callback'
     | '/products/$productId'
@@ -365,6 +405,7 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  authForgotPasswordRoute: typeof authForgotPasswordRoute
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
   authVerifyAccountRoute: typeof authVerifyAccountRoute
@@ -372,6 +413,7 @@ export interface RootRouteChildren {
   AdminUserManagementRoute: typeof AdminUserManagementRoute
   MyCartRoute: typeof MyCartRoute
   MyOrdersRoute: typeof MyOrdersRoute
+  MyProfileRoute: typeof MyProfileRoute
   PaymentSolanaCallbackRoute: typeof PaymentSolanaCallbackRoute
   PaymentVnpayCallbackRoute: typeof PaymentVnpayCallbackRoute
   ProductsProductIdRoute: typeof ProductsProductIdRoute
@@ -384,6 +426,7 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  authForgotPasswordRoute: authForgotPasswordRoute,
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
   authVerifyAccountRoute: authVerifyAccountRoute,
@@ -391,6 +434,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminUserManagementRoute: AdminUserManagementRoute,
   MyCartRoute: MyCartRoute,
   MyOrdersRoute: MyOrdersRoute,
+  MyProfileRoute: MyProfileRoute,
   PaymentSolanaCallbackRoute: PaymentSolanaCallbackRoute,
   PaymentVnpayCallbackRoute: PaymentVnpayCallbackRoute,
   ProductsProductIdRoute: ProductsProductIdRoute,
@@ -412,6 +456,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/(auth)/forgot-password",
         "/(auth)/login",
         "/(auth)/register",
         "/(auth)/verify-account",
@@ -419,6 +464,7 @@ export const routeTree = rootRoute
         "/admin/user-management",
         "/my/cart",
         "/my/orders",
+        "/my/profile",
         "/payment/solana-callback",
         "/payment/vnpay-callback",
         "/products/$productId",
@@ -431,6 +477,9 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/(auth)/forgot-password": {
+      "filePath": "(auth)/forgot-password.tsx"
     },
     "/(auth)/login": {
       "filePath": "(auth)/login.tsx"
@@ -452,6 +501,9 @@ export const routeTree = rootRoute
     },
     "/my/orders": {
       "filePath": "my/orders.tsx"
+    },
+    "/my/profile": {
+      "filePath": "my/profile.tsx"
     },
     "/payment/solana-callback": {
       "filePath": "payment/solana-callback.tsx"
