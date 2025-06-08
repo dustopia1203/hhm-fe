@@ -13,8 +13,10 @@ import Loader from "@components/common/Loader.tsx";
 import { FiChevronDown, FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import auth from "@utils/auth.ts";
 
 export const Route = createFileRoute('/my/shop/orders')({
+  beforeLoad: () => auth([]),
   component: RouteComponent,
 })
 

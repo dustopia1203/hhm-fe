@@ -17,9 +17,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import AdminHeader from "@components/features/AdminHeader.tsx";
 import Footer from "@components/features/Footer.tsx";
+import auth from "@utils/auth.ts";
 
 // Define search params for the route
 export const Route = createFileRoute('/admin/user-management')({
+  beforeLoad: () => auth(['TRANSACTION:MANAGE']),
   component: UserManagement,
   validateSearch: (search: Record<string, unknown>) => {
     return {
