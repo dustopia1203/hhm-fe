@@ -19,6 +19,7 @@ import { Route as PaymentSolanaCallbackImport } from './routes/payment/solana-ca
 import { Route as MyOrdersImport } from './routes/my/orders'
 import { Route as MyCartImport } from './routes/my/cart'
 import { Route as AdminUserManagementImport } from './routes/admin/user-management'
+import { Route as AdminTransactionImport } from './routes/admin/transaction'
 import { Route as authVerifyAccountImport } from './routes/(auth)/verify-account'
 import { Route as authRegisterImport } from './routes/(auth)/register'
 import { Route as authLoginImport } from './routes/(auth)/login'
@@ -74,6 +75,12 @@ const MyCartRoute = MyCartImport.update({
 const AdminUserManagementRoute = AdminUserManagementImport.update({
   id: '/admin/user-management',
   path: '/admin/user-management',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AdminTransactionRoute = AdminTransactionImport.update({
+  id: '/admin/transaction',
+  path: '/admin/transaction',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -149,6 +156,13 @@ declare module '@tanstack/react-router' {
       path: '/verify-account'
       fullPath: '/verify-account'
       preLoaderRoute: typeof authVerifyAccountImport
+      parentRoute: typeof rootRoute
+    }
+    '/admin/transaction': {
+      id: '/admin/transaction'
+      path: '/admin/transaction'
+      fullPath: '/admin/transaction'
+      preLoaderRoute: typeof AdminTransactionImport
       parentRoute: typeof rootRoute
     }
     '/admin/user-management': {
@@ -238,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
+  '/admin/transaction': typeof AdminTransactionRoute
   '/admin/user-management': typeof AdminUserManagementRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
@@ -256,6 +271,7 @@ export interface FileRoutesByTo {
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
+  '/admin/transaction': typeof AdminTransactionRoute
   '/admin/user-management': typeof AdminUserManagementRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
@@ -275,6 +291,7 @@ export interface FileRoutesById {
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
   '/(auth)/verify-account': typeof authVerifyAccountRoute
+  '/admin/transaction': typeof AdminTransactionRoute
   '/admin/user-management': typeof AdminUserManagementRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
@@ -295,6 +312,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/verify-account'
+    | '/admin/transaction'
     | '/admin/user-management'
     | '/my/cart'
     | '/my/orders'
@@ -312,6 +330,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/verify-account'
+    | '/admin/transaction'
     | '/admin/user-management'
     | '/my/cart'
     | '/my/orders'
@@ -329,6 +348,7 @@ export interface FileRouteTypes {
     | '/(auth)/login'
     | '/(auth)/register'
     | '/(auth)/verify-account'
+    | '/admin/transaction'
     | '/admin/user-management'
     | '/my/cart'
     | '/my/orders'
@@ -348,6 +368,7 @@ export interface RootRouteChildren {
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
   authVerifyAccountRoute: typeof authVerifyAccountRoute
+  AdminTransactionRoute: typeof AdminTransactionRoute
   AdminUserManagementRoute: typeof AdminUserManagementRoute
   MyCartRoute: typeof MyCartRoute
   MyOrdersRoute: typeof MyOrdersRoute
@@ -366,6 +387,7 @@ const rootRouteChildren: RootRouteChildren = {
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
   authVerifyAccountRoute: authVerifyAccountRoute,
+  AdminTransactionRoute: AdminTransactionRoute,
   AdminUserManagementRoute: AdminUserManagementRoute,
   MyCartRoute: MyCartRoute,
   MyOrdersRoute: MyOrdersRoute,
@@ -393,6 +415,7 @@ export const routeTree = rootRoute
         "/(auth)/login",
         "/(auth)/register",
         "/(auth)/verify-account",
+        "/admin/transaction",
         "/admin/user-management",
         "/my/cart",
         "/my/orders",
@@ -417,6 +440,9 @@ export const routeTree = rootRoute
     },
     "/(auth)/verify-account": {
       "filePath": "(auth)/verify-account.tsx"
+    },
+    "/admin/transaction": {
+      "filePath": "admin/transaction.tsx"
     },
     "/admin/user-management": {
       "filePath": "admin/user-management.tsx"
