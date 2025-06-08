@@ -118,7 +118,6 @@ interface ResetPasswordRequest {
 }
 
 async function resetPassword(data: ResetPasswordRequest) {
-  console.log("data", data);
   const response = await publicClient.post(resourceUrls.ACCOUNT_RESOURCE.RESET_PASSWORD, data);
   return response.data;
 }
@@ -126,6 +125,28 @@ async function resetPassword(data: ResetPasswordRequest) {
 function useResetPasswordApi() {
   return useMutation({
     mutationFn: resetPassword,
+  });
+}
+
+interface UpdateProfileRequest {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  gender: string;
+  dateOfBirth: string;
+  address: string;
+  phone: string;
+  avatarUrl: string;
+}
+
+async function updateProfile(data: UpdateProfileRequest) {
+  const response = await authClient.put(resourceUrls.ACCOUNT_RESOURCE.UPDATE_PROFILE, data);
+  return response.data;
+}
+
+function useUpdateProfileApi() {
+  return useMutation({
+    mutationFn: updateProfile,
   });
 }
 
@@ -137,5 +158,6 @@ export {
   useGoogleLoginApi,
   useForgotPasswordApi,
   useVerifyOtpApi,
-  useResetPasswordApi
+  useResetPasswordApi,
+  useUpdateProfileApi
 };

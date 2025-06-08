@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Footer from "@components/features/Footer.tsx"
-import { useGetAccountProfileApi } from "@apis/useAccountApis.ts"
+import { useGetAccountProfileApi, useUpdateProfileApi } from "@apis/useAccountApis.ts"
 import { toast } from "sonner"
 import { RxAvatar } from "react-icons/rx"
 import Loader from "@components/common/Loader.tsx"
@@ -9,6 +9,7 @@ import auth from "@utils/auth.ts"
 import { format } from 'date-fns'
 import Header from '@/components/features/Header'
 import ChangePasswordForm from '@/components/features/ChangePasswordForm'
+import uploadFile from '@/utils/cloudinary'
 
 export const Route = createFileRoute('/my/profile')({
   beforeLoad: () => auth([]),
@@ -16,9 +17,11 @@ export const Route = createFileRoute('/my/profile')({
 })
 
 function RouteComponent() {
-  const { data: profileData, isLoading } = useGetAccountProfileApi()
+  const { data: profileData, isLoading, refetch } = useGetAccountProfileApi()
+  const updateProfileMutation = useUpdateProfileApi()
   const [isEditing, setIsEditing] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [profile, setProfile] = useState({
     firstName: '',
     middleName: '',
@@ -26,7 +29,8 @@ function RouteComponent() {
     phone: '',
     dateOfBirth: '',
     gender: '',
-    address: ''
+    address: '',
+    avatarUrl: ''
   })
 
   useEffect(() => {
@@ -36,9 +40,10 @@ function RouteComponent() {
         middleName: profileData.data.middleName || '',
         lastName: profileData.data.lastName || '',
         phone: profileData.data.phone || '',
-        dateOfBirth: profileData.data.dateOfBirth ? format(new Date(profileData.data.dateOfBirth), 'yyyy-MM-dd') : '',
+        dateOfBirth: profileData.data.dateOfBirth ? format(new Date(Number(profileData.data.dateOfBirth)), 'dd/MM/yyyy') : '',
         gender: profileData.data.gender || '',
-        address: profileData.data.address || ''
+        address: profileData.data.address || '',
+        avatarUrl: profileData.data.avatarUrl || ''
       })
     }
   }, [profileData])
@@ -50,12 +55,75 @@ function RouteComponent() {
     }))
   }
 
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      try {
+        const imageUrl = await uploadFile(file)
+        setProfile(prev => ({
+          ...prev,
+          avatarUrl: imageUrl
+        }))
+        toast.success('Cập nhật ảnh đại diện thành công')
+      } catch (error) {
+        toast.error('Cập nhật ảnh đại diện thất bại')
+      }
+    }
+  }
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, ''); // Chỉ cho phép nhập số
+    
+    if (value.length > 0) {
+      // Nếu đã có dấu / thì giữ nguyên
+      if (e.target.value.includes('/')) {
+        value = e.target.value;
+      } else {
+        // Tự động thêm dấu /
+        if (value.length > 2) {
+          value = value.slice(0, 2) + '/' + value.slice(2);
+        }
+        if (value.length > 5) {
+          value = value.slice(0, 5) + '/' + value.slice(5);
+        }
+      }
+    }
+
+    // Xử lý trường hợp nhập liên tiếp
+    if (value.length > 2 && !value.includes('/')) {
+      value = value.slice(0, 2) + '/' + value.slice(2);
+    }
+    if (value.length > 5 && value.split('/').length === 2) {
+      value = value.slice(0, 5) + '/' + value.slice(5);
+    }
+
+    setProfile(prev => ({
+      ...prev,
+      dateOfBirth: value
+    }));
+  };
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement update profile API
-    toast.success('Cập nhật thông tin thành công')
-    setIsEditing(false)
+    try {
+      // Convert date from dd/MM/yyyy to yyyy-MM-dd for backend
+      const [day, month, year] = profile.dateOfBirth.split('/')
+      const formattedDate = `${year}-${month}-${day}`
+
+      await updateProfileMutation.mutateAsync({
+        ...profile,
+        dateOfBirth: formattedDate
+      })
+      toast.success('Cập nhật thông tin thành công')
+      setIsEditing(false)
+      await refetch()
+    } catch (error) {
+      toast.error('Cập nhật thông tin thất bại')
+    }
   }
 
   if (isLoading) {
@@ -74,22 +142,37 @@ function RouteComponent() {
           <div className="bg-gray-800 rounded-lg p-6 mb-8">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
-                <div className="h-20 w-20 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
-                  {currentProfile?.avatarUrl ? (
+                <div 
+                  className={`relative h-20 w-20 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center ${isEditing ? 'cursor-pointer group' : ''}`}
+                  onClick={isEditing ? handleAvatarClick : undefined}
+                >
+                  {profile.avatarUrl ? (
                     <img
-                      src={currentProfile.avatarUrl}
+                      src={profile.avatarUrl}
                       alt="Profile avatar"
                       className="h-full w-full object-cover"
                     />
                   ) : (
                     <RxAvatar size={50} className="text-gray-400" />
                   )}
+                  {isEditing && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-white text-sm">Thay đổi ảnh</span>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleAvatarChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-white">
-                    {currentProfile?.firstName} {currentProfile?.middleName} {currentProfile?.lastName}
+                    {profile.firstName} {profile.middleName} {profile.lastName}
                   </h1>
-                  <p className="text-gray-400">{currentProfile?.username}</p>
+                  <p className="text-gray-400">{profileData?.data?.username}</p>
                 </div>
               </div>
               <button
@@ -150,10 +233,12 @@ function RouteComponent() {
                   <div>
                     <label className="block text-gray-300 mb-2">Ngày sinh</label>
                     <input
-                      type="date"
+                      type="text"
                       name="dateOfBirth"
                       value={profile.dateOfBirth}
-                      onChange={handleProfileChange}
+                      onChange={handleDateChange}
+                      placeholder="dd/mm/yyyy"
+                      maxLength={10}
                       className="w-full px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:border-blue-500 focus:outline-none"
                     />
                   </div>
@@ -197,7 +282,6 @@ function RouteComponent() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-gray-400 mb-2">Thông tin cá nhân</h3>
                   <div className="space-y-3">
                     <div>
                       <span className="text-gray-400">Giới tính:</span>
@@ -208,7 +292,7 @@ function RouteComponent() {
                     <div>
                       <span className="text-gray-400">Ngày sinh:</span>
                       <span className="text-white ml-2">
-                        {currentProfile?.dateOfBirth ? format(new Date(currentProfile.dateOfBirth), 'dd/MM/yyyy') : 'N/A'}
+                        {profileData?.data?.dateOfBirth ? format(new Date(Number(profileData.data.dateOfBirth)), 'dd/MM/yyyy') : 'N/A'}
                       </span>
                     </div>
                     <div>
