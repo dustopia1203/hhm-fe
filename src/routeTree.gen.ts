@@ -18,6 +18,7 @@ import { Route as PaymentVnpayCallbackImport } from './routes/payment/vnpay-call
 import { Route as PaymentSolanaCallbackImport } from './routes/payment/solana-callback'
 import { Route as MyOrdersImport } from './routes/my/orders'
 import { Route as MyCartImport } from './routes/my/cart'
+import { Route as AdminUserManagementImport } from './routes/admin/user-management'
 import { Route as authVerifyAccountImport } from './routes/(auth)/verify-account'
 import { Route as authRegisterImport } from './routes/(auth)/register'
 import { Route as authLoginImport } from './routes/(auth)/login'
@@ -67,6 +68,12 @@ const MyOrdersRoute = MyOrdersImport.update({
 const MyCartRoute = MyCartImport.update({
   id: '/my/cart',
   path: '/my/cart',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AdminUserManagementRoute = AdminUserManagementImport.update({
+  id: '/admin/user-management',
+  path: '/admin/user-management',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -142,6 +149,13 @@ declare module '@tanstack/react-router' {
       path: '/verify-account'
       fullPath: '/verify-account'
       preLoaderRoute: typeof authVerifyAccountImport
+      parentRoute: typeof rootRoute
+    }
+    '/admin/user-management': {
+      id: '/admin/user-management'
+      path: '/admin/user-management'
+      fullPath: '/admin/user-management'
+      preLoaderRoute: typeof AdminUserManagementImport
       parentRoute: typeof rootRoute
     }
     '/my/cart': {
@@ -224,6 +238,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
+  '/admin/user-management': typeof AdminUserManagementRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
   '/payment/solana-callback': typeof PaymentSolanaCallbackRoute
@@ -241,6 +256,7 @@ export interface FileRoutesByTo {
   '/login': typeof authLoginRoute
   '/register': typeof authRegisterRoute
   '/verify-account': typeof authVerifyAccountRoute
+  '/admin/user-management': typeof AdminUserManagementRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
   '/payment/solana-callback': typeof PaymentSolanaCallbackRoute
@@ -259,6 +275,7 @@ export interface FileRoutesById {
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/register': typeof authRegisterRoute
   '/(auth)/verify-account': typeof authVerifyAccountRoute
+  '/admin/user-management': typeof AdminUserManagementRoute
   '/my/cart': typeof MyCartRoute
   '/my/orders': typeof MyOrdersRoute
   '/payment/solana-callback': typeof PaymentSolanaCallbackRoute
@@ -278,6 +295,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/verify-account'
+    | '/admin/user-management'
     | '/my/cart'
     | '/my/orders'
     | '/payment/solana-callback'
@@ -294,6 +312,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/verify-account'
+    | '/admin/user-management'
     | '/my/cart'
     | '/my/orders'
     | '/payment/solana-callback'
@@ -310,6 +329,7 @@ export interface FileRouteTypes {
     | '/(auth)/login'
     | '/(auth)/register'
     | '/(auth)/verify-account'
+    | '/admin/user-management'
     | '/my/cart'
     | '/my/orders'
     | '/payment/solana-callback'
@@ -328,6 +348,7 @@ export interface RootRouteChildren {
   authLoginRoute: typeof authLoginRoute
   authRegisterRoute: typeof authRegisterRoute
   authVerifyAccountRoute: typeof authVerifyAccountRoute
+  AdminUserManagementRoute: typeof AdminUserManagementRoute
   MyCartRoute: typeof MyCartRoute
   MyOrdersRoute: typeof MyOrdersRoute
   PaymentSolanaCallbackRoute: typeof PaymentSolanaCallbackRoute
@@ -345,6 +366,7 @@ const rootRouteChildren: RootRouteChildren = {
   authLoginRoute: authLoginRoute,
   authRegisterRoute: authRegisterRoute,
   authVerifyAccountRoute: authVerifyAccountRoute,
+  AdminUserManagementRoute: AdminUserManagementRoute,
   MyCartRoute: MyCartRoute,
   MyOrdersRoute: MyOrdersRoute,
   PaymentSolanaCallbackRoute: PaymentSolanaCallbackRoute,
@@ -371,6 +393,7 @@ export const routeTree = rootRoute
         "/(auth)/login",
         "/(auth)/register",
         "/(auth)/verify-account",
+        "/admin/user-management",
         "/my/cart",
         "/my/orders",
         "/payment/solana-callback",
@@ -394,6 +417,9 @@ export const routeTree = rootRoute
     },
     "/(auth)/verify-account": {
       "filePath": "(auth)/verify-account.tsx"
+    },
+    "/admin/user-management": {
+      "filePath": "admin/user-management.tsx"
     },
     "/my/cart": {
       "filePath": "my/cart.tsx"
