@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState, useRef } from 'react'
 import Footer from "@components/features/Footer.tsx"
-import { useGetAccountProfileApi, useUpdateProfileApi } from "@apis/useAccountApis.ts"
+import { useGetAccountProfileApi, useUpdateProfileApi, useGetAccountBalanceApi } from "@apis/useAccountApis.ts"
 import { toast } from "sonner"
 import { RxAvatar } from "react-icons/rx"
 import Loader from "@components/common/Loader.tsx"
@@ -18,6 +18,7 @@ export const Route = createFileRoute('/my/profile')({
 
 function RouteComponent() {
   const { data: profileData, isLoading, refetch } = useGetAccountProfileApi()
+  const { data: balanceData } = useGetAccountBalanceApi()
   const updateProfileMutation = useUpdateProfileApi()
   const [isEditing, setIsEditing] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
@@ -32,7 +33,6 @@ function RouteComponent() {
     address: '',
     avatarUrl: ''
   })
-
   useEffect(() => {
     if (profileData?.data) {
       setProfile({
@@ -175,12 +175,12 @@ function RouteComponent() {
                   <p className="text-gray-400">{profileData?.data?.username}</p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsEditing(!isEditing)}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                {isEditing ? 'Hủy' : 'Chỉnh sửa'}
-              </button>
+              <div className="text-right">
+                <div className="text-gray-400 mb-2">Số dư tài khoản</div>
+                <div className="text-2xl font-bold text-green-500">
+                  {balanceData?.data?.balance} VNĐ
+                </div>
+              </div>
             </div>
 
             {isEditing ? (
@@ -312,6 +312,14 @@ function RouteComponent() {
                       </button>
                     </div>
                   </div>
+                </div>
+                <div className="flex justify-end items-start">
+                  <button
+                    onClick={() => setIsEditing(!isEditing)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Chỉnh sửa
+                  </button>
                 </div>
               </div>
             )}

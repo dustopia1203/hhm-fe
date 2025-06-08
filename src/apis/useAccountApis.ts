@@ -150,6 +150,19 @@ function useUpdateProfileApi() {
   });
 }
 
+async function getAccountBalance() {
+  const response = await authClient.get(resourceUrls.ACCOUNT_RESOURCE.GET_BALANCE);
+  return response.data;
+}
+
+function useGetAccountBalanceApi(options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: ["accountBalance"],
+    queryFn: getAccountBalance,
+    enabled: options?.enabled ?? true
+  });
+}
+
 export {
   useLoginApi,
   useRegisterApi,
@@ -159,5 +172,6 @@ export {
   useForgotPasswordApi,
   useVerifyOtpApi,
   useResetPasswordApi,
-  useUpdateProfileApi
+  useUpdateProfileApi,
+  useGetAccountBalanceApi
 };

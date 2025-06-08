@@ -17,7 +17,8 @@ const resourceUrls: ResourceUrls = {
     FORGOT_PASSWORD: "/api/account/forgot-password",
     VERIFY_OTP: "/api/account/verify-otp",
     RESET_PASSWORD: "/api/account/reset-password",
-    UPDATE_PROFILE: "/api/account/update"
+    UPDATE_PROFILE: "/api/account/update",
+    GET_BALANCE: "/api/account/balance"
   },
   CART_RESOURCE: {
     GET_MY_CART: "/api/carts/my",
