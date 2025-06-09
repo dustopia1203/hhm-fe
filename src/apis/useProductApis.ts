@@ -39,7 +39,7 @@ function useSearchProductsApi(request: ProductSearchRequest) {
 }
 
 // Get by id API
-async function getProductById(id: string) {
+export async function getProductById(id: string) {
   const response = await publicClient.get(resourceUrls.PRODUCT_RESOURCE.GET_PRODUCT_BY_ID.replace("{id}", id));
 
   return response.data;

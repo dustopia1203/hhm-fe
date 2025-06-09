@@ -6,7 +6,7 @@ import ShopProfileCard from '../../components/features/ShopProfileCard';
 import ReviewCard from '../../components/features/ReviewCard';
 import Header from "@components/features/Header.tsx";
 import Footer from "@components/features/Footer.tsx";
-import { useGetProductByIdApi, useGetSimilarProductsApi } from "@apis/useProductApis.ts";
+import { getProductById, useGetProductByIdApi, useGetSimilarProductsApi } from "@apis/useProductApis.ts";
 import { useSearchReviewsApi } from "@apis/useReviewApis.ts";
 import Loader from "@components/common/Loader.tsx";
 import NotFound from "@components/common/NotFound.tsx";
@@ -39,6 +39,34 @@ function RouteComponent() {
     pageIndex: reviewPage,
     pageSize: 10
   });
+
+  const [similarProductsWithRating, setSimilarProductsWithRating] = useState<any[]>([]);
+  useEffect(() => {
+    const fetchRatings = async () => {
+      if (!similarProducts) return;
+
+      const enrichedProducts = await Promise.all(
+        similarProducts.map(async (product) => {
+          try {
+            const res = await getProductById(product.id); // không dùng hook
+            console.log(res.data.rating)
+            return {
+              ...product,
+              rating: res.data?.rating,
+              reviewCount: res.data?.reviewCount,
+            };
+          } catch (error) {
+            console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
+            return product; // fallback nếu lỗi
+          }
+        })
+      );
+
+      setSimilarProductsWithRating(enrichedProducts);
+    };
+
+    fetchRatings();
+  }, [similarProducts]);
 
   // All callback hooks
   const goToPrevSlide = useCallback(() => {
@@ -217,10 +245,10 @@ function RouteComponent() {
                   </div>
                 ))}
               </div>
-            ) : similarProducts?.length > 0 ? (
+            ) : similarProductsWithRating?.length > 0 ? (
               <div className="relative">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {similarProducts
+                  {similarProductsWithRating
                     .slice(currentSlide * 4, (currentSlide + 1) * 4)
                     .map((product: any) => (
                       <ProductCard

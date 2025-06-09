@@ -6,7 +6,7 @@ import ProductCard from "@components/features/ProductCard.tsx";
 import { FiChevronLeft, FiChevronRight, FiChevronRight as FiChevronRightIcon } from "react-icons/fi";
 import { BiSolidMessageRoundedDetail } from "react-icons/bi";
 import Categories from "@components/features/Categories.tsx";
-import { useGetSimilarProductsFromSearchesApi } from "@apis/useProductApis";
+import { getProductById, useGetSimilarProductsFromSearchesApi } from "@apis/useProductApis";
 
 interface Product {
   id: string;
@@ -31,57 +31,38 @@ function RouteComponent() {
   const [hideSeeMore, setHideSeeMore] = useState(false);
   const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]);
   const { data: recommendedProducts, isLoading } = useGetSimilarProductsFromSearchesApi(productCount);
-  console.log(recommendedProducts);
   // Banner images - replace with your actual images
   const banners = [
     "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80", // Electronics
     "https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80", // Fashion
     "https://images.unsplash.com/photo-1607082349566-187342175e2f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80"  // Sale
   ];
+  const [recommendedProductsWithRating, setRecommendedProductsWithRating] = useState<any[]>([]);
+  useEffect(() => {
+    const fetchRatings = async () => {
+      if (!recommendedProducts) return;
 
-  // Mock products data for Flash Sale with ratings and discounts
-  const flashSaleProducts = [
-    {
-      id: "fs001",
-      name: "Sony WH-1000XM4 Wireless Noise-Canceling Headphones",
-      price: 4990000,
-      imageUrl: "/images/products/headphones-1.jpg",
-      rating: 4.8,
-      reviewCount: 1245,
-      salePercent: 20,
-      salePrice: 3992000
-    },
-    {
-      id: "fs002",
-      name: "Samsung Galaxy Watch 5 Pro",
-      price: 7990000,
-      imageUrl: "/images/products/watch-1.jpg",
-      rating: 4.6,
-      reviewCount: 872,
-      salePercent: 15,
-      salePrice: 6791500
-    },
-    {
-      id: "fs003",
-      name: "Apple iPad Air (2022)",
-      price: 13990000,
-      imageUrl: "/images/products/ipad-1.jpg",
-      rating: 4.9,
-      reviewCount: 2103,
-      salePercent: 10,
-      salePrice: 12591000
-    },
-    {
-      id: "fs004",
-      name: "Nintendo Switch OLED Model",
-      price: 8490000,
-      imageUrl: "/images/products/switch-1.jpg",
-      rating: 4.7,
-      reviewCount: 1563,
-      salePercent: 25,
-      salePrice: 6367500
-    }
-  ];
+      const enrichedProducts = await Promise.all(
+        recommendedProducts.map(async (product) => {
+          try {
+            const res = await getProductById(product.id); // không dùng hook
+            return {
+              ...product,
+              rating: res.data?.rating,
+              reviewCount: res.data?.reviewCount,
+            };
+          } catch (error) {
+            console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
+            return product; // fallback nếu lỗi
+          }
+        })
+      );
+
+      setRecommendedProductsWithRating(enrichedProducts);
+    };
+
+    fetchRatings();
+  }, [recommendedProducts]);
 
   let categoryTimeoutId: NodeJS.Timeout;
 
@@ -118,23 +99,23 @@ function RouteComponent() {
   }, []);
 
   useEffect(() => {
-    if (recommendedProducts) {
-      if (lastProductLength !== null && recommendedProducts.length === lastProductLength) {
+    if (recommendedProductsWithRating) {
+      if (lastProductLength !== null && recommendedProductsWithRating.length === lastProductLength) {
         setHideSeeMore(true);
       } else {
         setHideSeeMore(false);
       }
-      setLastProductLength(recommendedProducts.length);
+      setLastProductLength(recommendedProductsWithRating.length);
       setDisplayedProducts((prev) => {
         const prevIds = new Set(prev.map((p) => p.id));
         if (prev.length === 0) {
-          return recommendedProducts.slice(0, 4);
+          return recommendedProductsWithRating.slice(0, 4);
         }
-        const newProducts = recommendedProducts.filter((p: Product) => !prevIds.has(p.id));
+        const newProducts = recommendedProductsWithRating.filter((p: Product) => !prevIds.has(p.id));
         return [...prev, ...newProducts];
       });
     }
-  }, [recommendedProducts]);
+  }, [recommendedProductsWithRating]);
 
   // Reset displayedProducts khi reload trang
   useEffect(() => {
@@ -203,26 +184,33 @@ function RouteComponent() {
             </div>
           </div>
 
-          {/* Flash Sale Section */}
+          {/* Recommended Products */}
           <div className="container mx-auto px-6 lg:px-48 py-6">
             <div className="bg-gray-800 rounded-3xl p-6 shadow-md">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-red-500 text-lg font-bold flex items-center">
-                  <span className="mr-2">⚡FLASH SALE</span>
+                <h2 className="text-white text-lg font-bold flex items-center">
+                  <span className="mr-2">⚡⚡⚡Gợi ý hàng đầu⚡⚡⚡</span>
                 </h2>
-                <Link to="/flash-sale" className="flex items-center text-sm text-gray-400 hover:text-white">
+                <Link to="/products" className="flex items-center text-sm text-gray-400 hover:text-white">
                   Xem tất cả <FiChevronRight className="ml-1"/>
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {flashSaleProducts.map(product => (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                {isLoading && Array(4).fill(0).map((_, index) => (
+                  <div key={index} className="bg-gray-800 rounded-lg p-4 animate-pulse">
+                    <div className="w-full h-48 bg-gray-700 rounded-lg mb-4"></div>
+                    <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+                  </div>
+                ))}
+                {displayedProducts.map((product: Product) => (
                   <ProductCard
                     key={product.id}
                     id={product.id}
                     name={product.name}
                     price={product.price}
-                    imageUrl={product.imageUrl}
+                    imageUrl={product.contentUrls}
                     rating={product.rating}
                     reviewCount={product.reviewCount}
                     salePercent={product.salePercent}
@@ -230,43 +218,16 @@ function RouteComponent() {
                   />
                 ))}
               </div>
-            </div>
-          </div>
-
-          {/* Featured Products */}
-          <div className="container mx-auto px-6 lg:px-48 py-6">
-            <h2 className="text-xl font-bold text-white mb-6">Gợi ý hàng đầu</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              {isLoading && Array(4).fill(0).map((_, index) => (
-                <div key={index} className="bg-gray-800 rounded-lg p-4 animate-pulse">
-                  <div className="w-full h-48 bg-gray-700 rounded-lg mb-4"></div>
-                  <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-gray-700 rounded w-1/2"></div>
-                </div>
-              ))}
-              {displayedProducts.map((product: Product) => (
-                <ProductCard
-                  key={product.id}
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  imageUrl={product.contentUrls}
-                  rating={product.rating}
-                  reviewCount={product.reviewCount}
-                  salePercent={product.salePercent}
-                  salePrice={product.salePrice}
-                />
-              ))}
-            </div>
-            <div className="flex justify-center">
-              {!hideSeeMore && (
-                <button
-                  className="px-8 py-2 border border-gray-700 rounded-full text-gray-300 hover:bg-gray-800 transition-colors"
-                  onClick={() => setProductCount((prev) => prev + 8)}
-                >
-                  Xem thêm
-                </button>
-              )}
+              <div className="flex justify-center">
+                {!hideSeeMore && (
+                  <button
+                    className="px-8 py-2 border border-gray-700 rounded-full text-gray-300 hover:bg-gray-800 transition-colors"
+                    onClick={() => setProductCount((prev) => prev + 8)}
+                  >
+                    Xem thêm
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
