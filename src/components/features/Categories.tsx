@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { FiMenu } from "react-icons/fi";
+import { FiMenu, FiChevronRight } from "react-icons/fi";
 import { useState, useEffect, useRef } from "react";
 import { useSearchCategories, useGetCategoryTreeById } from "@apis/useCategoryApis.ts";
 import Loader from "@components/common/Loader";
@@ -94,8 +94,15 @@ function Categories({ isOpen, onMouseEnter, onMouseLeave }: CategoriesProps) {
           {categories.map((category) => (
             <div key={category.id} className="mb-4">
               <Link
-                to={`/category/${category.id}`}
-                className="text-white font-medium text-base hover:text-blue-400 block mb-3 border-b border-gray-600 pb-1"
+                to="/products"
+                search={{
+                  categoryId: category.id,
+                  pageIndex: 1,
+                  sortBy: "createdAt",
+                  sortOrder: "DESC",
+                }}
+                className="text-white font-medium text-base hover:text-blue-400 block mb-3 border-b border-gray-600 pb-1 w-full text-left"
+                onClick={() => setActiveCategory(category.id)}
               >
                 {category.name}
               </Link>
@@ -114,8 +121,15 @@ function Categories({ isOpen, onMouseEnter, onMouseLeave }: CategoriesProps) {
           {categories.map((category) => (
             <li key={category.id}>
               <Link
-                to={`/category/${category.id}`}
-                className="text-gray-300 hover:text-white text-sm block py-1 hover:translate-x-1 transition-transform duration-150"
+                to="/products"
+                search={{
+                  categoryId: category.id,
+                  pageIndex: 1,
+                  sortBy: "createdAt",
+                  sortOrder: "DESC",
+                }}
+                className="text-gray-300 hover:text-white text-sm block py-1 hover:translate-x-1 transition-transform duration-150 w-full text-left"
+                onClick={() => setActiveCategory(category.id)}
               >
                 • {category.name}
               </Link>
@@ -173,8 +187,19 @@ function Categories({ isOpen, onMouseEnter, onMouseLeave }: CategoriesProps) {
                           }`}
                           onMouseEnter={() => handleCategoryHover(category.id)}
                         >
-                          <Link to={`/category/${category.id}`} className="block">
-                            {category.name}
+                          <Link
+                            to="/products"
+                            search={{
+                              categoryId: category.id,
+                              pageIndex: 1,
+                              sortBy: "createdAt",
+                              sortOrder: "DESC",
+                            }}
+                            className="flex items-center justify-between w-full text-left"
+                            onClick={() => setActiveCategory(category.id)}
+                          >
+                            <span>{category.name}</span>
+                            {category.subCategories && <FiChevronRight />}
                           </Link>
                         </li>
                       ))}
